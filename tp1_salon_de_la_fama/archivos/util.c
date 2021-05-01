@@ -3,6 +3,9 @@
 
 #define TAM_POS_CORTE_PTR 1
 #define TAM_NUEVA_POS 1
+#define TAM_STRING_VACIO 1
+#define TAM_BUFFER_INI 512
+
 
 size_t vtrlen(void* ptr){
     if (!ptr)
@@ -23,12 +26,9 @@ void* vtradd(void* ptr, void* item){
     size_t tam = vtrlen(ptr);
     //si vtrlen devuelve cero, me va a devolver un puntero de tamaño 2 (uno para el nuevo valor, otro para el NULL de corte)
     void** aux_ptr = realloc(ptr, (tam  + TAM_POS_CORTE_PTR +  TAM_NUEVA_POS) * sizeof(ptr));
-    printf("Tamaño vector dinamico = %zu\n", tam  + TAM_POS_CORTE_PTR + TAM_NUEVA_POS);
 
     if (!aux_ptr)
         return NULL;
-
-    //void** aux_aux_ptr = (void**)aux_ptr;
 
     aux_ptr[tam] = item;
     aux_ptr[tam + TAM_NUEVA_POS] = NULL;
@@ -46,33 +46,25 @@ void vtrfree(void* ptr){
     free(ptr);
 }
 
-
 char* duplicar_texto_hasta(const char* texto, size_t desde, size_t hasta) {
-    size_t tam = hasta - desde + 2;
-    // printf("Tamaño malloc del string: %zu\n", (tam) * sizeof(char));
-    // printf("texto: %s\n", texto);
-    printf("valores desde: %zu, hasta: %zu, tam: %zu\n", desde, hasta, tam);
+    size_t tam = hasta - desde + TAM_POS_CORTE_PTR +  TAM_NUEVA_POS;
+
     char* duplicado = calloc(tam, sizeof(char));
     if(!duplicado)
         return NULL;
 
-    // printf("texto mas desde: %s", texto + desde);
-    printf("tam strncopy: %zu\n", hasta - desde + 1);
     strncpy(duplicado, texto + desde, hasta - desde + 1);
-    printf("duplicado: \'%s\'\n", duplicado);
     return duplicado;
 }
 
-/**
- * Divide un string cada vez que encuentra el separador dado y devuelve un
- * vector de strings.
- */
+
+
 char** split(const char* str, char separador){
     if (!str)
         return NULL;
     if (strlen(str) == 0)
         return NULL;
-    printf("el string completo es: \'%s\'\n",str);
+
     //primero inicializo la posicion actual del string arranco al principio de la linea.
     size_t pos_actual = 0;
     //inicializo la cantidad de elementos que hay en el string original.
@@ -83,25 +75,17 @@ char** split(const char* str, char separador){
     char** split_str = NULL;
 
     //voy a recorrer el string hasta su posicion final
-    printf("pos_actual: %zu\n", pos_actual);
     for (size_t i = 0; i < strlen(str); i++) {
-        printf("i: %zu-----------------------------------------------------\n", i);
         //si encuentro el caracter de split, ejecuto las siguientes instrucciones:
         if(str[i] == separador) {
             //aumento la cantidad de elementos. Por cada separador encontrado, siempre habrá un elemento más.
             cant_elem++;
 
             //creo una referencia al string cortado, la duplico en memoria.
-            printf("duplicado dentro del bucle\n");
             char* texto_cortado = duplicar_texto_hasta(str, pos_actual, i-1);
             //si falló la duplicación, debo cortar el proceso. Antes, voy a liberar el resto de textos cortados del vector y, luego, al vector.
             if (!texto_cortado) {
-                //para ello, recorro cada elemento del vector y voy liberando.
-                for (size_t j = 0; j < vtrlen(split_str); j++) {
-                    free(split_str[j]);
-                }
-                //una vez que termine de eliminar los elementos, libero el vector y retorno NULL.
-                free(split_str);
+                vtrfree(split_str);
                 return NULL;
             }
 
@@ -110,11 +94,8 @@ char** split(const char* str, char separador){
 
             //si falla el proceso de agregar el elemento, debo liberar al vector dinamico, junto con todos los elementos que hayan sido agregados correctamente.
             if (!resultado) {
-                for (size_t j = 0; j < vtrlen(split_str); j++) {
-                    free(split_str[j]);
-                }
-                    free(split_str);
-                    return NULL;
+                vtrfree(split_str);
+                return NULL;
             }
 
             //no se si es necesario realizar esto, pero el puntero que devuelve el vtradd, es void**. Lo casteo a char**
@@ -122,12 +103,10 @@ char** split(const char* str, char separador){
 
             //una vez que terminé de procesar el string, ahora tengo que actualizar la posicion actual, se debe mover al siguiente char luego del separador.
             //esto solo se debe realizar, mientras que la posicion actualizada, permanezca dentro del string a procesar.
-            if (i < strlen(str) -1) {
+            //si la posicion queda por fuera, es porque el ultimo elemento era un separador.
+            if (i < strlen(str)) {
                 pos_actual = i + 1;
-            } else if ( i == strlen(str) - 1) {
-                pos_actual = i;
             }
-            printf("pos_actual: %zu\n", pos_actual);
         }
     }
 
@@ -136,56 +115,91 @@ char** split(const char* str, char separador){
     // Queda como excedente el 3, que está en posicion 4. Por ello, agregamos un elemento más, que lo va a contener.
     cant_elem++;
 
-    printf("duplicado fuera del bucle\n");
     char* texto_cortado = NULL;
-    if(pos_actual < strlen(str) - 1 || str[pos_actual] != separador) {
-        //creamos una nueva referencia a una posicion que contiene el texto restante.
-        texto_cortado = duplicar_texto_hasta(str, pos_actual, strlen(str) - 1);
-        if (!texto_cortado) {
-            for (size_t j = 0; j < vtrlen(split_str); j++) {
-                free(split_str[j]);
-            }
-            free(split_str);
-            return NULL;
-        }
-    } else {
-        //creamos una nueva referencia a una posicion que contiene el texto restante.
-        texto_cortado = duplicar_texto_hasta("", 0, 0);
-        if (!texto_cortado) {
-            for (size_t j = 0; j < vtrlen(split_str); j++) {
-                free(split_str[j]);
-            }
-            free(split_str);
-            return NULL;
-        }
+
+
+    //creamos una nueva referencia a una posicion que contiene el texto restante.
+    //Si estamos parados sobre un separador, debemos agregar un nuevo elemento vacío.
+    // Sino, agregamos el pedazo de string restante
+    const char* str_aux = (str[pos_actual] == separador) ? "" : str;
+    size_t pos_actual_aux = (str[pos_actual] == separador) ? 0 : pos_actual;
+    texto_cortado = duplicar_texto_hasta(str_aux, pos_actual_aux, strlen(str_aux) - 1);
+
+    if (!texto_cortado) {
+        vtrfree(split_str);
+        return NULL;
     }
 
     void** resultado = vtradd(split_str, texto_cortado);
     if (!resultado) {
-        for (size_t j = 0; j < vtrlen(split_str); j++) {
-            free(split_str[j]);
-        }
-        free(split_str);
+        vtrfree(split_str);
         return NULL;
     }
     split_str = (char**)resultado;
 
-    size_t pos = 0;
-    printf("deberia mostrarme algo\n");
-    while (split_str[pos]) {
-        printf("%s\n", split_str[pos]);
-        pos++;
-    }
-    printf("fin deberia mostrarme algo\n");
-    // printf("%s cant elem: %zu \n", str + pos_actual, cant_elem);
-    // printf("\n");
     return split_str;
 }
 
 char* fgets_alloc(FILE* archivo){
-    return NULL;
+    //bytes leidos de la linea del archivo
+    size_t bytes_leidos= 0;
+
+    //tamanio del buffer en donde voy a guardar la linea del archivo
+    size_t tam_buffer = TAM_BUFFER_INI;
+
+    //reservo memoria para el buffer que estoy leyendo
+    char* buffer = malloc(sizeof(char) * tam_buffer);
+
+    //si no pudo reservar, retorno NULL
+    if (!buffer)
+        return NULL;
+
+    //mientras que pueda leer la linea, continuo. le paso el buffer mas la cantidad de bytes leidos,
+    //le pido que lea el buffer menos la cantidad de bytes leidos, y por ultimo
+    //le paso el archivo abierto
+    while (fgets(buffer + bytes_leidos, (int)(tam_buffer - bytes_leidos), archivo)){
+        //me fijo cuantos bytes lei, sumando la longitud del buffer mas la cantidad de bytes que habia leido previamente.
+        //este valor deberia ser 0 para el primer ciclo y se actualiza al finalizar cada ciclo.
+        size_t leido = strlen(buffer + bytes_leidos);
+
+        //si lei algo y la anteultima posicion es un enter, retorno el buffer, porque llegué al fin de la linea
+        if (leido > 0 && *(buffer + bytes_leidos + leido - 1) == '\n') {
+            return buffer;
+        }
+        //si llené el buffer y la anteúltima posición no es un enter, tengo que seguir leyendo, así que duplico el buffer
+        else {
+            char* auxiliar = realloc(buffer, sizeof(char) * tam_buffer + TAM_BUFFER_INI);
+
+            //si no pude duplicar el buffer, libero lo que tenia leido y retorno NULL
+            if(!auxiliar) {
+                free(buffer);
+                return NULL;
+            }
+
+            //si pude duplicar el tamaño, se lo asigno al buffer
+            buffer = auxiliar;
+
+            //actualizo la variable del tamaño del buffer
+            tam_buffer += TAM_BUFFER_INI;
+        }
+
+
+        //actualizo la cantidad de bytes leidos.
+        bytes_leidos += leido;
+    }
+
+    //No pude leer nada, EOF
+    if(bytes_leidos == 0) {
+        free(buffer);
+        return NULL;
+    }
+
+    //llegue a fin de archivo pero pude leer algo
+    return buffer;
 }
 
 void fclosen(FILE* archivo){
-
+    if(archivo){
+        fclose(archivo);
+    }
 }
