@@ -8,60 +8,88 @@
 
 
 size_t vtrlen(void* ptr){
+    //si me pasan un puntero NULL, retorno 0.
     if (!ptr)
         return 0;
 
+    //sino, me creo un auxiliar de tipo void**, porque se que voy a recibir un vector dinamico para recorrer..
     void** ptr_aux = (void**)ptr;
+
     size_t cant = 0;
     size_t pos = 0;
 
+    //mientras el contenido del vector no sea NULL, voy acumulando cant
     while (ptr_aux[pos]) {
         cant++;
         pos++;
     }
+    //retorno la cant de elementos acumulada
     return cant;
 }
 
 void* vtradd(void* ptr, void* item){
+    //primero me fijo el tamaño del puntero.
     size_t tam = vtrlen(ptr);
-    //si vtrlen devuelve cero, me va a devolver un puntero de tamaño 2 (uno para el nuevo valor, otro para el NULL de corte)
+
+    //me creo un puntero auxiliar del tamaño del puntero original, mas dos posiciones. Una para el item nuevo, y otra para el elemento NULL
+    // que vtrlen no tiene en cuenta al momento de dar el tamaño del vector dinamico.
     void** aux_ptr = realloc(ptr, (tam  + TAM_POS_CORTE_PTR +  TAM_NUEVA_POS) * sizeof(ptr));
 
+    //si falla el realloc, retorno NULL.
     if (!aux_ptr)
         return NULL;
 
+    //en la nueva posicion creada, agrego el item
     aux_ptr[tam] = item;
+
+    //ahora asigno al ultimo elemento, el valor NULL.
     aux_ptr[tam + TAM_NUEVA_POS] = NULL;
 
+    //apunto al puntero original a la nueva direccion de memoria.
     ptr = (void*)aux_ptr;
 
+    //retorno el puntero
     return ptr;
 }
 
 void vtrfree(void* ptr){
+
+    //me creo un auxiliar para recorrer el vector dinamico.
     void** ptr_aux = (void**)ptr;
+
+    //recorro el puntero y voy liberando su contenido. Si el puntero fuera null, el ciclo no se ejecuta porque vtrlen == 0
     for (size_t i = 0; i < vtrlen(ptr); i++) {
         free(ptr_aux[i]);
     }
+    //una vez liberado el contenido del vector dinamico, libero el puntero al vector.
     free(ptr);
 }
 
 char* duplicar_texto_hasta(const char* texto, size_t desde, size_t hasta) {
+    //me fijo el tamaño
     size_t tam = hasta - desde + TAM_POS_CORTE_PTR +  TAM_NUEVA_POS;
 
+    //reservo con calloc memoria por el tamaño del string a copiar. Esto es para que se inicialice en 0 cada elemento.
     char* duplicado = calloc(tam, sizeof(char));
+
+    //si falla el calloc, retorno NULL
     if(!duplicado)
         return NULL;
 
+    //sino, copio el texto desde la posicion "desde", hasta la posicion hasta - desde + 1. La última posicion que se reservó, debería quedar con un 0.
     strncpy(duplicado, texto + desde, hasta - desde + 1);
+
+    //retorno el string duplicado
     return duplicado;
 }
 
 
 
 char** split(const char* str, char separador){
+    //si el puntero es nulo, retorno NULL
     if (!str)
         return NULL;
+    //si el largo del string es 0, retorno NULL
     if (strlen(str) == 0)
         return NULL;
 
@@ -94,6 +122,7 @@ char** split(const char* str, char separador){
 
             //si falla el proceso de agregar el elemento, debo liberar al vector dinamico, junto con todos los elementos que hayan sido agregados correctamente.
             if (!resultado) {
+                free(texto_cortado);
                 vtrfree(split_str);
                 return NULL;
             }
@@ -132,6 +161,7 @@ char** split(const char* str, char separador){
 
     void** resultado = vtradd(split_str, texto_cortado);
     if (!resultado) {
+        free(texto_cortado);
         vtrfree(split_str);
         return NULL;
     }
