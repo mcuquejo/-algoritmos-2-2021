@@ -41,12 +41,6 @@ void liberar_entrenadores(salon_t* salon) {
 }
 
 
-void liberar_salon(salon_t* salon) {
-    liberar_entrenadores(salon);
-    free(salon);
-}
-
-
 salon_t* cargar_entrenador(salon_t* salon, entrenador_t* entrenador) {
     void* entrenador_aux = vtradd(salon->entrenadores, entrenador);
     if (!entrenador_aux) {
@@ -73,7 +67,7 @@ salon_t* cargar_pokemon(salon_t* salon, entrenador_t* entrenador, pokemon_t* pok
     void* pokemon_aux = vtradd(entrenador->equipo, pokemon);
     if(!pokemon_aux) {
         free(pokemon);
-        liberar_salon(salon);
+        salon_destruir(salon);
         return NULL;
     }
 
@@ -121,7 +115,7 @@ salon_t* salon_leer_archivo(const char* nombre_archivo){
 
         char** vtr_linea_aux = split(linea, ';');
         if(!vtr_linea_aux) {
-            liberar_salon(salon);
+            salon_destruir(salon);
             free(linea);
             fclosen(archivo);
             return NULL;
@@ -142,7 +136,7 @@ salon_t* salon_leer_archivo(const char* nombre_archivo){
             if (!entrenador) {
                 vtrfree(vtr_linea_aux);
                 free(linea);
-                liberar_salon(salon);
+                salon_destruir(salon);
                 fclosen(archivo);
                 return NULL;
             }
@@ -153,7 +147,7 @@ salon_t* salon_leer_archivo(const char* nombre_archivo){
                 free(entrenador);
                 vtrfree(vtr_linea_aux);
                 free(linea);
-                liberar_salon(salon);
+                salon_destruir(salon);
                 fclosen(archivo);
                 return NULL;
             }
@@ -170,7 +164,7 @@ salon_t* salon_leer_archivo(const char* nombre_archivo){
             if (!pokemon) {
                 vtrfree(vtr_linea_aux);
                 free(linea);
-                liberar_salon(salon);
+                salon_destruir(salon);
                 fclosen(archivo);
                 return NULL;
             }
@@ -183,7 +177,7 @@ salon_t* salon_leer_archivo(const char* nombre_archivo){
                 free(pokemon);
                 vtrfree(vtr_linea_aux);
                 free(linea);
-                liberar_salon(salon);
+                salon_destruir(salon);
                 fclosen(archivo);
                 return NULL;
             }
@@ -325,22 +319,29 @@ entrenador_t** salon_obtener_entrenadores_mas_ganadores(salon_t* salon, int cant
 }
 
 void salon_mostrar_entrenador(entrenador_t* entrenador){
+
+    printf("------------------------------------------------------------------------------\n");
     if(!entrenador){
-        printf("No hay entrenador para mostrar\n");
+        printf("No hay entrenadores para mostrar\n");
+        printf("------------------------------------------------------------------------------\n");
         return;
     }
 
-    printf("Nombre: %s, Cantidad de Victorias: %d\n", entrenador->nombre, entrenador->victorias);
+    printf("NOMBRE ENTRENADOR: %s, CANT. VICTORIAS: %d\n", entrenador->nombre, entrenador->victorias);
+    printf("------------------------------------------------------------------------------\n");
     if(entrenador->equipo) {
-        printf("equipo de pokemones:\n");
+        printf("----EQUIPO UTILIZADO:\n");
         for (size_t i = 0; i < vtrlen(entrenador->equipo); i++) {
             pokemon_t* pokemon = entrenador->equipo[i];
-            printf("nombre: %s, nivel: %d, defensa: %d, fuerza: %d, velocidad: %d, inteligencia: %d\n", pokemon->nombre, pokemon->nivel, pokemon->defensa, pokemon->fuerza, pokemon->velocidad, pokemon->inteligencia);
+            printf("----NOMBRE: %s, NIV: %d, DEF: %d, FUER: %d, VEL: %d, INT: %d\n", pokemon->nombre, pokemon->nivel, pokemon->defensa, pokemon->fuerza, pokemon->velocidad, pokemon->inteligencia);
         }
+
+        printf("------------------------------------------------------------------------------\n");
     }
 
 }
 
 void salon_destruir(salon_t* salon){
-    liberar_salon(salon);
+    liberar_entrenadores(salon);
+    free(salon);
 }
