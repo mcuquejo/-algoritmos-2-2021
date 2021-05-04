@@ -196,6 +196,8 @@ salon_t* salon_leer_archivo(const char* nombre_archivo){
 
 
 int salon_guardar_archivo(salon_t* salon, const char* nombre_archivo) {
+    if(!salon)
+        return -1;
     FILE* archivo_nuevo = fopen(nombre_archivo, "w");
     if(!archivo_nuevo)
         return -1;
