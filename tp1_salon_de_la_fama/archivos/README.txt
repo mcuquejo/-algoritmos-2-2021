@@ -3,7 +3,7 @@ TP SALON DE LA FAMA POKEMON.
 SOLUCION IMPLEMENTADA:
 
 consideraciones sobre UTIL.C:
-• vtrlen desempaqueta el puntero void* a void** (tuve problemas con este punto, ya que no sabia que void era tan flexible).
+• vtrlen castea el puntero void* a void** (tuve problemas con este punto, ya que no sabia que void era tan flexible).
   Luego recorro los elementos no nulos del vector dinamico y devuelvo la cantidad
 
 • vtradd toma el largo del vector + dos posiciones extra, la del nuevo elemento y la de la posicion de corte del vector
@@ -59,21 +59,21 @@ ACLARACIONES:
 
 CONCEPTOS TEORICOS:
 1. Heap y stack: ¿Para qué y cómo se utiliza cada uno?
-• Stack: es memoria estática, que usamos para guardar variables, strings no modificables, y todos los punteros que vamos generando
-  a lo largo del ciclo de vida de nuestra funcion. Estos elementos quedan dentro del ambito de la misma, por lo cual es importante
-  prestar atencion a mantener las referencias de punteros a memoria dinámica que hayamos solicitado, ya que una vez que salimos de
-  las funciones, si no los guardamos, no podemos recuperarlos. Dicha memoria es limitada (o más bien el sector reservado para el
-  stack lo es. La memoria es toda la misma), y tenemos que prestar especial atencion al momento de realizar trabajos de recursividad,
-  ya que se apilan los llamados en la misma y puede dar overflow (esto siempre teniendo en cuenta que si el compilador lo permite, se
-  puede aplicar recursividad de cola y que la llamada recursiva se comporte como una iterativa, es decir, no se apile en el stack).
+• Stack: es memoria estática, que usamos para guardar variables, y todos los punteros que vamos generando a lo largo del ciclo de vida
+  de nuestra funcion. Estos elementos quedan dentro del ambito de la misma, por lo cual es importante prestar atencion a mantener las
+  referencias de punteros a memoria dinámica que hayamos solicitado, ya que una vez que salimos de las funciones, si no los guardamos,
+  no podemos recuperarlos. Dicha memoria es limitada (o más bien el sector reservado para el stack lo es. La memoria es toda la misma),
+  y tenemos que prestar especial atencion al momento de realizar trabajos de recursividad, ya que se apilan los llamados en la misma y
+  puede dar overflow (esto siempre teniendo en cuenta que si el compilador lo permite, se puede aplicar recursividad de cola y que la
+  llamada recursiva se comporte como una iterativa, es decir, no se apile en el stack).
 
 • Heap: Es la memoria dinámica. Tan ilimitada como memoria física tengamos en nuestro equipo. Es en donde guardamos los elementos que
   necesitemos mantener fuera del ambito de una funcion, como structs, arrays, o elementos en general que necesitemos mantener mientras
   el main esté vivo.
 
 2. Malloc/Realloc/Free: ¿Cómo y para qué se utilizan?
-• malloc requiere un parametro: el tamaño de memoria que necesitamos solicitar. Se utiliza para reservar memoria dinamica. Utilizamos
-  aritmetica de punteros para decir cuanto espacio vamos a solicitar. Por ejemplo, sizeof(char)*3, equivale a 3 bytes reservados.
+• malloc requiere un parametro: el tamaño de memoria que necesitamos solicitar. Se utiliza para reservar memoria dinamica. le tenemos
+  que decir cuanto espacio vamos a solicitar. Por ejemplo, sizeof(char)*3, equivale a 3 bytes reservados.
 
 • realloc, recibe un puntero a memoria dinamica y el nuevo tamaño que se quiere reservar. Devuelve un puntero a un sector de memoria del
   tamaño solicitado o NULL, si falla o se solicitara un tamaño de 0 bytes.
