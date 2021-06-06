@@ -32,6 +32,23 @@ nodo_abb_t* nodo_insertar(abb_comparador comparador, nodo_abb_t* nodo, void* ele
     return nodo;
 }
 
+nodo_abb_t* buscar_elemento(abb_comparador comparador, nodo_abb_t* nodo, void* elemento) {
+    if(!nodo)
+        return NULL;
+
+    nodo_abb_t* resultado = NULL;
+    if (comparador(elemento, nodo->elemento) == 0) {
+        return nodo;
+    }
+    if (comparador(elemento, nodo->elemento) > 0) {
+        resultado = buscar_elemento(comparador, nodo->derecha, elemento);
+    } else {
+        resultado = buscar_elemento(comparador, nodo->izquierda, elemento);
+    }
+
+    return resultado;
+}
+
 int arbol_insertar(abb_t* arbol, void* elemento){
     if(!arbol)
         return -1;
@@ -41,9 +58,14 @@ int arbol_insertar(abb_t* arbol, void* elemento){
 int arbol_borrar(abb_t* arbol, void* elemento){
     return 0;
 }
+
 void* arbol_buscar(abb_t* arbol, void* elemento){
-    return 0;
+    if(arbol_vacio(arbol))
+        return NULL;
+    nodo_abb_t* elemento_buscado = buscar_elemento(arbol->comparador, arbol->nodo_raiz, elemento);
+    return (!elemento_buscado) ? NULL : elemento_buscado->elemento;
 }
+
 void* arbol_raiz(abb_t* arbol){
     if(!arbol)
         return NULL;

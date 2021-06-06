@@ -17,7 +17,7 @@ void dadoUnABBNull_SiCreoUnABBSinComparador_ElABBSigueSiendoNull() {
   abb_t* arbol_bb = NULL;
 
   arbol_bb = arbol_crear(NULL, NULL);
-  pa2m_afirmar(arbol_bb == NULL, "El arbol sigue siendo NULL porque no se puede crear sin pasar una funcion comparadora");
+  pa2m_afirmar(arbol_bb == NULL, "El ABB sigue siendo NULL porque no se puede crear sin pasar una funcion comparadora");
   arbol_destruir(arbol_bb);
 }
 
@@ -198,7 +198,7 @@ void dadoUnABBVacio_SiSolicitoBuscarUnElemento_RetornaNullPorqueNoExisteElElemen
 
 void dadoUnABBConElementos_SiSolicitoBuscarUnElementoQueNoExisteEnElArbol_RetornaNullPorqueNoExisteElElemento(){
   abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
-  int elemento_buscado = 4;
+  int elemento_buscado = 7;
 
   int dato1 = 1;
   int dato2 = 2;
@@ -214,13 +214,18 @@ void dadoUnABBConElementos_SiSolicitoBuscarUnElementoQueNoExisteEnElArbol_Retorn
   arbol_insertar(arbol_bb, &dato6);
   arbol_insertar(arbol_bb, &dato4);
 
-  pa2m_afirmar(!arbol_buscar(arbol_bb, &elemento_buscado), "Buscar un elemento que no existe en el ABB retorna NULL");
+  pa2m_afirmar(!arbol_buscar(arbol_bb, &elemento_buscado), "Buscar el elemento 6 en el ABB. Como el mismo no existe, retorna NULL");
   arbol_destruir(arbol_bb);
 }
 
 void dadoUnABBConElementos_SiSolicitoBuscarUnElementoQueExisteEnElArbol_DevuelveElValorDelElementoCorrectamente(){
   abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
-  int elemento_buscado = 4;
+  int elemento_buscado_1 = 1;
+  int elemento_buscado_2 = 2;
+  int elemento_buscado_3 = 3;
+  int elemento_buscado_4 = 4;
+  int elemento_buscado_5 = 5;
+  int elemento_buscado_6 = 6;
 
   int dato1 = 1;
   int dato2 = 2;
@@ -236,12 +241,17 @@ void dadoUnABBConElementos_SiSolicitoBuscarUnElementoQueExisteEnElArbol_Devuelve
   arbol_insertar(arbol_bb, &dato6);
   arbol_insertar(arbol_bb, &dato4);
 
-  pa2m_afirmar(*(int*)arbol_buscar(arbol_bb, &elemento_buscado) == 4, "Se puede buscar el elemento 4 en el ABB y lo retorna correctamente");
+  pa2m_afirmar(*(int*)arbol_buscar(arbol_bb, &elemento_buscado_1) == 1, "Se puede buscar el elemento 1 en el ABB y lo retorna correctamente");
+  pa2m_afirmar(*(int*)arbol_buscar(arbol_bb, &elemento_buscado_2) == 2, "Se puede buscar el elemento 2 en el ABB y lo retorna correctamente");
+  pa2m_afirmar(*(int*)arbol_buscar(arbol_bb, &elemento_buscado_3) == 3, "Se puede buscar el elemento 3 en el ABB y lo retorna correctamente");
+  pa2m_afirmar(*(int*)arbol_buscar(arbol_bb, &elemento_buscado_4) == 4, "Se puede buscar el elemento 4 en el ABB y lo retorna correctamente");
+  pa2m_afirmar(*(int*)arbol_buscar(arbol_bb, &elemento_buscado_5) == 5, "Se puede buscar el elemento 5 en el ABB y lo retorna correctamente");
+  pa2m_afirmar(*(int*)arbol_buscar(arbol_bb, &elemento_buscado_6) == 6, "Se puede buscar el elemento 6 en el ABB y lo retorna correctamente");
   arbol_destruir(arbol_bb);
 }
 
 
-int main(){
+int main() {
   pa2m_nuevo_grupo("Pruebas Creacion ABB");
   dadoUnABBNull_SiCreoUnABBSinComparador_ElABBSigueSiendoNull();
   dadoUnABBNull_SiCreoUnABB_ResultaUnABBNoNullYVacio();
@@ -264,9 +274,9 @@ int main(){
   dadoUnABBNull_SiSolicitoBuscarUnElemento_RetornaNullPorqueNoExisteElElemento();
   pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB Vacio");
   dadoUnABBVacio_SiSolicitoBuscarUnElemento_RetornaNullPorqueNoExisteElElemento();
-  pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB con elementos - El elemento no existe en el arbol");
+  pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB con elementos [1, 2, 3, 4, 5, 6] - El elemento no existe en el ABB");
   dadoUnABBConElementos_SiSolicitoBuscarUnElementoQueNoExisteEnElArbol_RetornaNullPorqueNoExisteElElemento();
-  pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB con elementos - El elemento existe en el arbol");
+  pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB con elementos [1, 2, 3, 4, 5, 6] - El elemento existe en el ABB");
   dadoUnABBConElementos_SiSolicitoBuscarUnElementoQueExisteEnElArbol_DevuelveElValorDelElementoCorrectamente();
   return pa2m_mostrar_reporte();
 }
