@@ -25,10 +25,9 @@ nodo_abb_t* nodo_insertar(abb_comparador comparador, nodo_abb_t* nodo, void* ele
         nodo->elemento = elemento;
         return nodo;
     }
-    int comparacion = comparador(elemento, nodo->elemento);
-    if(comparacion > 0)
+    if(comparador(elemento, nodo->elemento) > 0)
         nodo->derecha = nodo_insertar(comparador, nodo->derecha, elemento);
-    if(comparacion<=0)
+    if(comparador(elemento, nodo->elemento) <= 0)
         nodo->izquierda = nodo_insertar(comparador, nodo->izquierda, elemento);
     return nodo;
 }
@@ -46,7 +45,9 @@ void* arbol_buscar(abb_t* arbol, void* elemento){
     return 0;
 }
 void* arbol_raiz(abb_t* arbol){
-    return 0;
+    if(!arbol)
+        return NULL;
+    return arbol->nodo_raiz;
 }
 bool arbol_vacio(abb_t* arbol){
     if (!arbol)

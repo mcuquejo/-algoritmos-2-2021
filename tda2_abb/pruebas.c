@@ -182,6 +182,64 @@ void dadoUnABBVacio_SiInsertoDatosEnOrdenBCA_LosDatosSeInsertanEnElOrdenCorrecto
   arbol_destruir(arbol_bb);
 }
 
+void dadoUnABBNull_SiSolicitoBuscarUnElemento_RetornaNullPorqueNoExisteElElemento(){
+  abb_t* arbol_bb = NULL;
+  int elemento_buscado = 4;
+  pa2m_afirmar(!arbol_buscar(arbol_bb, &elemento_buscado), "Buscar en un ABB NULL devuelve como resultado NULL");
+  arbol_destruir(arbol_bb);
+}
+
+void dadoUnABBVacio_SiSolicitoBuscarUnElemento_RetornaNullPorqueNoExisteElElemento(){
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
+  int elemento_buscado = 4;
+  pa2m_afirmar(!arbol_buscar(arbol_bb, &elemento_buscado), "Buscar en un ABB Vacio devuelve como resultado NULL");
+  arbol_destruir(arbol_bb);
+}
+
+void dadoUnABBConElementos_SiSolicitoBuscarUnElementoQueNoExisteEnElArbol_RetornaNullPorqueNoExisteElElemento(){
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
+  int elemento_buscado = 4;
+
+  int dato1 = 1;
+  int dato2 = 2;
+  int dato3 = 3;
+  int dato4 = 4;
+  int dato5 = 5;
+  int dato6 = 6;
+
+  arbol_insertar(arbol_bb, &dato2);
+  arbol_insertar(arbol_bb, &dato3);
+  arbol_insertar(arbol_bb, &dato1);
+  arbol_insertar(arbol_bb, &dato5);
+  arbol_insertar(arbol_bb, &dato6);
+  arbol_insertar(arbol_bb, &dato4);
+
+  pa2m_afirmar(!arbol_buscar(arbol_bb, &elemento_buscado), "Buscar un elemento que no existe en el ABB retorna NULL");
+  arbol_destruir(arbol_bb);
+}
+
+void dadoUnABBConElementos_SiSolicitoBuscarUnElementoQueExisteEnElArbol_DevuelveElValorDelElementoCorrectamente(){
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
+  int elemento_buscado = 4;
+
+  int dato1 = 1;
+  int dato2 = 2;
+  int dato3 = 3;
+  int dato4 = 4;
+  int dato5 = 5;
+  int dato6 = 6;
+
+  arbol_insertar(arbol_bb, &dato2);
+  arbol_insertar(arbol_bb, &dato3);
+  arbol_insertar(arbol_bb, &dato1);
+  arbol_insertar(arbol_bb, &dato5);
+  arbol_insertar(arbol_bb, &dato6);
+  arbol_insertar(arbol_bb, &dato4);
+
+  pa2m_afirmar(*(int*)arbol_buscar(arbol_bb, &elemento_buscado) == 4, "Se puede buscar el elemento 4 en el ABB y lo retorna correctamente");
+  arbol_destruir(arbol_bb);
+}
+
 
 int main(){
   pa2m_nuevo_grupo("Pruebas Creacion ABB");
@@ -202,5 +260,13 @@ int main(){
   dadoUnABBVacio_SiInsertoDatosEnOrdenBAC_LosDatosSeInsertanEnElOrdenCorrecto();
   pa2m_nuevo_grupo("Pruebas Insertar Datos en ABB. Se inserta en el siguiente orden: 2, 3 y 1");
   dadoUnABBVacio_SiInsertoDatosEnOrdenBCA_LosDatosSeInsertanEnElOrdenCorrecto();
+  pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB NULL");
+  dadoUnABBNull_SiSolicitoBuscarUnElemento_RetornaNullPorqueNoExisteElElemento();
+  pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB Vacio");
+  dadoUnABBVacio_SiSolicitoBuscarUnElemento_RetornaNullPorqueNoExisteElElemento();
+  pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB con elementos - El elemento no existe en el arbol");
+  dadoUnABBConElementos_SiSolicitoBuscarUnElementoQueNoExisteEnElArbol_RetornaNullPorqueNoExisteElElemento();
+  pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB con elementos - El elemento existe en el arbol");
+  dadoUnABBConElementos_SiSolicitoBuscarUnElementoQueExisteEnElArbol_DevuelveElValorDelElementoCorrectamente();
   return pa2m_mostrar_reporte();
 }
