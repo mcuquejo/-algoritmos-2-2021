@@ -288,6 +288,29 @@ void dadoUnABBConElementos_SiSolicitoBorrarUnElementoQueNoExisteEnElArbol_NoPerm
   arbol_destruir(arbol_bb);
 }
 
+void dadoUnABBConElementos_SiSolicitoBorrarElementosQueExisteEnElArbolYNoTienenHijos_PermiteBorrarCorrectamente(){
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
+  int elemento_buscado = 6;
+
+  int dato1 = 1;
+  int dato2 = 2;
+  int dato3 = 3;
+  int dato4 = 4;
+  int dato5 = 5;
+  int dato6 = 6;
+
+  arbol_insertar(arbol_bb, &dato2);
+  arbol_insertar(arbol_bb, &dato3);
+  arbol_insertar(arbol_bb, &dato1);
+  arbol_insertar(arbol_bb, &dato5);
+  arbol_insertar(arbol_bb, &dato6);
+  arbol_insertar(arbol_bb, &dato4);
+
+  pa2m_afirmar(arbol_borrar(arbol_bb, &elemento_buscado) == 0, "Se solicito borrar el elemento 6 en el ABB. Como el mismo existia, lo borra correctamente");
+  pa2m_afirmar(!arbol_buscar(arbol_bb, &elemento_buscado), "Ya no se encuentra el elemento 6 en el ABB");
+  arbol_destruir(arbol_bb);
+}
+
 int main() {
   pa2m_nuevo_grupo("Pruebas Creacion ABB");
   dadoUnABBNull_SiCreoUnABBSinComparador_ElABBSigueSiendoNull();
@@ -321,5 +344,7 @@ int main() {
   dadoUnABBVacio_SiSolicitoBorrarUnElemento_NoPermiteBorrarPorqueElABBEsVacio();
   pa2m_nuevo_grupo("Pruebas Eliminar datos en ABB con elementos [1, 2, 3, 4, 5, 6] - El elemento no existe en el ABB");
   dadoUnABBConElementos_SiSolicitoBorrarUnElementoQueNoExisteEnElArbol_NoPermiteBorrarPorqueNoExisteElElemento();
+  pa2m_nuevo_grupo("Pruebas Eliminar datos en ABB con elementos [1, 2, 3, 4, 5, 6] - Los elementos existen en el ABB y no tienen hijos");
+  dadoUnABBConElementos_SiSolicitoBorrarElementosQueExisteEnElArbolYNoTienenHijos_PermiteBorrarCorrectamente();
   return pa2m_mostrar_reporte();
 }
