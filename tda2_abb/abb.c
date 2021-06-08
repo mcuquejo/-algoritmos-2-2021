@@ -1,4 +1,5 @@
 #include "abb.h"
+#include <stdio.h>
 
 nodo_abb_t* nodo_crear() {
     nodo_abb_t* nodo = calloc(1, sizeof(nodo_abb_t));
@@ -65,26 +66,30 @@ nodo_abb_t* buscar_predecesor_inorden(nodo_abb_t* nodo) {
 }
 
 
-nodo_abb_t* eliminar_nodo(abb_t* arbol, nodo_abb_t* nodo, void* elemento) {
+nodo_abb_t* eliminar_nodo(abb_t* arbol, nodo_abb_t* nodo, void* elemento, int* pudo_eliminar) {
     if(!nodo)
         return NULL;
 
-    nodo_abb_t* resultado = NULL;
     if (arbol->comparador(elemento, nodo->elemento) == 0) {
-        if(es_hoja(nodo)){
+        if(es_hoja(nodo)) {
+            printf("entro por nodo hoja a borrar\n");
             if(arbol->destructor)
                 arbol->destructor(nodo->elemento);
             free(nodo);
+            *pudo_eliminar = 0;
             return NULL;
         }
         if(tiene_un_hijo(nodo)) {
+            printf("el nodo tenia un hijo al borrar\n");
             nodo_abb_t* hijo = (!nodo->derecha) ? nodo->izquierda : nodo->derecha;
             if(arbol->destructor)
                 arbol->destructor(nodo->elemento);
             free(nodo);
+            *pudo_eliminar = 0;
             return hijo;
         }
         if(tiene_dos_hijos(nodo)) {
+            printf("el nodo tiene dos hijos al borrar\n");
             nodo_abb_t* nodo_predecesor = buscar_predecesor_inorden(nodo);
             nodo_abb_t* nodo_auxiliar = nodo;
             nodo = nodo_predecesor;
@@ -93,31 +98,26 @@ nodo_abb_t* eliminar_nodo(abb_t* arbol, nodo_abb_t* nodo, void* elemento) {
             if(arbol->destructor)
                 arbol->destructor(nodo_auxiliar->elemento);
             free(nodo_auxiliar);
+            *pudo_eliminar = 0;
             return nodo;
-
         }
     }
     if (arbol->comparador(elemento, nodo->elemento) > 0) {
-        resultado = eliminar_nodo(arbol, nodo->derecha, elemento);
+        nodo->derecha = eliminar_nodo(arbol, nodo->derecha, elemento, pudo_eliminar);
     } else {
-        resultado = eliminar_nodo(arbol, nodo->izquierda, elemento);
+        nodo->izquierda =  eliminar_nodo(arbol, nodo->izquierda, elemento, pudo_eliminar);
     }
-    return resultado;
+    return nodo;
 }
 
 
 
 int arbol_borrar(abb_t* arbol, void* elemento){
+    int pudo_eliminar = -1;
     if(arbol_vacio(arbol))
-        return -1;
-    nodo_abb_t* nodo_a_eliminar = eliminar_nodo(arbol, arbol->nodo_raiz, elemento);
-    if (!nodo_a_eliminar)
-        return 0;
-    //dejo que falle hasta que implemente los distintos borrados
-    //sin hijos
-    //con un hijo
-    //con dos hijos
-    return 0;
+        return pudo_eliminar;
+    arbol->nodo_raiz = eliminar_nodo(arbol, arbol->nodo_raiz, elemento, &pudo_eliminar);
+    return pudo_eliminar;
 }
 
 nodo_abb_t* buscar_nodo(abb_t* arbol, nodo_abb_t* nodo, void* elemento) {

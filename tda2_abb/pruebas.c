@@ -290,7 +290,12 @@ void dadoUnABBConElementos_SiSolicitoBorrarUnElementoQueNoExisteEnElArbol_NoPerm
 
 void dadoUnABBConElementos_SiSolicitoBorrarElementosQueExisteEnElArbolYNoTienenHijos_PermiteBorrarCorrectamente(){
   abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
-  int elemento_buscado = 6;
+  int elemento_buscado_1 = 1;
+  int elemento_buscado_2 = 2;
+  int elemento_buscado_3 = 3;
+  int elemento_buscado_4 = 4;
+  int elemento_buscado_5 = 5;
+  int elemento_buscado_6 = 6;
 
   int dato1 = 1;
   int dato2 = 2;
@@ -306,8 +311,29 @@ void dadoUnABBConElementos_SiSolicitoBorrarElementosQueExisteEnElArbolYNoTienenH
   arbol_insertar(arbol_bb, &dato6);
   arbol_insertar(arbol_bb, &dato4);
 
-  pa2m_afirmar(arbol_borrar(arbol_bb, &elemento_buscado) == 0, "Se solicito borrar el elemento 6 en el ABB. Como el mismo existia, lo borra correctamente");
-  pa2m_afirmar(!arbol_buscar(arbol_bb, &elemento_buscado), "Ya no se encuentra el elemento 6 en el ABB");
+  pa2m_afirmar(arbol_borrar(arbol_bb, &elemento_buscado_6) == 0, "Se solicito borrar el elemento 6 en el ABB. Como el mismo existia, lo borra correctamente");
+  pa2m_afirmar(!arbol_buscar(arbol_bb, &elemento_buscado_6), "Ya no se encuentra el elemento 6 en el ABB");
+  pa2m_afirmar(arbol_borrar(arbol_bb, &elemento_buscado_6) == -1, "Se solicito borrar el elemento 6 en el ABB. Como el mismo ya no existia, retorna -1");
+
+  pa2m_afirmar(arbol_borrar(arbol_bb, &elemento_buscado_4) == 0, "Se solicito borrar el elemento 4 en el ABB. Como el mismo existia, lo borra correctamente");
+  pa2m_afirmar(!arbol_buscar(arbol_bb, &elemento_buscado_4), "Ya no se encuentra el elemento 4 en el ABB");
+  pa2m_afirmar(arbol_borrar(arbol_bb, &elemento_buscado_4) == -1, "Se solicito borrar el elemento 4 en el ABB. Como el mismo ya no existia, retorna -1");
+
+  pa2m_afirmar(arbol_borrar(arbol_bb, &elemento_buscado_5) == 0, "Se solicito borrar el elemento 5 en el ABB. Como el mismo existia, lo borra correctamente");
+  pa2m_afirmar(!arbol_buscar(arbol_bb, &elemento_buscado_5), "Ya no se encuentra el elemento 5 en el ABB");
+  pa2m_afirmar(arbol_borrar(arbol_bb, &elemento_buscado_5) == -1, "Se solicito borrar el elemento 5 en el ABB. Como el mismo ya no existia, retorna -1");
+
+  pa2m_afirmar(arbol_borrar(arbol_bb, &elemento_buscado_3) == 0, "Se solicito borrar el elemento 3 en el ABB. Como el mismo existia, lo borra correctamente");
+  pa2m_afirmar(!arbol_buscar(arbol_bb, &elemento_buscado_3), "Ya no se encuentra el elemento 3 en el ABB");
+  pa2m_afirmar(arbol_borrar(arbol_bb, &elemento_buscado_3) == -1, "Se solicito borrar el elemento 3 en el ABB. Como el mismo ya no existia, retorna -1");
+
+  pa2m_afirmar(arbol_borrar(arbol_bb, &elemento_buscado_1) == 0, "Se solicito borrar el elemento 1 en el ABB. Como el mismo existia, lo borra correctamente");
+  pa2m_afirmar(!arbol_buscar(arbol_bb, &elemento_buscado_1), "Ya no se encuentra el elemento 1 en el ABB");
+  pa2m_afirmar(arbol_borrar(arbol_bb, &elemento_buscado_1) == -1, "Se solicito borrar el elemento 1 en el ABB. Como el mismo ya no existia, retorna -1");
+
+  pa2m_afirmar(arbol_borrar(arbol_bb, &elemento_buscado_2) == 0, "Se solicito borrar el elemento 2 en el ABB. Como el mismo existia, lo borra correctamente");
+  pa2m_afirmar(!arbol_buscar(arbol_bb, &elemento_buscado_2), "Ya no se encuentra el elemento 2 en el ABB");
+  pa2m_afirmar(arbol_borrar(arbol_bb, &elemento_buscado_2) == -1, "Se solicito borrar el elemento 2 en el ABB. Como el mismo ya no existia, retorna -1");
   arbol_destruir(arbol_bb);
 }
 
