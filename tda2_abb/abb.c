@@ -55,14 +55,17 @@ bool tiene_dos_hijos(nodo_abb_t* nodo) {
     return (nodo->derecha != NULL && nodo->izquierda != NULL);
 }
 
-nodo_abb_t* _buscar_predecesor_inorden(nodo_abb_t* nodo) {
-    if (!nodo->derecha)
+nodo_abb_t* _buscar_predecesor_inorden(nodo_abb_t* nodo, nodo_abb_t* padre) {
+    if (!nodo->derecha) {
+        if (padre)
+            padre->derecha = nodo->izquierda;
         return nodo;
-    return _buscar_predecesor_inorden(nodo->derecha);
+    }
+    return _buscar_predecesor_inorden(nodo->derecha, nodo);
 }
 
 nodo_abb_t* buscar_predecesor_inorden(nodo_abb_t* nodo) {
-    return _buscar_predecesor_inorden(nodo->izquierda);
+    return _buscar_predecesor_inorden(nodo->izquierda, nodo);
 }
 
 
@@ -91,10 +94,15 @@ nodo_abb_t* eliminar_nodo(abb_t* arbol, nodo_abb_t* nodo, void* elemento, int* p
         if(tiene_dos_hijos(nodo)) {
             printf("el nodo tiene dos hijos al borrar\n");
             nodo_abb_t* nodo_predecesor = buscar_predecesor_inorden(nodo);
+            printf("el nodo predecesor es: %i\n", *(int*)nodo_predecesor->elemento);
             nodo_abb_t* nodo_auxiliar = nodo;
             nodo = nodo_predecesor;
             nodo->izquierda = nodo_auxiliar->izquierda;
+            if(nodo_auxiliar->izquierda != NULL)
+                printf("le asigno al nodo predecesor el hijo izq: %i\n", *(int*)nodo_auxiliar->izquierda->elemento);
             nodo->derecha = nodo_auxiliar->derecha;
+            if(nodo_auxiliar->derecha != NULL)
+                printf("le asigno al nodo predecesor el hijo der: %i\n", *(int*)nodo_auxiliar->derecha->elemento);
             if(arbol->destructor)
                 arbol->destructor(nodo_auxiliar->elemento);
             free(nodo_auxiliar);
@@ -179,6 +187,7 @@ void liberar_nodos(nodo_abb_t* nodo, abb_liberar_elemento destructor) {
 
     if(destructor)
         destructor(nodo->elemento);
+    printf("el elemento que estoy eliminando es: %i\n", *(int*)nodo->elemento);
     free(nodo);
 }
 
