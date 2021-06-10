@@ -398,57 +398,70 @@ void dadoUnABBConElementos_SiSolicitoBorrarElementosQueExisteEnElArbolYTienenDos
   arbol_insertar(arbol_bb, &dato4);
   arbol_insertar(arbol_bb, &dato8);
 
-
-  pa2m_afirmar(*(int*)arbol_buscar(arbol_bb, &elemento_buscado_6) == 6, "El elemento 6 en el ABB existe antes de borrar el elemento 7");
-
   pa2m_afirmar(arbol_borrar(arbol_bb, &elemento_buscado_7) == 0, "Se solicito borrar el elemento 7 en el ABB. Como el mismo existia, lo borra correctamente");
   pa2m_afirmar(!arbol_buscar(arbol_bb, &elemento_buscado_7), "Ya no se encuentra el elemento 7 en el ABB");
   pa2m_afirmar(arbol_borrar(arbol_bb, &elemento_buscado_7) == -1, "Se solicito borrar el elemento 7 en el ABB. Como el mismo ya no existia, retorna -1");
 
-  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->elemento == 2, "RAIZ == 2");
-
-  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->izquierda->elemento == 1, "RAIZ-IZQ == 1");
-  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->elemento == 3, "RAIZ-DER == 3");
-
-  pa2m_afirmar(!arbol_bb->nodo_raiz->izquierda->izquierda && !arbol_bb->nodo_raiz->izquierda->derecha, "RAIZ-IZQ-IZQ == NULL y RAIZ-IZQ-DER == NULL");
-
-  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->izquierda, "RAIZ-DER-IZQ == NULL");
-  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->derecha->elemento == 6, "RAIZ-DER-DER = 6");
-
-  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->derecha->izquierda->elemento == 5, "RAIZ-DER-DER-IZQ = 5");
-  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->derecha->derecha->elemento == 8, "RAIZ-DER-DER-DER = 8");
-
-  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->derecha->izquierda->izquierda->elemento == 4, "RAIZ-DER-DER-IZQ-IZQ = 4");
-  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->derecha->izquierda->derecha, "RAIZ-DER-DER-IZQ-DER = NULL");
-
-  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->derecha->izquierda->izquierda->izquierda && !arbol_bb->nodo_raiz->derecha->derecha->izquierda->izquierda->derecha, "RAIZ-DER-DER-IZQ-IZQ-IZQ == NULL y RAIZ-DER-DER-IZQ-IZQ-DER == NULL");
-
-
-  pa2m_afirmar(*(int*)arbol_buscar(arbol_bb, &elemento_buscado_6) == 6, "El elemento 6 en el ABB sigue existiendo despues de borrar el elemento 7");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->elemento == 2, "El nodo RAIZ tiene valor 2");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->izquierda->elemento == 1, "El nodo RAIZ->HIJO_IZQ tiene valor 1");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->elemento == 3, "El nodo RAIZ->HIJO_DER tiene valor 3");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->izquierda->izquierda, "El nodo RAIZ->HIJO_IZQ->HIJO_IZQ es NULL");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->izquierda->derecha, "El nodo RAIZ->HIJO_IZQ->HIJO_DER es NULL");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->izquierda, "El nodo RAIZ->HIJO_DER->HIJO_IZQ es NULL");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->derecha->elemento == 6, "El nodo RAIZ->HIJO_DER->HIJO_DER tiene valor 6");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->derecha->izquierda->elemento == 5, "El nodo RAIZ->HIJO_DER->HIJO_DER->HIJO_IZQ tiene valor 5");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->derecha->derecha->elemento == 8, "El nodo RAIZ->HIJO_DER->HIJO_DER->HIJO_DER tiene valor 8");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->derecha->izquierda->izquierda->elemento == 4, "El nodo RAIZ->HIJO_DER->HIJO_DER->HIJO_IZQ->HIJO_IZQ tiene valor 4");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->derecha->izquierda->derecha, "El nodo RAIZ->HIJO_DER->HIJO_DER->HIJO_IZQ->HIJO_DER es NULL");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->derecha->izquierda->izquierda->izquierda, "El nodo RAIZ->HIJO_DER->HIJO_DER->HIJO_IZQ->HIJO_IZQ->HIJO_IZQ es NULL");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->derecha->izquierda->izquierda->derecha, "El nodo RAIZ->HIJO_DER->HIJO_DER->HIJO_IZQ->HIJO_IZQ->HIJO_DER es NULL");
 
   pa2m_afirmar(arbol_borrar(arbol_bb, &elemento_buscado_6) == 0, "Se solicito borrar el elemento 6 en el ABB. Como el mismo existia, lo borra correctamente");
   pa2m_afirmar(!arbol_buscar(arbol_bb, &elemento_buscado_6), "Ya no se encuentra el elemento 6 en el ABB");
   pa2m_afirmar(arbol_borrar(arbol_bb, &elemento_buscado_6) == -1, "Se solicito borrar el elemento 6 en el ABB. Como el mismo ya no existia, retorna -1");
 
-  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->elemento == 2, "RAIZ == 2");
-
-  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->izquierda->elemento == 1, "RAIZ-IZQ == 1");
-  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->elemento == 3, "RAIZ-DER = 3");
-
-  pa2m_afirmar(!arbol_bb->nodo_raiz->izquierda->izquierda && !arbol_bb->nodo_raiz->izquierda->derecha, "RAIZ-IZQ-IZQ == NULL y RAIZ-IZQ-DER == NULL");
-
-  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->izquierda, "RAIZ-DER-IZQ == NULL");
-  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->derecha->elemento == 5, "RAIZ-DER-DER = 5");
-  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->derecha->izquierda->elemento == 4, "RAIZ-DER-DER-IZQ = 4");
-  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->derecha->derecha->elemento == 8, "RAIZ-DER-DER-DER = 8");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->elemento == 2, "El nodo RAIZ tiene valor 2");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->izquierda->elemento == 1, "El nodo RAIZ->HIJO_IZQ tiene valor 1");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->elemento == 3, "El nodo RAIZ->HIJO_DER tiene valor 3");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->izquierda->izquierda, "El nodo RAIZ->HIJO_IZQ->HIJO_IZQ es NULL");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->izquierda->derecha, "El nodo RAIZ->HIJO_IZQ->HIJO_DER es NULL");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->izquierda, "El nodo RAIZ->HIJO_DER->HIJO_IZQ es NULL");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->derecha->elemento == 5, "El nodo RAIZ->HIJO_DER->HIJO_DER tiene valor 5");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->derecha->izquierda->elemento == 4, "El nodo RAIZ->HIJO_DER->HIJO_DER->HIJO_IZQ tiene valor 4");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->derecha->derecha->elemento == 8, "El nodo RAIZ->HIJO_DER->HIJO_DER->HIJO_DER tiene valor 8");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->derecha->derecha->izquierda, "El nodo RAIZ->HIJO_DER->HIJO_DER->HIJO_IZQ->HIJO_IZQ es NULL");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->derecha->derecha->derecha, "El nodo RAIZ->HIJO_DER->HIJO_DER->HIJO_IZQ->HIJO_DER es NULL");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->derecha->derecha->izquierda, "El nodo RAIZ->HIJO_DER->HIJO_DER->HIJO_DER->HIJO_IZQ es NULL");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->derecha->derecha->derecha, "El nodo RAIZ->HIJO_DER->HIJO_DER->HIJO_DER->HIJO_DER es NULL");
 
   pa2m_afirmar(arbol_borrar(arbol_bb, &elemento_buscado_5) == 0, "Se solicito borrar el elemento 5 en el ABB. Como el mismo existia, lo borra correctamente");
   pa2m_afirmar(!arbol_buscar(arbol_bb, &elemento_buscado_5), "Ya no se encuentra el elemento 5 en el ABB");
   pa2m_afirmar(arbol_borrar(arbol_bb, &elemento_buscado_5) == -1, "Se solicito borrar el elemento 5 en el ABB. Como el mismo ya no existia, retorna -1");
 
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->elemento == 2, "El nodo RAIZ tiene valor 2");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->izquierda->elemento == 1, "El nodo RAIZ->HIJO_IZQ tiene valor 1");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->elemento == 3, "El nodo RAIZ->HIJO_DER tiene valor 3");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->izquierda->izquierda, "El nodo RAIZ->HIJO_IZQ->HIJO_IZQ es NULL");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->izquierda->derecha, "El nodo RAIZ->HIJO_IZQ->HIJO_DER es NULL");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->izquierda, "El nodo RAIZ->HIJO_DER->HIJO_IZQ es NULL");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->derecha->elemento == 4, "El nodo RAIZ->HIJO_DER->HIJO_DER tiene valor 4");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->derecha->izquierda, "El nodo RAIZ->HIJO_DER->HIJO_DER->HIJO_IZQ tiene es NULL");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->derecha->derecha->elemento == 8, "El nodo RAIZ->HIJO_DER->HIJO_DER->HIJO_DER tiene valor 8");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->derecha->derecha->izquierda, "El nodo RAIZ->HIJO_DER->HIJO_DER->HIJO_DER->HIJO_IZQ es NULL");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->derecha->derecha->derecha, "El nodo RAIZ->HIJO_DER->HIJO_DER->HIJO_DER->HIJO_DER es NULL");
+
+
   pa2m_afirmar(arbol_borrar(arbol_bb, &elemento_buscado_2) == 0, "Se solicito borrar el elemento 2 en el ABB. Como el mismo existia, lo borra correctamente");
   pa2m_afirmar(!arbol_buscar(arbol_bb, &elemento_buscado_2), "Ya no se encuentra el elemento 2 en el ABB");
   pa2m_afirmar(arbol_borrar(arbol_bb, &elemento_buscado_2) == -1, "Se solicito borrar el elemento 2 en el ABB. Como el mismo ya no existia, retorna -1");
+
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->elemento == 1, "RAIZ == 1");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->izquierda, "RAIZ-IZQ == NULL");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->elemento == 3, "RAIZ-DER = 3");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->izquierda, "RAIZ-DER-IZQ = NULL");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->derecha->elemento == 4, "RAIZ-DER-DER = 4");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->derecha->izquierda, "RAIZ-DER-DER-IZQ = NULL");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->derecha->derecha->elemento == 8, "RAIZ-DER-DER->DER = 8");
 
   arbol_destruir(arbol_bb);
 }
@@ -478,19 +491,19 @@ int main() {
   dadoUnABBVacio_SiSolicitoBuscarUnElemento_RetornaNullPorqueNoExisteElElemento();
   pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB con elementos [1, 2, 3, 4, 5, 6] - El elemento no existe en el ABB");
   dadoUnABBConElementos_SiSolicitoBuscarUnElementoQueNoExisteEnElArbol_RetornaNullPorqueNoExisteElElemento();
-  pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB con elementos [1, 2, 3, 4, 5, 6] - El elemento existe en el ABB");
+  pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB con elementos [2, 3, 1, 5, 6, 4] - El elemento existe en el ABB");
   dadoUnABBConElementos_SiSolicitoBuscarUnElementoQueExisteEnElArbol_DevuelveElValorDelElementoCorrectamente();
   pa2m_nuevo_grupo("Pruebas Eliminar Datos en ABB NULL");
   dadoUnABBNull_SiSolicitoBorrarUnElemento_NoPermiteBorrarPorqueElABBEsNull();
   pa2m_nuevo_grupo("Pruebas Eliminar Datos en ABB Vacio");
   dadoUnABBVacio_SiSolicitoBorrarUnElemento_NoPermiteBorrarPorqueElABBEsVacio();
-  pa2m_nuevo_grupo("Pruebas Eliminar datos en ABB con elementos [1, 2, 3, 4, 5, 6] - El elemento no existe en el ABB");
+  pa2m_nuevo_grupo("Pruebas Eliminar datos en ABB con elementos [2, 3, 1, 5, 6, 4] - El elemento no existe en el ABB");
   dadoUnABBConElementos_SiSolicitoBorrarUnElementoQueNoExisteEnElArbol_NoPermiteBorrarPorqueNoExisteElElemento();
-  pa2m_nuevo_grupo("Pruebas Eliminar datos en ABB con elementos [1, 2, 3, 4, 5, 6] - Los elementos existen en el ABB y no tienen hijos");
+  pa2m_nuevo_grupo("Pruebas Eliminar datos en ABB con elementos [2, 3, 1, 5, 6, 4] - Los elementos existen en el ABB y no tienen hijos");
   dadoUnABBConElementos_SiSolicitoBorrarElementosQueExisteEnElArbolYNoTienenHijos_PermiteBorrarCorrectamente();
-  pa2m_nuevo_grupo("Pruebas Eliminar datos en ABB con elementos [1, 2, 3, 4, 5, 6, 7] - Los elementos existen en el ABB y tienen un hijo");
+  pa2m_nuevo_grupo("Pruebas Eliminar datos en ABB con elementos [2, 3, 6, 5, 4, 7] - Los elementos existen en el ABB y tienen un hijo");
   dadoUnABBConElementos_SiSolicitoBorrarElementosQueExisteEnElArbolYTienenUnHijo_PermiteBorrarCorrectamente();
-  pa2m_nuevo_grupo("Pruebas Eliminar datos en ABB con elementos insertados en el siguiente orden: [2, 3, 1, 7, 5, 6, 4, 8] - Los elementos existen en el ABB y tienen dos hijos");
+  pa2m_nuevo_grupo("Pruebas Eliminar datos en ABB con elementos [2, 3, 1, 7, 5, 6, 4, 8] - Los elementos existen en el ABB y tienen dos hijos");
   dadoUnABBConElementos_SiSolicitoBorrarElementosQueExisteEnElArbolYTienenDosHijos_PermiteBorrarCorrectamente();
   return pa2m_mostrar_reporte();
 }
