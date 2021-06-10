@@ -528,7 +528,63 @@ void dadoUnABBVacio_SiSolicitoRecorrerInOrden_RetornaCorrectamenteLaCantidadDeEl
   arbol_destruir(arbol_bb);
 }
 
-void dadoUnABBConElementos_SiSolicitoRecorrerInOrden_GuardaCorrectamenteLosElementos() {
+void dadoUnABBConElementos_SiSolicitoRecorrerInOrdenConUnArrayNULL_RetornaCorrectamenteLaCantidadDeElementosRecorridos(){
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
+
+  int dato1 = 1;
+  int dato2 = 2;
+  int dato3 = 3;
+  int dato4 = 4;
+  int dato5 = 5;
+  int dato6 = 6;
+  int dato7 = 7;
+  int dato8 = 8;
+
+  arbol_insertar(arbol_bb, &dato2);
+  arbol_insertar(arbol_bb, &dato3);
+  arbol_insertar(arbol_bb, &dato1);
+  arbol_insertar(arbol_bb, &dato7);
+  arbol_insertar(arbol_bb, &dato5);
+  arbol_insertar(arbol_bb, &dato6);
+  arbol_insertar(arbol_bb, &dato4);
+  arbol_insertar(arbol_bb, &dato8);
+
+  int* array = NULL;
+  size_t cantidad = arbol_recorrido_inorden(arbol_bb,(void**)array, 8);
+  pa2m_afirmar(cantidad == 0, "El ABB se recorre 0 veces porque el array es NULL");
+
+  arbol_destruir(arbol_bb);
+}
+
+void dadoUnABBConElementos_SiSolicitoRecorrerInOrdenConUnArrayPasandoTamanioCero_RetornaCorrectamenteLaCantidadDeElementosRecorridos() {
+    abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
+
+  int dato1 = 1;
+  int dato2 = 2;
+  int dato3 = 3;
+  int dato4 = 4;
+  int dato5 = 5;
+  int dato6 = 6;
+  int dato7 = 7;
+  int dato8 = 8;
+
+  arbol_insertar(arbol_bb, &dato2);
+  arbol_insertar(arbol_bb, &dato3);
+  arbol_insertar(arbol_bb, &dato1);
+  arbol_insertar(arbol_bb, &dato7);
+  arbol_insertar(arbol_bb, &dato5);
+  arbol_insertar(arbol_bb, &dato6);
+  arbol_insertar(arbol_bb, &dato4);
+  arbol_insertar(arbol_bb, &dato8);
+
+  int* array[8];
+  size_t cantidad = arbol_recorrido_inorden(arbol_bb,(void**)array, 0);
+  pa2m_afirmar(cantidad == 0, "El ABB se recorre 0 veces porque se pasa un tamanio 0");
+
+  arbol_destruir(arbol_bb);
+}
+
+void dadoUnABBConElementos_SiSolicitoRecorrerConArrayDelMismoTamanioQueElABB_GuardaCorrectamenteLosElementos() {
   abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
 
   int dato1 = 1;
@@ -559,6 +615,72 @@ void dadoUnABBConElementos_SiSolicitoRecorrerInOrden_GuardaCorrectamenteLosEleme
   arbol_destruir(arbol_bb);
 
 }
+
+
+void dadoUnABBConElementos_SiSolicitoRecorrerConArrayDeMayorTamanioQueElABB_GuardaCorrectamenteLosElementos() {
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
+
+  int dato1 = 1;
+  int dato2 = 2;
+  int dato3 = 3;
+  int dato4 = 4;
+  int dato5 = 5;
+  int dato6 = 6;
+  int dato7 = 7;
+  int dato8 = 8;
+
+  arbol_insertar(arbol_bb, &dato2);
+  arbol_insertar(arbol_bb, &dato3);
+  arbol_insertar(arbol_bb, &dato1);
+  arbol_insertar(arbol_bb, &dato7);
+  arbol_insertar(arbol_bb, &dato5);
+  arbol_insertar(arbol_bb, &dato6);
+  arbol_insertar(arbol_bb, &dato4);
+  arbol_insertar(arbol_bb, &dato8);
+
+  int* array[20];
+  size_t cantidad = arbol_recorrido_inorden(arbol_bb,(void**)array, 20);
+  pa2m_afirmar(cantidad == 8, "Se recorren todos los elementos del arbol");
+  for(size_t i = 0; i < cantidad; i++) {
+    pa2m_afirmar(*array[i] == i + 1, "El elemento del array es correcto");
+  }
+
+  arbol_destruir(arbol_bb);
+}
+
+
+void dadoUnABBConElementos_SiSolicitoRecorrerConArrayDeMenorTamanioQueElABB_GuardaCorrectamenteLosElementos() {
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
+
+  int dato1 = 1;
+  int dato2 = 2;
+  int dato3 = 3;
+  int dato4 = 4;
+  int dato5 = 5;
+  int dato6 = 6;
+  int dato7 = 7;
+  int dato8 = 8;
+
+  arbol_insertar(arbol_bb, &dato2);
+  arbol_insertar(arbol_bb, &dato3);
+  arbol_insertar(arbol_bb, &dato1);
+  arbol_insertar(arbol_bb, &dato7);
+  arbol_insertar(arbol_bb, &dato5);
+  arbol_insertar(arbol_bb, &dato6);
+  arbol_insertar(arbol_bb, &dato4);
+  arbol_insertar(arbol_bb, &dato8);
+
+  int* array[3];
+  size_t cantidad = arbol_recorrido_inorden(arbol_bb,(void**)array, 3);
+  pa2m_afirmar(cantidad == 3, "Se recorren tres elementos del arbol");
+  for(size_t i = 0; i < cantidad; i++) {
+    pa2m_afirmar(*array[i] == i + 1, "El elemento del array es correcto");
+  }
+
+  arbol_destruir(arbol_bb);
+}
+
+
 
 int main() {
   pa2m_nuevo_grupo("Pruebas Creacion ABB");
@@ -609,7 +731,16 @@ int main() {
   dadoUnABBNull_SiSolicitoRecorrerInOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
   pa2m_nuevo_grupo("Pruebas recorrido inorden en ABB Vacio");
   dadoUnABBVacio_SiSolicitoRecorrerInOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
-  pa2m_nuevo_grupo("Pruebas recorrido inorden");
-  dadoUnABBConElementos_SiSolicitoRecorrerInOrden_GuardaCorrectamenteLosElementos();
+  pa2m_nuevo_grupo("Pruebas recorrido inorden en ABB con elementos pero con un array NULL");
+  dadoUnABBConElementos_SiSolicitoRecorrerInOrdenConUnArrayNULL_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
+  pa2m_nuevo_grupo("Pruebas recorrido inorden en ABB con elementos pero solicitando recorrer 0 veces un array");
+  dadoUnABBConElementos_SiSolicitoRecorrerInOrdenConUnArrayPasandoTamanioCero_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
+  pa2m_nuevo_grupo("Pruebas recorrido inorden ABB del mismo tamanio que el array");
+  dadoUnABBConElementos_SiSolicitoRecorrerConArrayDelMismoTamanioQueElABB_GuardaCorrectamenteLosElementos();
+  pa2m_nuevo_grupo("Pruebas recorrido inorden ABB de mayor tamanio que el array");
+  dadoUnABBConElementos_SiSolicitoRecorrerConArrayDeMayorTamanioQueElABB_GuardaCorrectamenteLosElementos();
+  pa2m_nuevo_grupo("Pruebas recorrido inorden ABB de menor tamanio que el array");
+  dadoUnABBConElementos_SiSolicitoRecorrerConArrayDeMenorTamanioQueElABB_GuardaCorrectamenteLosElementos();
+
   return pa2m_mostrar_reporte();
 }

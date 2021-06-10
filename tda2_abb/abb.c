@@ -159,14 +159,14 @@ bool arbol_vacio(abb_t* arbol){
 }
 
 
-void _arbol_recorrido_inorden(nodo_abb_t* nodo, void** array, size_t tamanio_array, size_t* contador) {
-    if(tamanio_array > 0) {
+void _arbol_recorrido_inorden(nodo_abb_t* nodo, void** array, size_t* tamanio_array, size_t* contador) {
+    if(*tamanio_array > 0) {
         if(!nodo)
             return;
         _arbol_recorrido_inorden(nodo->izquierda, array, tamanio_array, contador);
 
         array[(*contador)++] = nodo->elemento;
-        tamanio_array--;
+        (*tamanio_array)--;
         _arbol_recorrido_inorden(nodo->derecha, array, tamanio_array, contador);
     }
 }
@@ -175,7 +175,7 @@ void _arbol_recorrido_inorden(nodo_abb_t* nodo, void** array, size_t tamanio_arr
 size_t arbol_recorrido_inorden(abb_t* arbol, void** array, size_t tamanio_array){
     size_t contador = 0;
     if(array != NULL && arbol != NULL)
-        _arbol_recorrido_inorden(arbol->nodo_raiz, array, tamanio_array, &contador);
+        _arbol_recorrido_inorden(arbol->nodo_raiz, array, &tamanio_array, &contador);
     return contador;
 }
 
