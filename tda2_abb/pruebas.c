@@ -455,15 +455,109 @@ void dadoUnABBConElementos_SiSolicitoBorrarElementosQueExisteEnElArbolYTienenDos
   pa2m_afirmar(!arbol_buscar(arbol_bb, &elemento_buscado_2), "Ya no se encuentra el elemento 2 en el ABB");
   pa2m_afirmar(arbol_borrar(arbol_bb, &elemento_buscado_2) == -1, "Se solicito borrar el elemento 2 en el ABB. Como el mismo ya no existia, retorna -1");
 
-  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->elemento == 1, "RAIZ == 1");
-  pa2m_afirmar(!arbol_bb->nodo_raiz->izquierda, "RAIZ-IZQ == NULL");
-  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->elemento == 3, "RAIZ-DER = 3");
-  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->izquierda, "RAIZ-DER-IZQ = NULL");
-  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->derecha->elemento == 4, "RAIZ-DER-DER = 4");
-  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->derecha->izquierda, "RAIZ-DER-DER-IZQ = NULL");
-  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->derecha->derecha->elemento == 8, "RAIZ-DER-DER->DER = 8");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->elemento == 1, "El nodo RAIZ tiene valor 1");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->izquierda, "El nodo RAIZ->HIJO_IZQ es NULL");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->elemento == 3, "El nodo RAIZ->HIJO_DER tiene valor 3");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->izquierda, "El nodo RAIZ->HIJO_DER->HIJO_IZQ es NULL");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->derecha->elemento == 4, "El nodo RAIZ->HIJO_DER->HIJO_DER tiene valor 4");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->derecha->izquierda, "El nodo RAIZ->HIJO_DER->HIJO_DER->HIJO_IZQ tiene es NULL");
+  pa2m_afirmar(*(int*)arbol_bb->nodo_raiz->derecha->derecha->derecha->elemento == 8, "El nodo RAIZ->HIJO_DER->HIJO_DER->HIJO_DER tiene valor 8");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->derecha->derecha->izquierda, "El nodo RAIZ->HIJO_DER->HIJO_DER->HIJO_DER->HIJO_IZQ es NULL");
+  pa2m_afirmar(!arbol_bb->nodo_raiz->derecha->derecha->derecha->derecha, "El nodo RAIZ->HIJO_DER->HIJO_DER->HIJO_DER->HIJO_DER es NULL");
 
   arbol_destruir(arbol_bb);
+}
+
+void dadoUnABBNull_SiSolicitoVerRaiz_RetornaNull() {
+  abb_t* arbol_bb = NULL;
+  pa2m_afirmar(!arbol_raiz(arbol_bb), "Ver raiz en un ABB NULL retorna NULL");
+
+  arbol_destruir(arbol_bb);
+}
+
+void dadoUnABBVacio_SiSolicitoVerRaiz_RetornaNull() {
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
+  pa2m_afirmar(!arbol_raiz(arbol_bb), "Ver raiz en un ABB Vacio retorna NULL");
+
+  arbol_destruir(arbol_bb);
+}
+
+void dadoUnABBConElementos_SiSolicitoVerRaiz_RetornaElElementoDeLaRaiz() {
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
+
+  int dato1 = 1;
+  int dato2 = 2;
+  int dato3 = 3;
+  int dato4 = 4;
+  int dato5 = 5;
+  int dato6 = 6;
+  int dato7 = 7;
+  int dato8 = 8;
+
+  arbol_insertar(arbol_bb, &dato2);
+  arbol_insertar(arbol_bb, &dato3);
+  arbol_insertar(arbol_bb, &dato1);
+  arbol_insertar(arbol_bb, &dato7);
+  arbol_insertar(arbol_bb, &dato5);
+  arbol_insertar(arbol_bb, &dato6);
+  arbol_insertar(arbol_bb, &dato4);
+  arbol_insertar(arbol_bb, &dato8);
+
+  pa2m_afirmar(*(int*)arbol_raiz(arbol_bb) == 2, "Ver raiz en un ABB Con Elementos retorna correctamente la Raiz");
+
+  arbol_destruir(arbol_bb);
+}
+
+void dadoUnABBNull_SiSolicitoRecorrerInOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos(){
+  abb_t* arbol_bb = NULL;
+
+  int* array[8];
+  size_t cantidad = arbol_recorrido_inorden(arbol_bb,(void**)array, 8);
+  pa2m_afirmar(cantidad == 0, "El ABB NULL se recorre 0 veces");
+
+  arbol_destruir(arbol_bb);
+}
+
+void dadoUnABBVacio_SiSolicitoRecorrerInOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos(){
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);;
+
+  int* array[8];
+  size_t cantidad = arbol_recorrido_inorden(arbol_bb,(void**)array, 8);
+  pa2m_afirmar(cantidad == 0, "El ABB Vacio se recorre 0 veces");
+
+  arbol_destruir(arbol_bb);
+}
+
+void dadoUnABBConElementos_SiSolicitoRecorrerInOrden_GuardaCorrectamenteLosElementos() {
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
+
+  int dato1 = 1;
+  int dato2 = 2;
+  int dato3 = 3;
+  int dato4 = 4;
+  int dato5 = 5;
+  int dato6 = 6;
+  int dato7 = 7;
+  int dato8 = 8;
+
+  arbol_insertar(arbol_bb, &dato2);
+  arbol_insertar(arbol_bb, &dato3);
+  arbol_insertar(arbol_bb, &dato1);
+  arbol_insertar(arbol_bb, &dato7);
+  arbol_insertar(arbol_bb, &dato5);
+  arbol_insertar(arbol_bb, &dato6);
+  arbol_insertar(arbol_bb, &dato4);
+  arbol_insertar(arbol_bb, &dato8);
+
+  int* array[8];
+  size_t cantidad = arbol_recorrido_inorden(arbol_bb,(void**)array, 8);
+  pa2m_afirmar(cantidad == 8, "Se recorre el arbol completo");
+  for(size_t i = 0; i < cantidad; i++) {
+    pa2m_afirmar(*array[i] == i + 1, "El elemento del array es correcto");
+  }
+
+  arbol_destruir(arbol_bb);
+
 }
 
 int main() {
@@ -489,7 +583,7 @@ int main() {
   dadoUnABBNull_SiSolicitoBuscarUnElemento_RetornaNullPorqueNoExisteElElemento();
   pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB Vacio");
   dadoUnABBVacio_SiSolicitoBuscarUnElemento_RetornaNullPorqueNoExisteElElemento();
-  pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB con elementos [1, 2, 3, 4, 5, 6] - El elemento no existe en el ABB");
+  pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB con elementos [2, 3, 1, 5, 6, 4] - El elemento no existe en el ABB");
   dadoUnABBConElementos_SiSolicitoBuscarUnElementoQueNoExisteEnElArbol_RetornaNullPorqueNoExisteElElemento();
   pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB con elementos [2, 3, 1, 5, 6, 4] - El elemento existe en el ABB");
   dadoUnABBConElementos_SiSolicitoBuscarUnElementoQueExisteEnElArbol_DevuelveElValorDelElementoCorrectamente();
@@ -505,5 +599,17 @@ int main() {
   dadoUnABBConElementos_SiSolicitoBorrarElementosQueExisteEnElArbolYTienenUnHijo_PermiteBorrarCorrectamente();
   pa2m_nuevo_grupo("Pruebas Eliminar datos en ABB con elementos [2, 3, 1, 7, 5, 6, 4, 8] - Los elementos existen en el ABB y tienen dos hijos");
   dadoUnABBConElementos_SiSolicitoBorrarElementosQueExisteEnElArbolYTienenDosHijos_PermiteBorrarCorrectamente();
+  pa2m_nuevo_grupo("Pruebas consultar Raiz en ABB NULL");
+  dadoUnABBNull_SiSolicitoVerRaiz_RetornaNull();
+  pa2m_nuevo_grupo("Pruebas consultar Raiz en ABB Vacio");
+  dadoUnABBVacio_SiSolicitoVerRaiz_RetornaNull();
+  pa2m_nuevo_grupo("Pruebas consultar Raiz en ABB con datos");
+  dadoUnABBConElementos_SiSolicitoVerRaiz_RetornaElElementoDeLaRaiz();
+  pa2m_nuevo_grupo("Pruebas recorrido inorden en ABB NULL");
+  dadoUnABBNull_SiSolicitoRecorrerInOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
+  pa2m_nuevo_grupo("Pruebas recorrido inorden en ABB Vacio");
+  dadoUnABBVacio_SiSolicitoRecorrerInOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
+  pa2m_nuevo_grupo("Pruebas recorrido inorden");
+  dadoUnABBConElementos_SiSolicitoRecorrerInOrden_GuardaCorrectamenteLosElementos();
   return pa2m_mostrar_reporte();
 }
