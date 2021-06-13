@@ -186,8 +186,8 @@ void _arbol_recorrido_preorden(nodo_abb_t* nodo, void** array, size_t* tamanio_a
             return;
         array[(*contador)++] = nodo->elemento;
         (*tamanio_array)--;
-        _arbol_recorrido_inorden(nodo->izquierda, array, tamanio_array, contador);
-        _arbol_recorrido_inorden(nodo->derecha, array, tamanio_array, contador);
+        _arbol_recorrido_preorden(nodo->izquierda, array, tamanio_array, contador);
+        _arbol_recorrido_preorden(nodo->derecha, array, tamanio_array, contador);
     }
 }
 
@@ -202,8 +202,8 @@ void _arbol_recorrido_postorden(nodo_abb_t* nodo, void** array, size_t* tamanio_
     if(*tamanio_array > 0) {
         if(!nodo)
             return;
-        _arbol_recorrido_inorden(nodo->izquierda, array, tamanio_array, contador);
-        _arbol_recorrido_inorden(nodo->derecha, array, tamanio_array, contador);
+        _arbol_recorrido_postorden(nodo->izquierda, array, tamanio_array, contador);
+        _arbol_recorrido_postorden(nodo->derecha, array, tamanio_array, contador);
         array[(*contador)++] = nodo->elemento;
         (*tamanio_array)--;
     }
