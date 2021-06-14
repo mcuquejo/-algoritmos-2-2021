@@ -304,57 +304,72 @@ void _abb_con_cada_elemento_postorden(nodo_abb_t* nodo, bool (*funcion)(void*, v
     }
 }
 
-void abb_con_cada_elemento_preorden(nodo_abb_t* nodo, bool (*funcion)(void*, void*), void *extra, size_t* contador) {
+void abb_con_cada_elemento_preorden(nodo_abb_t* nodo, bool (*funcion)(void*, void*), void *extra, size_t* contador, bool* finalizar) {
     if(!nodo)
         return;
-    bool finalizar = funcion(nodo->elemento, extra);
-    (*contador)++;
-    if(finalizar)
-        return;
 
-    abb_con_cada_elemento_preorden(nodo->izquierda, funcion, extra, contador);
-    abb_con_cada_elemento_preorden(nodo->derecha, funcion, extra, contador);
+    printf("finalizar en esta iteracion vale: %s\n", (*finalizar) ? "true" : "false");
+    if(!*finalizar) {
+        (*contador)++;
+        printf("estoy recorriendo el elemento: %i\n", *(int*)nodo->elemento);
+        *finalizar = funcion(nodo->elemento, extra);
+        if(*finalizar) {
+            return;
+        }
+    }
+
+    abb_con_cada_elemento_preorden(nodo->izquierda, funcion, extra, contador, finalizar);
+    abb_con_cada_elemento_preorden(nodo->derecha, funcion, extra, contador, finalizar);
 }
 
-void abb_con_cada_elemento_inorden(nodo_abb_t* nodo, bool (*funcion)(void*, void*), void *extra, size_t* contador) {
+void abb_con_cada_elemento_inorden(nodo_abb_t* nodo, bool (*funcion)(void*, void*), void *extra, size_t* contador, bool* finalizar) {
     if(!nodo)
         return;
-    abb_con_cada_elemento_inorden(nodo->izquierda, funcion, extra, contador);
-    bool finalizar = funcion(nodo->elemento, extra);
+    abb_con_cada_elemento_inorden(nodo->izquierda, funcion, extra, contador, finalizar);
 
-    (*contador)++;
+    printf("finalizar en esta iteracion vale: %s\n", (*finalizar) ? "true" : "false");
+    if(!*finalizar) {
+        (*contador)++;
+        printf("estoy recorriendo el elemento: %i\n", *(int*)nodo->elemento);
+        *finalizar = funcion(nodo->elemento, extra);
+        if(*finalizar) {
+            return;
+        }
+    }
 
-    if(finalizar)
-        return;
-
-    abb_con_cada_elemento_inorden(nodo->derecha, funcion, extra, contador);
+    abb_con_cada_elemento_inorden(nodo->derecha, funcion, extra, contador, finalizar);
 }
 
-void abb_con_cada_elemento_postorden(nodo_abb_t* nodo, bool (*funcion)(void*, void*), void *extra, size_t* contador) {
+void abb_con_cada_elemento_postorden(nodo_abb_t* nodo, bool (*funcion)(void*, void*), void *extra, size_t* contador, bool* finalizar) {
     if(!nodo)
         return;
-    abb_con_cada_elemento_postorden(nodo->izquierda, funcion, extra, contador);
-    abb_con_cada_elemento_postorden(nodo->derecha, funcion, extra, contador);
-    bool finalizar = funcion(nodo->elemento, extra);
-    (*contador)++;
-    if(finalizar)
-        return;
+    abb_con_cada_elemento_postorden(nodo->izquierda, funcion, extra, contador, finalizar);
+    abb_con_cada_elemento_postorden(nodo->derecha, funcion, extra, contador, finalizar);
+    printf("finalizar en esta iteracion vale: %s\n", (*finalizar) ? "true" : "false");
+    if(!*finalizar) {
+        (*contador)++;
+        printf("estoy recorriendo el elemento: %i\n", *(int*)nodo->elemento);
+        *finalizar = funcion(nodo->elemento, extra);
+        if(*finalizar) {
+            return;
+        }
+    }
 }
 
 size_t abb_con_cada_elemento(abb_t* arbol, int recorrido, bool (*funcion)(void*, void*), void* extra){
     size_t contador = 0;
-    //bool finalizar = false;
+    bool finalizar = false;
     if(!arbol || !funcion)
         return contador;
     nodo_abb_t* nodo_actual = arbol->nodo_raiz;
     if (recorrido == ABB_RECORRER_PREORDEN)
         //abb_con_cada_elemento_preorden(nodo_actual, funcion, extra, &contador, &finalizar);
-        abb_con_cada_elemento_preorden(nodo_actual, funcion, extra, &contador);
+        abb_con_cada_elemento_preorden(nodo_actual, funcion, extra, &contador, &finalizar);
     if (recorrido == ABB_RECORRER_INORDEN)
         //abb_con_cada_elemento_inorden(nodo_actual, funcion, extra, &contador, &finalizar);
-        abb_con_cada_elemento_inorden(nodo_actual, funcion, extra, &contador);
+        abb_con_cada_elemento_inorden(nodo_actual, funcion, extra, &contador, &finalizar);
     if (recorrido == ABB_RECORRER_POSTORDEN)
         //abb_con_cada_elemento_postorden(nodo_actual, funcion, extra, &contador, &finalizar);
-        abb_con_cada_elemento_postorden(nodo_actual, funcion, extra, &contador);
+        abb_con_cada_elemento_postorden(nodo_actual, funcion, extra, &contador, &finalizar);
     return contador;
 }
