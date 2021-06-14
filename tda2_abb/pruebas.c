@@ -856,6 +856,423 @@ void dadoUnABBConElementos_SiSolicitoRecorrerPreOrdenConArrayDeMenorTamanioQueEl
   arbol_destruir(arbol_bb);
 }
 
+void dadoUnABBNull_SiSolicitoRecorrerPostOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos(){
+  abb_t* arbol_bb = NULL;
+
+  int* array[8];
+  size_t cantidad = arbol_recorrido_postorden(arbol_bb,(void**)array, 8);
+  pa2m_afirmar(cantidad == 0, "El ABB NULL se recorre 0 veces");
+
+  arbol_destruir(arbol_bb);
+}
+
+void dadoUnABBVacio_SiSolicitoRecorrerPostOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos(){
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);;
+
+  int* array[8];
+  size_t cantidad = arbol_recorrido_postorden(arbol_bb,(void**)array, 8);
+  pa2m_afirmar(cantidad == 0, "El ABB Vacio se recorre 0 veces");
+
+  arbol_destruir(arbol_bb);
+}
+
+void dadoUnABBConElementos_SiSolicitoRecorrerPostOrdenConUnArrayNULL_RetornaCorrectamenteLaCantidadDeElementosRecorridos(){
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
+
+  int dato1 = 1;
+  int dato2 = 2;
+  int dato3 = 3;
+  int dato4 = 4;
+  int dato5 = 5;
+  int dato6 = 6;
+  int dato7 = 7;
+  int dato8 = 8;
+
+  arbol_insertar(arbol_bb, &dato2);
+  arbol_insertar(arbol_bb, &dato3);
+  arbol_insertar(arbol_bb, &dato1);
+  arbol_insertar(arbol_bb, &dato7);
+  arbol_insertar(arbol_bb, &dato5);
+  arbol_insertar(arbol_bb, &dato6);
+  arbol_insertar(arbol_bb, &dato4);
+  arbol_insertar(arbol_bb, &dato8);
+
+  int* array = NULL;
+  size_t cantidad = arbol_recorrido_postorden(arbol_bb,(void**)array, 8);
+  pa2m_afirmar(cantidad == 0, "El ABB se recorre 0 veces porque el array es NULL");
+
+  arbol_destruir(arbol_bb);
+}
+
+void dadoUnABBConElementos_SiSolicitoRecorrerPostOrdenConUnArrayPasandoTamanioCero_RetornaCorrectamenteLaCantidadDeElementosRecorridos() {
+    abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
+
+  int dato1 = 1;
+  int dato2 = 2;
+  int dato3 = 3;
+  int dato4 = 4;
+  int dato5 = 5;
+  int dato6 = 6;
+  int dato7 = 7;
+  int dato8 = 8;
+
+  arbol_insertar(arbol_bb, &dato2);
+  arbol_insertar(arbol_bb, &dato3);
+  arbol_insertar(arbol_bb, &dato1);
+  arbol_insertar(arbol_bb, &dato7);
+  arbol_insertar(arbol_bb, &dato5);
+  arbol_insertar(arbol_bb, &dato6);
+  arbol_insertar(arbol_bb, &dato4);
+  arbol_insertar(arbol_bb, &dato8);
+
+  int* array[8];
+  size_t cantidad = arbol_recorrido_postorden(arbol_bb,(void**)array, 0);
+  pa2m_afirmar(cantidad == 0, "El ABB se recorre 0 veces porque se pasa un tamanio 0");
+
+  arbol_destruir(arbol_bb);
+}
+
+void dadoUnABBConElementos_SiSolicitoRecorrerPostOrdenConArrayDelMismoTamanioQueElABB_GuardaCorrectamenteLosElementos() {
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
+
+  int dato1 = 1;
+  int dato2 = 2;
+  int dato3 = 3;
+  int dato4 = 4;
+  int dato5 = 5;
+  int dato6 = 6;
+  int dato7 = 7;
+  int dato8 = 8;
+
+  arbol_insertar(arbol_bb, &dato2);
+  arbol_insertar(arbol_bb, &dato3);
+  arbol_insertar(arbol_bb, &dato1);
+  arbol_insertar(arbol_bb, &dato7);
+  arbol_insertar(arbol_bb, &dato5);
+  arbol_insertar(arbol_bb, &dato6);
+  arbol_insertar(arbol_bb, &dato4);
+  arbol_insertar(arbol_bb, &dato8);
+
+  int* array[8];
+  int array_esperado[] = {1,4,6,5,8,7,3,2};
+
+  size_t cantidad = arbol_recorrido_postorden(arbol_bb,(void**)array, 8);
+  pa2m_afirmar(cantidad == 8, "Se recorre el arbol completo");
+  for(size_t i = 0; i < cantidad; i++) {
+    pa2m_afirmar(*array[i] == array_esperado[i], "El elemento del array es correcto");
+  }
+
+  arbol_destruir(arbol_bb);
+
+}
+
+void dadoUnABBConElementos_SiSolicitoRecorrerPostOrdenConArrayDeMayorTamanioQueElABB_GuardaCorrectamenteLosElementos() {
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
+
+  int dato1 = 1;
+  int dato2 = 2;
+  int dato3 = 3;
+  int dato4 = 4;
+  int dato5 = 5;
+  int dato6 = 6;
+  int dato7 = 7;
+  int dato8 = 8;
+
+  arbol_insertar(arbol_bb, &dato2);
+  arbol_insertar(arbol_bb, &dato3);
+  arbol_insertar(arbol_bb, &dato1);
+  arbol_insertar(arbol_bb, &dato7);
+  arbol_insertar(arbol_bb, &dato5);
+  arbol_insertar(arbol_bb, &dato6);
+  arbol_insertar(arbol_bb, &dato4);
+  arbol_insertar(arbol_bb, &dato8);
+
+  int* array[20];
+  int array_esperado[] = {1,4,6,5,8,7,3,2};
+  size_t cantidad = arbol_recorrido_postorden(arbol_bb,(void**)array, 20);
+  pa2m_afirmar(cantidad == 8, "Se recorren todos los elementos del arbol");
+  for(size_t i = 0; i < cantidad; i++) {
+    pa2m_afirmar(*array[i] == array_esperado[i], "El elemento del array es correcto");
+  }
+
+  arbol_destruir(arbol_bb);
+}
+
+
+void dadoUnABBConElementos_SiSolicitoRecorrerPostOrdenConArrayDeMenorTamanioQueElABB_GuardaCorrectamenteLosElementos() {
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
+
+  int dato1 = 1;
+  int dato2 = 2;
+  int dato3 = 3;
+  int dato4 = 4;
+  int dato5 = 5;
+  int dato6 = 6;
+  int dato7 = 7;
+  int dato8 = 8;
+
+  arbol_insertar(arbol_bb, &dato2);
+  arbol_insertar(arbol_bb, &dato3);
+  arbol_insertar(arbol_bb, &dato1);
+  arbol_insertar(arbol_bb, &dato7);
+  arbol_insertar(arbol_bb, &dato5);
+  arbol_insertar(arbol_bb, &dato6);
+  arbol_insertar(arbol_bb, &dato4);
+  arbol_insertar(arbol_bb, &dato8);
+
+  int* array[3];
+  int array_esperado[] = {1,4,6};
+  size_t cantidad = arbol_recorrido_postorden(arbol_bb,(void**)array, 3);
+  pa2m_afirmar(cantidad == 3, "Se recorren tres elementos del arbol");
+  for(size_t i = 0; i < cantidad; i++) {
+    pa2m_afirmar(*array[i] == array_esperado[i] , "El elemento del array es correcto");
+  }
+
+  arbol_destruir(arbol_bb);
+}
+
+bool visitar_todo(void* elemento, void* extra) {
+    if(elemento)
+        (*(int*)extra)++;
+    return false;
+}
+
+bool visitar_hasta_cinco(void* elemento, void* extra) {
+    if(*(int*)extra < 5) {
+        (*(int*)extra)++;
+    } else {
+      return true;
+    }
+    return false;
+}
+
+bool visitar_con_corte(void* elemento, void* extra) {
+    if(*(int*)elemento == 5) {
+      return true;
+    } else {
+      (*(int*)extra)++;
+    }
+    return false;
+}
+
+void dadoUnABBNull_SiSolicitoIterarInternamenteTodosLosElementosEnTodosLosOrdenesPosibles_RetornaElResultadoCorrecto(){
+  abb_t* arbol_bb = NULL;
+  int contador = 0;
+  pa2m_afirmar(abb_con_cada_elemento(arbol_bb, ABB_RECORRER_INORDEN, visitar_todo, &contador) == 0, "Recorrer in orden un ABB NULL retorna 0");
+  pa2m_afirmar(abb_con_cada_elemento(arbol_bb, ABB_RECORRER_PREORDEN, visitar_todo, &contador) == 0, "Recorrer pre orden un ABB NULL retorna 0");
+  pa2m_afirmar(abb_con_cada_elemento(arbol_bb, ABB_RECORRER_POSTORDEN, visitar_todo, &contador) == 0, "Recorrer post orden un ABB NULL retorna 0");
+
+  arbol_destruir(arbol_bb);
+}
+
+void dadoUnABBVacio_SiSolicitoIterarInternamenteTodosLosElementosEnTodosLosOrdenesPosibles_RetornaElResultadoCorrecto(){
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
+  int contador = 0;
+  pa2m_afirmar(abb_con_cada_elemento(arbol_bb, ABB_RECORRER_INORDEN, visitar_todo, &contador) == 0, "Recorrer in orden un ABB Vacio retorna 0");
+  pa2m_afirmar(abb_con_cada_elemento(arbol_bb, ABB_RECORRER_PREORDEN, visitar_todo, &contador) == 0, "Recorrer pre orden un ABB Vacio retorna 0");
+  pa2m_afirmar(abb_con_cada_elemento(arbol_bb, ABB_RECORRER_POSTORDEN, visitar_todo, &contador) == 0, "Recorrer post orden un ABB Vacio retorna 0");
+
+  arbol_destruir(arbol_bb);
+}
+
+void dadoUnABBConElementos_SiSolicitoIterarInternamenteTodosLosElementosEnTodosLosOrdenesPosiblesSinUnaFuncionVisitar_RetornaElResultadoCorrecto(){
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
+  int contador = 0;
+
+  int dato1 = 1;
+  int dato2 = 2;
+  int dato3 = 3;
+  int dato4 = 4;
+  int dato5 = 5;
+  int dato6 = 6;
+  int dato7 = 7;
+  int dato8 = 8;
+
+  arbol_insertar(arbol_bb, &dato2);
+  arbol_insertar(arbol_bb, &dato3);
+  arbol_insertar(arbol_bb, &dato1);
+  arbol_insertar(arbol_bb, &dato7);
+  arbol_insertar(arbol_bb, &dato5);
+  arbol_insertar(arbol_bb, &dato6);
+  arbol_insertar(arbol_bb, &dato4);
+  arbol_insertar(arbol_bb, &dato8);
+
+  pa2m_afirmar(abb_con_cada_elemento(arbol_bb, ABB_RECORRER_INORDEN, NULL, &contador) == 0, "Recorrer in orden un ABB con elementos pero sin funcion visitar retorna 0");
+  pa2m_afirmar(abb_con_cada_elemento(arbol_bb, ABB_RECORRER_PREORDEN, NULL, &contador) == 0, "Recorrer pre orden un ABB con elementos pero sin funcion visitar retorna 0");
+  pa2m_afirmar(abb_con_cada_elemento(arbol_bb, ABB_RECORRER_POSTORDEN, NULL, &contador) == 0, "Recorrer post orden un ABB con elementos pero sin funcion visitar retorna 0");
+
+  arbol_destruir(arbol_bb);
+}
+
+void dadoUnABBConElementos_SiSolicitoIterarInternamenteTodosLosElementosEnTodosLosOrdenesPosiblesConUnaFuncionVisitar_RetornaElResultadoCorrecto(){
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
+  int contador_1 = 0;
+  int contador_2 = 0;
+  int contador_3 = 0;
+
+  int dato1 = 1;
+  int dato2 = 2;
+  int dato3 = 3;
+  int dato4 = 4;
+  int dato5 = 5;
+  int dato6 = 6;
+  int dato7 = 7;
+  int dato8 = 8;
+
+  arbol_insertar(arbol_bb, &dato2);
+  arbol_insertar(arbol_bb, &dato3);
+  arbol_insertar(arbol_bb, &dato1);
+  arbol_insertar(arbol_bb, &dato7);
+  arbol_insertar(arbol_bb, &dato5);
+  arbol_insertar(arbol_bb, &dato6);
+  arbol_insertar(arbol_bb, &dato4);
+  arbol_insertar(arbol_bb, &dato8);
+
+  size_t cuenta_1 = abb_con_cada_elemento(arbol_bb, ABB_RECORRER_INORDEN, visitar_todo, &contador_1);
+  pa2m_afirmar(cuenta_1 == 8, "Recorrer in orden un ABB con elementos y con funcion visitar retorna 8");
+  pa2m_afirmar(contador_1 == 8, "Recorrer in orden un ABB con elementos y con funcion visitar actualiza correctamente el valor extra a 8");
+
+  size_t cuenta_2 = abb_con_cada_elemento(arbol_bb, ABB_RECORRER_PREORDEN, visitar_todo, &contador_2);
+  pa2m_afirmar(cuenta_2 == 8, "Recorrer pre orden un ABB con elementos y con funcion visitar retorna 8");
+  pa2m_afirmar(contador_2 == 8, "Recorrer pre orden un ABB con elementos y con funcion visitar actualiza correctamente el valor extra a 8");
+
+  size_t cuenta_3 = abb_con_cada_elemento(arbol_bb, ABB_RECORRER_POSTORDEN, visitar_todo, &contador_3);
+  pa2m_afirmar(cuenta_3 == 8, "Recorrer post orden un ABB con elementos y con funcion visitar retorna 8");
+  pa2m_afirmar(contador_3 == 8, "Recorrer post orden un ABB con elementos y con funcion visitar actualiza correctamente el valor extra a 8");
+
+  arbol_destruir(arbol_bb);
+}
+
+void dadoUnABBConElementos_SiSolicitoIterarInternamenteCincoElementosEnTodosLosOrdenesPosiblesConUnaFuncionVisitar_RetornaElResultadoCorrecto(){
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
+  int contador_1 = 0;
+  int contador_2 = 0;
+  int contador_3 = 0;
+
+  int dato1 = 1;
+  int dato2 = 2;
+  int dato3 = 3;
+  int dato4 = 4;
+  int dato5 = 5;
+  int dato6 = 6;
+  int dato7 = 7;
+  int dato8 = 8;
+
+  arbol_insertar(arbol_bb, &dato2);
+  arbol_insertar(arbol_bb, &dato3);
+  arbol_insertar(arbol_bb, &dato1);
+  arbol_insertar(arbol_bb, &dato7);
+  arbol_insertar(arbol_bb, &dato5);
+  arbol_insertar(arbol_bb, &dato6);
+  arbol_insertar(arbol_bb, &dato4);
+  arbol_insertar(arbol_bb, &dato8);
+
+  size_t cuenta_2 = abb_con_cada_elemento(arbol_bb, ABB_RECORRER_PREORDEN, visitar_hasta_cinco, &contador_2);
+  pa2m_afirmar(cuenta_2 == 5, "Recorrer pre orden un ABB con elementos y con funcion visitar hasta 5 retorna 5");
+  pa2m_afirmar(contador_2 == 5, "Recorrer pre orden un ABB con elementos y con funcion visitar actualiza correctamente el valor extra a 5");
+  printf("cuenta: %zu\n", cuenta_2);
+  printf("contador: %i\n", contador_2);
+
+  size_t cuenta_1 = abb_con_cada_elemento(arbol_bb, ABB_RECORRER_INORDEN, visitar_hasta_cinco, &contador_1);
+  pa2m_afirmar(cuenta_1 == 5, "Recorrer in orden un ABB con elementos y con funcion visitar hasta 5 retorna 5");
+  pa2m_afirmar(contador_1 == 5, "Recorrer in orden un ABB con elementos y con funcion visitar actualiza correctamente el valor extra a 5");
+  printf("cuenta: %zu\n", cuenta_1);
+  printf("contador: %i\n", contador_1);
+
+
+  size_t cuenta_3 = abb_con_cada_elemento(arbol_bb, ABB_RECORRER_POSTORDEN, visitar_hasta_cinco, &contador_3);
+  pa2m_afirmar(cuenta_3 == 5, "Recorrer post orden un ABB con elementos y con funcion visitar hasta 5 retorna 5");
+  pa2m_afirmar(contador_3 == 5, "Recorrer post orden un ABB con elementos y con funcion visitar actualiza correctamente el valor extra a 5");
+  printf("cuenta: %zu\n", cuenta_3);
+  printf("contador: %i\n", contador_3);
+
+  arbol_destruir(arbol_bb);
+}
+
+void dadoUnABBConElementos_SiSolicitoIterarInternamenteHastaEncontrarUnElementoQueExisteEnElABBEnTodosLosOrdenesPosiblesConUnaFuncionVisitar_RetornaElResultadoCorrecto(){
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
+  int contador_1 = 0;
+  int contador_2 = 0;
+  int contador_3 = 0;
+
+  int dato1 = 1;
+  int dato2 = 2;
+  int dato3 = 3;
+  int dato4 = 4;
+  int dato5 = 5;
+  int dato6 = 6;
+  int dato7 = 7;
+  int dato8 = 8;
+
+  arbol_insertar(arbol_bb, &dato2);
+  arbol_insertar(arbol_bb, &dato3);
+  arbol_insertar(arbol_bb, &dato1);
+  arbol_insertar(arbol_bb, &dato7);
+  arbol_insertar(arbol_bb, &dato5);
+  arbol_insertar(arbol_bb, &dato6);
+  arbol_insertar(arbol_bb, &dato4);
+  arbol_insertar(arbol_bb, &dato8);
+
+  size_t cuenta_2 = abb_con_cada_elemento(arbol_bb, ABB_RECORRER_PREORDEN, visitar_con_corte, &contador_2);
+  pa2m_afirmar(cuenta_2 == 5, "Recorrer pre orden un ABB con elementos y con funcion visitar que corta cuando encuentra un elemento, retorna 5 porque encuentra el elemento");
+  pa2m_afirmar(contador_2 == 5, "Recorrer pre orden un ABB con elementos y con funcion visitar actualiza correctamente el valor extra a 5");
+  printf("cuenta: %zu\n", cuenta_2);
+  printf("contador: %i\n", contador_2);
+
+  size_t cuenta_1 = abb_con_cada_elemento(arbol_bb, ABB_RECORRER_INORDEN, visitar_con_corte, &contador_1);
+  pa2m_afirmar(cuenta_1 == 5, "Recorrer in orden un ABB con elementos y con funcion visitar que corta cuando encuentra un elemento, retorna 5 porque encuentra el elemento");
+  pa2m_afirmar(contador_1 == 5, "Recorrer in orden un ABB con elementos y con funcion visitar actualiza correctamente el valor extra a 5");
+  printf("cuenta: %zu\n", cuenta_1);
+  printf("contador: %i\n", contador_1);
+
+  size_t cuenta_3 = abb_con_cada_elemento(arbol_bb, ABB_RECORRER_POSTORDEN, visitar_con_corte, &contador_3);
+  pa2m_afirmar(cuenta_3 == 4, "Recorrer post orden un ABB con elementos y con funcion visitar que corta cuando encuentra un elemento, retorna 4 porque encuentra el elemento");
+  pa2m_afirmar(contador_3 == 4, "Recorrer post orden un ABB con elementos y con funcion visitar actualiza correctamente el valor extra a 4");
+  printf("cuenta: %zu\n", cuenta_3);
+  printf("contador: %i\n", contador_3);
+
+  arbol_destruir(arbol_bb);
+}
+
+void dadoUnABBConElementos_SiSolicitoIterarInternamenteHastaEncontrarUnElementoQueNoExisteEnElABBEnTodosLosOrdenesPosiblesConUnaFuncionVisitar_RetornaElResultadoCorrecto(){
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_int, NULL);
+  int contador_1 = 0;
+  int contador_2 = 0;
+  int contador_3 = 0;
+
+  int dato1 = 1;
+  int dato2 = 2;
+  int dato3 = 3;
+  int dato4 = 4;
+  int dato5 = 6;
+  int dato6 = 7;
+  int dato7 = 8;
+  int dato8 = 9;
+
+  arbol_insertar(arbol_bb, &dato2);
+  arbol_insertar(arbol_bb, &dato3);
+  arbol_insertar(arbol_bb, &dato1);
+  arbol_insertar(arbol_bb, &dato7);
+  arbol_insertar(arbol_bb, &dato5);
+  arbol_insertar(arbol_bb, &dato6);
+  arbol_insertar(arbol_bb, &dato4);
+  arbol_insertar(arbol_bb, &dato8);
+
+  size_t cuenta_2 = abb_con_cada_elemento(arbol_bb, ABB_RECORRER_PREORDEN, visitar_con_corte, &contador_2);
+  pa2m_afirmar(cuenta_2 == 8, "Recorrer pre orden un ABB con elementos y con funcion visitar que corta cuando encuentra un elemento, retorna 8 porque no existe el elemento.");
+  pa2m_afirmar(contador_2 == 8, "Recorrer pre orden un ABB con elementos y con funcion visitar actualiza correctamente el valor extra a 8");
+
+  size_t cuenta_1 = abb_con_cada_elemento(arbol_bb, ABB_RECORRER_INORDEN, visitar_con_corte, &contador_1);
+  pa2m_afirmar(cuenta_1 == 8, "Recorrer in orden un ABB con elementos y con funcion visitar que corta cuando encuentra un elemento, retorna 8 porque no existe el elemento.");
+  pa2m_afirmar(contador_1 == 8, "Recorrer in orden un ABB con elementos y con funcion visitar actualiza correctamente el valor extra a 8");
+
+  size_t cuenta_3 = abb_con_cada_elemento(arbol_bb, ABB_RECORRER_POSTORDEN, visitar_con_corte, &contador_3);
+  pa2m_afirmar(cuenta_3 == 8, "Recorrer post orden un ABB con elementos y con funcion visitar que corta cuando encuentra un elemento, retorna 8 porque no existe el elemento.");
+  pa2m_afirmar(contador_3 == 8, "Recorrer post orden un ABB con elementos y con funcion visitar actualiza correctamente el valor extra a 8");
+
+  arbol_destruir(arbol_bb);
+}
+
 
 int main() {
   pa2m_nuevo_grupo("Pruebas Creacion ABB");
@@ -902,7 +1319,6 @@ int main() {
   dadoUnABBVacio_SiSolicitoVerRaiz_RetornaNull();
   pa2m_nuevo_grupo("Pruebas consultar Raiz en ABB con datos");
   dadoUnABBConElementos_SiSolicitoVerRaiz_RetornaElElementoDeLaRaiz();
-
   pa2m_nuevo_grupo("Pruebas recorrido inorden en ABB NULL");
   dadoUnABBNull_SiSolicitoRecorrerInOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
   pa2m_nuevo_grupo("Pruebas recorrido inorden en ABB Vacio");
@@ -917,7 +1333,6 @@ int main() {
   dadoUnABBConElementos_SiSolicitoRecorrerInOrdenConArrayDeMayorTamanioQueElABB_GuardaCorrectamenteLosElementos();
   pa2m_nuevo_grupo("Pruebas recorrido inorden ABB de menor tamanio que el array");
   dadoUnABBConElementos_SiSolicitoRecorrerInOrdenConArrayDeMenorTamanioQueElABB_GuardaCorrectamenteLosElementos();
-
   pa2m_nuevo_grupo("Pruebas recorrido preorden en ABB NULL");
   dadoUnABBNull_SiSolicitoRecorrerPreOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
   pa2m_nuevo_grupo("Pruebas recorrido preorden en ABB Vacio");
@@ -926,13 +1341,40 @@ int main() {
   dadoUnABBConElementos_SiSolicitoRecorrerPreOrdenConUnArrayNULL_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
   pa2m_nuevo_grupo("Pruebas recorrido preorden en ABB con elementos pero solicitando recorrer 0 veces un array");
   dadoUnABBConElementos_SiSolicitoRecorrerPreOrdenConUnArrayPasandoTamanioCero_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
-
   pa2m_nuevo_grupo("Pruebas recorrido preorden ABB del mismo tamanio que el array");
   dadoUnABBConElementos_SiSolicitoRecorrerPreOrdenConArrayDelMismoTamanioQueElABB_GuardaCorrectamenteLosElementos();
   pa2m_nuevo_grupo("Pruebas recorrido preorden ABB de mayor tamanio que el array");
   dadoUnABBConElementos_SiSolicitoRecorrerPreOrdenConArrayDeMayorTamanioQueElABB_GuardaCorrectamenteLosElementos();
   pa2m_nuevo_grupo("Pruebas recorrido preorden ABB de menor tamanio que el array");
   dadoUnABBConElementos_SiSolicitoRecorrerPreOrdenConArrayDeMenorTamanioQueElABB_GuardaCorrectamenteLosElementos();
+  pa2m_nuevo_grupo("Pruebas recorrido postorden en ABB NULL");
+  dadoUnABBNull_SiSolicitoRecorrerPostOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
+  pa2m_nuevo_grupo("Pruebas recorrido postorden en ABB Vacio");
+  dadoUnABBVacio_SiSolicitoRecorrerPostOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
+  pa2m_nuevo_grupo("Pruebas recorrido postorden en ABB con elementos pero con un array NULL");
+  dadoUnABBConElementos_SiSolicitoRecorrerPostOrdenConUnArrayNULL_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
+  pa2m_nuevo_grupo("Pruebas recorrido postorden en ABB con elementos pero solicitando recorrer 0 veces un array");
+  dadoUnABBConElementos_SiSolicitoRecorrerPostOrdenConUnArrayPasandoTamanioCero_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
+  pa2m_nuevo_grupo("Pruebas recorrido postorden ABB del mismo tamanio que el array");
+  dadoUnABBConElementos_SiSolicitoRecorrerPostOrdenConArrayDelMismoTamanioQueElABB_GuardaCorrectamenteLosElementos();
+  pa2m_nuevo_grupo("Pruebas recorrido postorden ABB de mayor tamanio que el array");
+  dadoUnABBConElementos_SiSolicitoRecorrerPostOrdenConArrayDeMayorTamanioQueElABB_GuardaCorrectamenteLosElementos();
+  pa2m_nuevo_grupo("Pruebas recorrido postorden ABB de menor tamanio que el array");
+  dadoUnABBConElementos_SiSolicitoRecorrerPostOrdenConArrayDeMenorTamanioQueElABB_GuardaCorrectamenteLosElementos();
+  pa2m_nuevo_grupo("Pruebas iterador interno con ABB NULL");
+  dadoUnABBNull_SiSolicitoIterarInternamenteTodosLosElementosEnTodosLosOrdenesPosibles_RetornaElResultadoCorrecto();
+  pa2m_nuevo_grupo("Pruebas iterador interno con ABB Vacio");
+  dadoUnABBVacio_SiSolicitoIterarInternamenteTodosLosElementosEnTodosLosOrdenesPosibles_RetornaElResultadoCorrecto();
+  pa2m_nuevo_grupo("Pruebas iterador interno con ABB Con elementos, pero sin funcion Visitar");
+  dadoUnABBConElementos_SiSolicitoIterarInternamenteTodosLosElementosEnTodosLosOrdenesPosiblesSinUnaFuncionVisitar_RetornaElResultadoCorrecto();
+  pa2m_nuevo_grupo("Pruebas iterador interno con ABB Con elementos, informando funcion Visitar que recorre todos los elementos");
+  dadoUnABBConElementos_SiSolicitoIterarInternamenteTodosLosElementosEnTodosLosOrdenesPosiblesConUnaFuncionVisitar_RetornaElResultadoCorrecto();
+  pa2m_nuevo_grupo("Pruebas iterador interno con ABB Con elementos, informando funcion Visitar que recorre cinco elementos");
+  dadoUnABBConElementos_SiSolicitoIterarInternamenteCincoElementosEnTodosLosOrdenesPosiblesConUnaFuncionVisitar_RetornaElResultadoCorrecto();
+  pa2m_nuevo_grupo("Pruebas iterador interno con ABB Con elementos, informando funcion Visitar que recorre hasta encontrar el elemento de valor 5, Existiendo el elemento en el ABB");
+  dadoUnABBConElementos_SiSolicitoIterarInternamenteHastaEncontrarUnElementoQueExisteEnElABBEnTodosLosOrdenesPosiblesConUnaFuncionVisitar_RetornaElResultadoCorrecto();
+  pa2m_nuevo_grupo("Pruebas iterador interno con ABB Con elementos, informando funcion Visitar que recorre hasta encontrar el elemento de valor 5, No Existiendo el elemento en el ABB");
+  dadoUnABBConElementos_SiSolicitoIterarInternamenteHastaEncontrarUnElementoQueNoExisteEnElABBEnTodosLosOrdenesPosiblesConUnaFuncionVisitar_RetornaElResultadoCorrecto();
 
   return pa2m_mostrar_reporte();
 }
