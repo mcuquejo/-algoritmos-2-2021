@@ -1,5 +1,4 @@
 #include "abb.h"
-#include <stdio.h>
 
 nodo_abb_t* nodo_crear() {
     nodo_abb_t* nodo = calloc(1, sizeof(nodo_abb_t));
@@ -237,81 +236,12 @@ void arbol_destruir(abb_t* arbol){
     free(arbol);
 }
 
-void _abb_con_cada_elemento_inorden(nodo_abb_t* nodo, bool (*funcion)(void*, void*), void *extra, size_t* contador, bool* finalizar) {
-    if(!(*finalizar)) {
-        if(!nodo)
-            return;
-    }
-    if(!(*finalizar)) {
-        _abb_con_cada_elemento_inorden(nodo->izquierda, funcion, extra, contador, finalizar);
-    }
-    if(!(*finalizar)) {
-        *finalizar = funcion(nodo->elemento, extra);
-        if(!(*finalizar)) {
-            (*contador)++;
-        } else {
-            (*contador)++;
-            return;
-        }
-    }
-    if(!(*finalizar)) {
-        _abb_con_cada_elemento_inorden(nodo->derecha, funcion, extra, contador, finalizar);
-    }
-}
-
-void _abb_con_cada_elemento_preorden(nodo_abb_t* nodo, bool (*funcion)(void*, void*), void *extra, size_t* contador, bool* finalizar) {
-    if(!(*finalizar)) {
-        if(!nodo)
-            return;
-    }
-    if(!(*finalizar)) {
-        *finalizar = funcion(nodo->elemento, extra);
-        if(!(*finalizar)) {
-            (*contador)++;
-        } else {
-            (*contador)++;
-            return;
-        }
-    }
-    if(!(*finalizar)) {
-        _abb_con_cada_elemento_preorden(nodo->izquierda, funcion, extra, contador, finalizar);
-    }
-    if(!(*finalizar)) {
-        _abb_con_cada_elemento_preorden(nodo->derecha, funcion, extra, contador, finalizar);
-    }
-}
-
-
-void _abb_con_cada_elemento_postorden(nodo_abb_t* nodo, bool (*funcion)(void*, void*), void *extra, size_t* contador, bool* finalizar) {
-    if(!(*finalizar)) {
-        if(!nodo)
-            return;
-    }
-    if(!(*finalizar)) {
-        _abb_con_cada_elemento_postorden(nodo->izquierda, funcion, extra, contador, finalizar);
-    }
-    if(!(*finalizar)) {
-        _abb_con_cada_elemento_postorden(nodo->derecha, funcion, extra, contador, finalizar);
-    }
-    if(!(*finalizar)) {
-        *finalizar = funcion(nodo->elemento, extra);
-        if(!(*finalizar)) {
-            (*contador)++;
-        } else {
-            (*contador)++;
-            return;
-        }
-    }
-}
 
 void abb_con_cada_elemento_preorden(nodo_abb_t* nodo, bool (*funcion)(void*, void*), void *extra, size_t* contador, bool* finalizar) {
     if(!nodo)
         return;
-
-    printf("finalizar en esta iteracion vale: %s\n", (*finalizar) ? "true" : "false");
     if(!*finalizar) {
         (*contador)++;
-        printf("estoy recorriendo el elemento: %i\n", *(int*)nodo->elemento);
         *finalizar = funcion(nodo->elemento, extra);
         if(*finalizar) {
             return;
@@ -326,17 +256,13 @@ void abb_con_cada_elemento_inorden(nodo_abb_t* nodo, bool (*funcion)(void*, void
     if(!nodo)
         return;
     abb_con_cada_elemento_inorden(nodo->izquierda, funcion, extra, contador, finalizar);
-
-    printf("finalizar en esta iteracion vale: %s\n", (*finalizar) ? "true" : "false");
     if(!*finalizar) {
         (*contador)++;
-        printf("estoy recorriendo el elemento: %i\n", *(int*)nodo->elemento);
         *finalizar = funcion(nodo->elemento, extra);
         if(*finalizar) {
             return;
         }
     }
-
     abb_con_cada_elemento_inorden(nodo->derecha, funcion, extra, contador, finalizar);
 }
 
@@ -345,10 +271,8 @@ void abb_con_cada_elemento_postorden(nodo_abb_t* nodo, bool (*funcion)(void*, vo
         return;
     abb_con_cada_elemento_postorden(nodo->izquierda, funcion, extra, contador, finalizar);
     abb_con_cada_elemento_postorden(nodo->derecha, funcion, extra, contador, finalizar);
-    printf("finalizar en esta iteracion vale: %s\n", (*finalizar) ? "true" : "false");
     if(!*finalizar) {
         (*contador)++;
-        printf("estoy recorriendo el elemento: %i\n", *(int*)nodo->elemento);
         *finalizar = funcion(nodo->elemento, extra);
         if(*finalizar) {
             return;
@@ -363,13 +287,10 @@ size_t abb_con_cada_elemento(abb_t* arbol, int recorrido, bool (*funcion)(void*,
         return contador;
     nodo_abb_t* nodo_actual = arbol->nodo_raiz;
     if (recorrido == ABB_RECORRER_PREORDEN)
-        //abb_con_cada_elemento_preorden(nodo_actual, funcion, extra, &contador, &finalizar);
         abb_con_cada_elemento_preorden(nodo_actual, funcion, extra, &contador, &finalizar);
     if (recorrido == ABB_RECORRER_INORDEN)
-        //abb_con_cada_elemento_inorden(nodo_actual, funcion, extra, &contador, &finalizar);
         abb_con_cada_elemento_inorden(nodo_actual, funcion, extra, &contador, &finalizar);
     if (recorrido == ABB_RECORRER_POSTORDEN)
-        //abb_con_cada_elemento_postorden(nodo_actual, funcion, extra, &contador, &finalizar);
         abb_con_cada_elemento_postorden(nodo_actual, funcion, extra, &contador, &finalizar);
     return contador;
 }

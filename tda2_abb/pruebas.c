@@ -1038,9 +1038,8 @@ bool visitar_todo(void* elemento, void* extra) {
 }
 
 bool visitar_hasta_cinco(void* elemento, void* extra) {
-    if(*(int*)extra < 5) {
-        (*(int*)extra)++;
-    } else {
+    (*(int*)extra)++;
+    if(*(int*)extra >= 5) {
       return true;
     }
     return false;
@@ -1168,21 +1167,15 @@ void dadoUnABBConElementos_SiSolicitoIterarInternamenteCincoElementosEnTodosLosO
   size_t cuenta_2 = abb_con_cada_elemento(arbol_bb, ABB_RECORRER_PREORDEN, visitar_hasta_cinco, &contador_2);
   pa2m_afirmar(cuenta_2 == 5, "Recorrer pre orden un ABB con elementos y con funcion visitar hasta 5 retorna 5");
   pa2m_afirmar(contador_2 == 5, "Recorrer pre orden un ABB con elementos y con funcion visitar actualiza correctamente el valor extra a 5");
-  printf("cuenta: %zu\n", cuenta_2);
-  printf("contador: %i\n", contador_2);
 
   size_t cuenta_1 = abb_con_cada_elemento(arbol_bb, ABB_RECORRER_INORDEN, visitar_hasta_cinco, &contador_1);
   pa2m_afirmar(cuenta_1 == 5, "Recorrer in orden un ABB con elementos y con funcion visitar hasta 5 retorna 5");
   pa2m_afirmar(contador_1 == 5, "Recorrer in orden un ABB con elementos y con funcion visitar actualiza correctamente el valor extra a 5");
-  printf("cuenta: %zu\n", cuenta_1);
-  printf("contador: %i\n", contador_1);
 
 
   size_t cuenta_3 = abb_con_cada_elemento(arbol_bb, ABB_RECORRER_POSTORDEN, visitar_hasta_cinco, &contador_3);
   pa2m_afirmar(cuenta_3 == 5, "Recorrer post orden un ABB con elementos y con funcion visitar hasta 5 retorna 5");
   pa2m_afirmar(contador_3 == 5, "Recorrer post orden un ABB con elementos y con funcion visitar actualiza correctamente el valor extra a 5");
-  printf("cuenta: %zu\n", cuenta_3);
-  printf("contador: %i\n", contador_3);
 
   arbol_destruir(arbol_bb);
 }
@@ -1214,20 +1207,14 @@ void dadoUnABBConElementos_SiSolicitoIterarInternamenteHastaEncontrarUnElementoQ
   size_t cuenta_2 = abb_con_cada_elemento(arbol_bb, ABB_RECORRER_PREORDEN, visitar_con_corte, &contador_2);
   pa2m_afirmar(cuenta_2 == 5, "Recorrer pre orden un ABB con elementos y con funcion visitar que corta cuando encuentra un elemento, retorna 5 porque encuentra el elemento");
   pa2m_afirmar(contador_2 == 5, "Recorrer pre orden un ABB con elementos y con funcion visitar actualiza correctamente el valor extra a 5");
-  printf("cuenta: %zu\n", cuenta_2);
-  printf("contador: %i\n", contador_2);
 
   size_t cuenta_1 = abb_con_cada_elemento(arbol_bb, ABB_RECORRER_INORDEN, visitar_con_corte, &contador_1);
   pa2m_afirmar(cuenta_1 == 5, "Recorrer in orden un ABB con elementos y con funcion visitar que corta cuando encuentra un elemento, retorna 5 porque encuentra el elemento");
   pa2m_afirmar(contador_1 == 5, "Recorrer in orden un ABB con elementos y con funcion visitar actualiza correctamente el valor extra a 5");
-  printf("cuenta: %zu\n", cuenta_1);
-  printf("contador: %i\n", contador_1);
 
   size_t cuenta_3 = abb_con_cada_elemento(arbol_bb, ABB_RECORRER_POSTORDEN, visitar_con_corte, &contador_3);
   pa2m_afirmar(cuenta_3 == 4, "Recorrer post orden un ABB con elementos y con funcion visitar que corta cuando encuentra un elemento, retorna 4 porque encuentra el elemento");
   pa2m_afirmar(contador_3 == 4, "Recorrer post orden un ABB con elementos y con funcion visitar actualiza correctamente el valor extra a 4");
-  printf("cuenta: %zu\n", cuenta_3);
-  printf("contador: %i\n", contador_3);
 
   arbol_destruir(arbol_bb);
 }
@@ -1272,107 +1259,238 @@ void dadoUnABBConElementos_SiSolicitoIterarInternamenteHastaEncontrarUnElementoQ
 }
 
 
+int comparar_elementos_tipo_string(void* elemento1, void* elemento2) {
+  return strcmp(*(char**)elemento1, *(char**)elemento2);
+}
+
+void dadoUnABBConElementosDeTipoStringCreadosEnElHeap_SiSolicitoOperarSobreLosElementosYLuegoDestruirElArbolSinFuncionDestruccion_PermiteOperarSobreLosElementosYLuegoDestruirElArbolCorrectamente() {
+  char** dato1 = calloc(1, sizeof(char) * 10);
+  char** dato2 = calloc(1, sizeof(char) * 10);
+  char** dato3 = calloc(1, sizeof(char) * 10);
+  char** dato4 = calloc(1, sizeof(char) * 10);
+  char** dato5 = calloc(1, sizeof(char) * 10);
+  char** dato6 = calloc(1, sizeof(char) * 10);
+  char** dato7 = calloc(1, sizeof(char) * 10);
+  char** dato8 = calloc(1, sizeof(char) * 10);
+
+  *dato1 = "aleph";
+  *dato2 = "bifurcacion";
+  *dato3 = "circulo";
+  *dato4 = "daneri";
+  *dato5 = "ermita";
+  *dato6 = "fisura";
+  *dato7 = "gondola";
+  *dato8 = "hipotenusa";
+
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_string, NULL);
+
+  arbol_insertar(arbol_bb, dato2);
+  arbol_insertar(arbol_bb, dato3);
+  arbol_insertar(arbol_bb, dato1);
+  arbol_insertar(arbol_bb, dato7);
+  arbol_insertar(arbol_bb, dato5);
+  arbol_insertar(arbol_bb, dato6);
+  arbol_insertar(arbol_bb, dato4);
+  arbol_insertar(arbol_bb, dato8);
+
+  char* esperado_inorden[]   = {"aleph", "bifurcacion", "circulo", "daneri", "ermita", "fisura", "gondola", "hipotenusa"};
+  char* esperado_preorden[]  = {"bifurcacion", "aleph", "circulo", "gondola", "ermita", "daneri", "fisura", "hipotenusa"};
+  char* esperado_postorden[] = {"aleph", "daneri", "fisura", "ermita", "hipotenusa", "gondola", "circulo", "bifurcacion"};
+
+  char** array_inorden[8];
+  char** array_preorden[8];
+  char** array_postorden[8];
+
+
+  size_t cantidad_1 = arbol_recorrido_inorden(arbol_bb,(void**)array_inorden, 8);
+  size_t cantidad_2 = arbol_recorrido_preorden(arbol_bb,(void**)array_preorden, 8);
+  size_t cantidad_3 = arbol_recorrido_postorden(arbol_bb,(void**)array_postorden, 8);
+
+  pa2m_afirmar(cantidad_1 == 8, "Se recorre el arbol completo inorden");
+  pa2m_afirmar(cantidad_2 == 8, "Se recorre el arbol completo preorden");
+  pa2m_afirmar(cantidad_3 == 8, "Se recorre el arbol completo postorden");
+
+  for(size_t i = 0; i < cantidad_1; i++) {
+    pa2m_afirmar(strcmp(*(char**)array_inorden[i],esperado_inorden[i]) == 0, "El elemento del array inorden es correcto");
+    pa2m_afirmar(strcmp(*(char**)array_preorden[i], esperado_preorden[i]) == 0, "El elemento del array preorden es correcto");
+    pa2m_afirmar(strcmp(*(char**)array_postorden[i], esperado_postorden[i]) == 0, "El elemento del array postorden es correcto");
+  }
+
+  free(dato1);
+  free(dato2);
+  free(dato3);
+  free(dato4);
+  free(dato5);
+  free(dato6);
+  free(dato7);
+  free(dato8);
+
+  arbol_destruir(arbol_bb);
+
+}
+
+void dadoUnABBConElementosDeTipoStringCreadosEnElHeap_SiSolicitoOperarSobreLosElementosYLuegoDestruirElArbolConFuncionDestruccion_PermiteOperarSobreLosElementosYLuegoDestruirElArbolCorrectamente() {
+  char** dato1 = calloc(1, sizeof(char) * 10);
+  char** dato2 = calloc(1, sizeof(char) * 10);
+  char** dato3 = calloc(1, sizeof(char) * 10);
+  char** dato4 = calloc(1, sizeof(char) * 10);
+  char** dato5 = calloc(1, sizeof(char) * 10);
+  char** dato6 = calloc(1, sizeof(char) * 10);
+  char** dato7 = calloc(1, sizeof(char) * 10);
+  char** dato8 = calloc(1, sizeof(char) * 10);
+
+  *dato1 = "aleph";
+  *dato2 = "bifurcacion";
+  *dato3 = "circulo";
+  *dato4 = "daneri";
+  *dato5 = "ermita";
+  *dato6 = "fisura";
+  *dato7 = "gondola";
+  *dato8 = "hipotenusa";
+
+  abb_t* arbol_bb = arbol_crear(comparar_elementos_tipo_string, free);
+
+  arbol_insertar(arbol_bb, dato2);
+  arbol_insertar(arbol_bb, dato3);
+  arbol_insertar(arbol_bb, dato1);
+  arbol_insertar(arbol_bb, dato7);
+  arbol_insertar(arbol_bb, dato5);
+  arbol_insertar(arbol_bb, dato6);
+  arbol_insertar(arbol_bb, dato4);
+  arbol_insertar(arbol_bb, dato8);
+
+  char* esperado_inorden[]   = {"aleph", "bifurcacion", "circulo", "daneri", "ermita", "fisura", "gondola", "hipotenusa"};
+  char* esperado_preorden[]  = {"bifurcacion", "aleph", "circulo", "gondola", "ermita", "daneri", "fisura", "hipotenusa"};
+  char* esperado_postorden[] = {"aleph", "daneri", "fisura", "ermita", "hipotenusa", "gondola", "circulo", "bifurcacion"};
+
+  char** array_inorden[8];
+  char** array_preorden[8];
+  char** array_postorden[8];
+
+
+  size_t cantidad_1 = arbol_recorrido_inorden(arbol_bb,(void**)array_inorden, 8);
+  size_t cantidad_2 = arbol_recorrido_preorden(arbol_bb,(void**)array_preorden, 8);
+  size_t cantidad_3 = arbol_recorrido_postorden(arbol_bb,(void**)array_postorden, 8);
+
+  pa2m_afirmar(cantidad_1 == 8, "Se recorre el arbol completo inorden");
+  pa2m_afirmar(cantidad_2 == 8, "Se recorre el arbol completo preorden");
+  pa2m_afirmar(cantidad_3 == 8, "Se recorre el arbol completo postorden");
+
+  for(size_t i = 0; i < cantidad_1; i++) {
+    pa2m_afirmar(strcmp(*(char**)array_inorden[i],esperado_inorden[i]) == 0, "El elemento del array inorden es correcto");
+    pa2m_afirmar(strcmp(*(char**)array_preorden[i], esperado_preorden[i]) == 0, "El elemento del array preorden es correcto");
+    pa2m_afirmar(strcmp(*(char**)array_postorden[i], esperado_postorden[i]) == 0, "El elemento del array postorden es correcto");
+  }
+
+  arbol_destruir(arbol_bb);
+}
+
+
 int main() {
-  // pa2m_nuevo_grupo("Pruebas Creacion ABB");
-  // dadoUnABBNull_SiCreoUnABBSinComparador_ElABBSigueSiendoNull();
-  // dadoUnABBNull_SiCreoUnABB_ResultaUnABBNoNullYVacio();
-  // pa2m_nuevo_grupo("Pruebas Insertar Datos en ABB");
-  // dadoUnABBNull_SiInsertoDatos_NoPermiteInsertarDatosEnUnABBNull();
-  // dadoUnABBVacio_SiInsertoDatos_ElABBYaNoEstaVacio();
-  // pa2m_nuevo_grupo("Pruebas Insertar Datos en ABB. Se inserta en el siguiente orden: 1, 2 y 3");
-  // dadoUnABBVacio_SiInsertoDatosEnOrdenABC_LosDatosSeInsertanEnElOrdenCorrecto();
-  // pa2m_nuevo_grupo("Pruebas Insertar Datos en ABB. Se inserta en el siguiente orden: 1, 3 y 2");
-  // dadoUnABBVacio_SiInsertoDatosEnOrdenACB_LosDatosSeInsertanEnElOrdenCorrecto();
-  // pa2m_nuevo_grupo("Pruebas Insertar Datos en ABB. Se inserta en el siguiente orden: 3, 2 y 1");
-  // dadoUnABBVacio_SiInsertoDatosEnOrdenCBA_LosDatosSeInsertanEnElOrdenCorrecto();
-  // pa2m_nuevo_grupo("Pruebas Insertar Datos en ABB. Se inserta en el siguiente orden: 3, 1 y 2");
-  // dadoUnABBVacio_SiInsertoDatosEnOrdenCAB_LosDatosSeInsertanEnElOrdenCorrecto();
-  // pa2m_nuevo_grupo("Pruebas Insertar Datos en ABB. Se inserta en el siguiente orden: 2, 1 y 3");
-  // dadoUnABBVacio_SiInsertoDatosEnOrdenBAC_LosDatosSeInsertanEnElOrdenCorrecto();
-  // pa2m_nuevo_grupo("Pruebas Insertar Datos en ABB. Se inserta en el siguiente orden: 2, 3 y 1");
-  // dadoUnABBVacio_SiInsertoDatosEnOrdenBCA_LosDatosSeInsertanEnElOrdenCorrecto();
-  // pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB NULL");
-  // dadoUnABBNull_SiSolicitoBuscarUnElemento_RetornaNullPorqueNoExisteElElemento();
-  // pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB Vacio");
-  // dadoUnABBVacio_SiSolicitoBuscarUnElemento_RetornaNullPorqueNoExisteElElemento();
-  // pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB con elementos [2, 3, 1, 5, 6, 4] - El elemento no existe en el ABB");
-  // dadoUnABBConElementos_SiSolicitoBuscarUnElementoQueNoExisteEnElArbol_RetornaNullPorqueNoExisteElElemento();
-  // pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB con elementos [2, 3, 1, 5, 6, 4] - El elemento existe en el ABB");
-  // dadoUnABBConElementos_SiSolicitoBuscarUnElementoQueExisteEnElArbol_DevuelveElValorDelElementoCorrectamente();
-  // pa2m_nuevo_grupo("Pruebas Eliminar Datos en ABB NULL");
-  // dadoUnABBNull_SiSolicitoBorrarUnElemento_NoPermiteBorrarPorqueElABBEsNull();
-  // pa2m_nuevo_grupo("Pruebas Eliminar Datos en ABB Vacio");
-  // dadoUnABBVacio_SiSolicitoBorrarUnElemento_NoPermiteBorrarPorqueElABBEsVacio();
-  // pa2m_nuevo_grupo("Pruebas Eliminar datos en ABB con elementos [2, 3, 1, 5, 6, 4] - El elemento no existe en el ABB");
-  // dadoUnABBConElementos_SiSolicitoBorrarUnElementoQueNoExisteEnElArbol_NoPermiteBorrarPorqueNoExisteElElemento();
-  // pa2m_nuevo_grupo("Pruebas Eliminar datos en ABB con elementos [2, 3, 1, 5, 6, 4] - Los elementos existen en el ABB y no tienen hijos");
-  // dadoUnABBConElementos_SiSolicitoBorrarElementosQueExisteEnElArbolYNoTienenHijos_PermiteBorrarCorrectamente();
-  // pa2m_nuevo_grupo("Pruebas Eliminar datos en ABB con elementos [2, 3, 6, 5, 4, 7] - Los elementos existen en el ABB y tienen un hijo");
-  // dadoUnABBConElementos_SiSolicitoBorrarElementosQueExisteEnElArbolYTienenUnHijo_PermiteBorrarCorrectamente();
-  // pa2m_nuevo_grupo("Pruebas Eliminar datos en ABB con elementos [2, 3, 1, 7, 5, 6, 4, 8] - Los elementos existen en el ABB y tienen dos hijos");
-  // dadoUnABBConElementos_SiSolicitoBorrarElementosQueExisteEnElArbolYTienenDosHijos_PermiteBorrarCorrectamente();
-  // pa2m_nuevo_grupo("Pruebas consultar Raiz en ABB NULL");
-  // dadoUnABBNull_SiSolicitoVerRaiz_RetornaNull();
-  // pa2m_nuevo_grupo("Pruebas consultar Raiz en ABB Vacio");
-  // dadoUnABBVacio_SiSolicitoVerRaiz_RetornaNull();
-  // pa2m_nuevo_grupo("Pruebas consultar Raiz en ABB con datos");
-  // dadoUnABBConElementos_SiSolicitoVerRaiz_RetornaElElementoDeLaRaiz();
-  // pa2m_nuevo_grupo("Pruebas recorrido inorden en ABB NULL");
-  // dadoUnABBNull_SiSolicitoRecorrerInOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
-  // pa2m_nuevo_grupo("Pruebas recorrido inorden en ABB Vacio");
-  // dadoUnABBVacio_SiSolicitoRecorrerInOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
-  // pa2m_nuevo_grupo("Pruebas recorrido inorden en ABB con elementos pero con un array NULL");
-  // dadoUnABBConElementos_SiSolicitoRecorrerInOrdenConUnArrayNULL_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
-  // pa2m_nuevo_grupo("Pruebas recorrido inorden en ABB con elementos pero solicitando recorrer 0 veces un array");
-  // dadoUnABBConElementos_SiSolicitoRecorrerInOrdenConUnArrayPasandoTamanioCero_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
-  // pa2m_nuevo_grupo("Pruebas recorrido inorden ABB del mismo tamanio que el array");
-  // dadoUnABBConElementos_SiSolicitoRecorrerInOrdenConArrayDelMismoTamanioQueElABB_GuardaCorrectamenteLosElementos();
-  // pa2m_nuevo_grupo("Pruebas recorrido inorden ABB de mayor tamanio que el array");
-  // dadoUnABBConElementos_SiSolicitoRecorrerInOrdenConArrayDeMayorTamanioQueElABB_GuardaCorrectamenteLosElementos();
-  // pa2m_nuevo_grupo("Pruebas recorrido inorden ABB de menor tamanio que el array");
-  // dadoUnABBConElementos_SiSolicitoRecorrerInOrdenConArrayDeMenorTamanioQueElABB_GuardaCorrectamenteLosElementos();
-  // pa2m_nuevo_grupo("Pruebas recorrido preorden en ABB NULL");
-  // dadoUnABBNull_SiSolicitoRecorrerPreOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
-  // pa2m_nuevo_grupo("Pruebas recorrido preorden en ABB Vacio");
-  // dadoUnABBVacio_SiSolicitoRecorrerPreOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
-  // pa2m_nuevo_grupo("Pruebas recorrido preorden en ABB con elementos pero con un array NULL");
-  // dadoUnABBConElementos_SiSolicitoRecorrerPreOrdenConUnArrayNULL_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
-  // pa2m_nuevo_grupo("Pruebas recorrido preorden en ABB con elementos pero solicitando recorrer 0 veces un array");
-  // dadoUnABBConElementos_SiSolicitoRecorrerPreOrdenConUnArrayPasandoTamanioCero_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
-  // pa2m_nuevo_grupo("Pruebas recorrido preorden ABB del mismo tamanio que el array");
-  // dadoUnABBConElementos_SiSolicitoRecorrerPreOrdenConArrayDelMismoTamanioQueElABB_GuardaCorrectamenteLosElementos();
-  // pa2m_nuevo_grupo("Pruebas recorrido preorden ABB de mayor tamanio que el array");
-  // dadoUnABBConElementos_SiSolicitoRecorrerPreOrdenConArrayDeMayorTamanioQueElABB_GuardaCorrectamenteLosElementos();
-  // pa2m_nuevo_grupo("Pruebas recorrido preorden ABB de menor tamanio que el array");
-  // dadoUnABBConElementos_SiSolicitoRecorrerPreOrdenConArrayDeMenorTamanioQueElABB_GuardaCorrectamenteLosElementos();
-  // pa2m_nuevo_grupo("Pruebas recorrido postorden en ABB NULL");
-  // dadoUnABBNull_SiSolicitoRecorrerPostOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
-  // pa2m_nuevo_grupo("Pruebas recorrido postorden en ABB Vacio");
-  // dadoUnABBVacio_SiSolicitoRecorrerPostOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
-  // pa2m_nuevo_grupo("Pruebas recorrido postorden en ABB con elementos pero con un array NULL");
-  // dadoUnABBConElementos_SiSolicitoRecorrerPostOrdenConUnArrayNULL_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
-  // pa2m_nuevo_grupo("Pruebas recorrido postorden en ABB con elementos pero solicitando recorrer 0 veces un array");
-  // dadoUnABBConElementos_SiSolicitoRecorrerPostOrdenConUnArrayPasandoTamanioCero_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
-  // pa2m_nuevo_grupo("Pruebas recorrido postorden ABB del mismo tamanio que el array");
-  // dadoUnABBConElementos_SiSolicitoRecorrerPostOrdenConArrayDelMismoTamanioQueElABB_GuardaCorrectamenteLosElementos();
-  // pa2m_nuevo_grupo("Pruebas recorrido postorden ABB de mayor tamanio que el array");
-  // dadoUnABBConElementos_SiSolicitoRecorrerPostOrdenConArrayDeMayorTamanioQueElABB_GuardaCorrectamenteLosElementos();
-  // pa2m_nuevo_grupo("Pruebas recorrido postorden ABB de menor tamanio que el array");
-  // dadoUnABBConElementos_SiSolicitoRecorrerPostOrdenConArrayDeMenorTamanioQueElABB_GuardaCorrectamenteLosElementos();
-  // pa2m_nuevo_grupo("Pruebas iterador interno con ABB NULL");
-  // dadoUnABBNull_SiSolicitoIterarInternamenteTodosLosElementosEnTodosLosOrdenesPosibles_RetornaElResultadoCorrecto();
-  // pa2m_nuevo_grupo("Pruebas iterador interno con ABB Vacio");
-  // dadoUnABBVacio_SiSolicitoIterarInternamenteTodosLosElementosEnTodosLosOrdenesPosibles_RetornaElResultadoCorrecto();
-  // pa2m_nuevo_grupo("Pruebas iterador interno con ABB Con elementos, pero sin funcion Visitar");
-  // dadoUnABBConElementos_SiSolicitoIterarInternamenteTodosLosElementosEnTodosLosOrdenesPosiblesSinUnaFuncionVisitar_RetornaElResultadoCorrecto();
-  // pa2m_nuevo_grupo("Pruebas iterador interno con ABB Con elementos, informando funcion Visitar que recorre todos los elementos");
+  pa2m_nuevo_grupo("Pruebas Creacion ABB");
+  dadoUnABBNull_SiCreoUnABBSinComparador_ElABBSigueSiendoNull();
+  dadoUnABBNull_SiCreoUnABB_ResultaUnABBNoNullYVacio();
+  pa2m_nuevo_grupo("Pruebas Insertar Datos en ABB");
+  dadoUnABBNull_SiInsertoDatos_NoPermiteInsertarDatosEnUnABBNull();
+  dadoUnABBVacio_SiInsertoDatos_ElABBYaNoEstaVacio();
+  pa2m_nuevo_grupo("Pruebas Insertar Datos en ABB. Se inserta en el siguiente orden: 1, 2 y 3");
+  dadoUnABBVacio_SiInsertoDatosEnOrdenABC_LosDatosSeInsertanEnElOrdenCorrecto();
+  pa2m_nuevo_grupo("Pruebas Insertar Datos en ABB. Se inserta en el siguiente orden: 1, 3 y 2");
+  dadoUnABBVacio_SiInsertoDatosEnOrdenACB_LosDatosSeInsertanEnElOrdenCorrecto();
+  pa2m_nuevo_grupo("Pruebas Insertar Datos en ABB. Se inserta en el siguiente orden: 3, 2 y 1");
+  dadoUnABBVacio_SiInsertoDatosEnOrdenCBA_LosDatosSeInsertanEnElOrdenCorrecto();
+  pa2m_nuevo_grupo("Pruebas Insertar Datos en ABB. Se inserta en el siguiente orden: 3, 1 y 2");
+  dadoUnABBVacio_SiInsertoDatosEnOrdenCAB_LosDatosSeInsertanEnElOrdenCorrecto();
+  pa2m_nuevo_grupo("Pruebas Insertar Datos en ABB. Se inserta en el siguiente orden: 2, 1 y 3");
+  dadoUnABBVacio_SiInsertoDatosEnOrdenBAC_LosDatosSeInsertanEnElOrdenCorrecto();
+  pa2m_nuevo_grupo("Pruebas Insertar Datos en ABB. Se inserta en el siguiente orden: 2, 3 y 1");
+  dadoUnABBVacio_SiInsertoDatosEnOrdenBCA_LosDatosSeInsertanEnElOrdenCorrecto();
+  pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB NULL");
+  dadoUnABBNull_SiSolicitoBuscarUnElemento_RetornaNullPorqueNoExisteElElemento();
+  pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB Vacio");
+  dadoUnABBVacio_SiSolicitoBuscarUnElemento_RetornaNullPorqueNoExisteElElemento();
+  pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB con elementos [2, 3, 1, 5, 6, 4] - El elemento no existe en el ABB");
+  dadoUnABBConElementos_SiSolicitoBuscarUnElementoQueNoExisteEnElArbol_RetornaNullPorqueNoExisteElElemento();
+  pa2m_nuevo_grupo("Pruebas busqueda de datos en ABB con elementos [2, 3, 1, 5, 6, 4] - El elemento existe en el ABB");
+  dadoUnABBConElementos_SiSolicitoBuscarUnElementoQueExisteEnElArbol_DevuelveElValorDelElementoCorrectamente();
+  pa2m_nuevo_grupo("Pruebas Eliminar Datos en ABB NULL");
+  dadoUnABBNull_SiSolicitoBorrarUnElemento_NoPermiteBorrarPorqueElABBEsNull();
+  pa2m_nuevo_grupo("Pruebas Eliminar Datos en ABB Vacio");
+  dadoUnABBVacio_SiSolicitoBorrarUnElemento_NoPermiteBorrarPorqueElABBEsVacio();
+  pa2m_nuevo_grupo("Pruebas Eliminar datos en ABB con elementos [2, 3, 1, 5, 6, 4] - El elemento no existe en el ABB");
+  dadoUnABBConElementos_SiSolicitoBorrarUnElementoQueNoExisteEnElArbol_NoPermiteBorrarPorqueNoExisteElElemento();
+  pa2m_nuevo_grupo("Pruebas Eliminar datos en ABB con elementos [2, 3, 1, 5, 6, 4] - Los elementos existen en el ABB y no tienen hijos");
+  dadoUnABBConElementos_SiSolicitoBorrarElementosQueExisteEnElArbolYNoTienenHijos_PermiteBorrarCorrectamente();
+  pa2m_nuevo_grupo("Pruebas Eliminar datos en ABB con elementos [2, 3, 6, 5, 4, 7] - Los elementos existen en el ABB y tienen un hijo");
+  dadoUnABBConElementos_SiSolicitoBorrarElementosQueExisteEnElArbolYTienenUnHijo_PermiteBorrarCorrectamente();
+  pa2m_nuevo_grupo("Pruebas Eliminar datos en ABB con elementos [2, 3, 1, 7, 5, 6, 4, 8] - Los elementos existen en el ABB y tienen dos hijos");
+  dadoUnABBConElementos_SiSolicitoBorrarElementosQueExisteEnElArbolYTienenDosHijos_PermiteBorrarCorrectamente();
+  pa2m_nuevo_grupo("Pruebas consultar Raiz en ABB NULL");
+  dadoUnABBNull_SiSolicitoVerRaiz_RetornaNull();
+  pa2m_nuevo_grupo("Pruebas consultar Raiz en ABB Vacio");
+  dadoUnABBVacio_SiSolicitoVerRaiz_RetornaNull();
+  pa2m_nuevo_grupo("Pruebas consultar Raiz en ABB con datos");
+  dadoUnABBConElementos_SiSolicitoVerRaiz_RetornaElElementoDeLaRaiz();
+  pa2m_nuevo_grupo("Pruebas recorrido inorden en ABB NULL");
+  dadoUnABBNull_SiSolicitoRecorrerInOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
+  pa2m_nuevo_grupo("Pruebas recorrido inorden en ABB Vacio");
+  dadoUnABBVacio_SiSolicitoRecorrerInOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
+  pa2m_nuevo_grupo("Pruebas recorrido inorden en ABB con elementos pero con un array NULL");
+  dadoUnABBConElementos_SiSolicitoRecorrerInOrdenConUnArrayNULL_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
+  pa2m_nuevo_grupo("Pruebas recorrido inorden en ABB con elementos pero solicitando recorrer 0 veces un array");
+  dadoUnABBConElementos_SiSolicitoRecorrerInOrdenConUnArrayPasandoTamanioCero_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
+  pa2m_nuevo_grupo("Pruebas recorrido inorden ABB del mismo tamanio que el array");
+  dadoUnABBConElementos_SiSolicitoRecorrerInOrdenConArrayDelMismoTamanioQueElABB_GuardaCorrectamenteLosElementos();
+  pa2m_nuevo_grupo("Pruebas recorrido inorden ABB de mayor tamanio que el array");
+  dadoUnABBConElementos_SiSolicitoRecorrerInOrdenConArrayDeMayorTamanioQueElABB_GuardaCorrectamenteLosElementos();
+  pa2m_nuevo_grupo("Pruebas recorrido inorden ABB de menor tamanio que el array");
+  dadoUnABBConElementos_SiSolicitoRecorrerInOrdenConArrayDeMenorTamanioQueElABB_GuardaCorrectamenteLosElementos();
+  pa2m_nuevo_grupo("Pruebas recorrido preorden en ABB NULL");
+  dadoUnABBNull_SiSolicitoRecorrerPreOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
+  pa2m_nuevo_grupo("Pruebas recorrido preorden en ABB Vacio");
+  dadoUnABBVacio_SiSolicitoRecorrerPreOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
+  pa2m_nuevo_grupo("Pruebas recorrido preorden en ABB con elementos pero con un array NULL");
+  dadoUnABBConElementos_SiSolicitoRecorrerPreOrdenConUnArrayNULL_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
+  pa2m_nuevo_grupo("Pruebas recorrido preorden en ABB con elementos pero solicitando recorrer 0 veces un array");
+  dadoUnABBConElementos_SiSolicitoRecorrerPreOrdenConUnArrayPasandoTamanioCero_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
+  pa2m_nuevo_grupo("Pruebas recorrido preorden ABB del mismo tamanio que el array");
+  dadoUnABBConElementos_SiSolicitoRecorrerPreOrdenConArrayDelMismoTamanioQueElABB_GuardaCorrectamenteLosElementos();
+  pa2m_nuevo_grupo("Pruebas recorrido preorden ABB de mayor tamanio que el array");
+  dadoUnABBConElementos_SiSolicitoRecorrerPreOrdenConArrayDeMayorTamanioQueElABB_GuardaCorrectamenteLosElementos();
+  pa2m_nuevo_grupo("Pruebas recorrido preorden ABB de menor tamanio que el array");
+  dadoUnABBConElementos_SiSolicitoRecorrerPreOrdenConArrayDeMenorTamanioQueElABB_GuardaCorrectamenteLosElementos();
+  pa2m_nuevo_grupo("Pruebas recorrido postorden en ABB NULL");
+  dadoUnABBNull_SiSolicitoRecorrerPostOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
+  pa2m_nuevo_grupo("Pruebas recorrido postorden en ABB Vacio");
+  dadoUnABBVacio_SiSolicitoRecorrerPostOrden_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
+  pa2m_nuevo_grupo("Pruebas recorrido postorden en ABB con elementos pero con un array NULL");
+  dadoUnABBConElementos_SiSolicitoRecorrerPostOrdenConUnArrayNULL_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
+  pa2m_nuevo_grupo("Pruebas recorrido postorden en ABB con elementos pero solicitando recorrer 0 veces un array");
+  dadoUnABBConElementos_SiSolicitoRecorrerPostOrdenConUnArrayPasandoTamanioCero_RetornaCorrectamenteLaCantidadDeElementosRecorridos();
+  pa2m_nuevo_grupo("Pruebas recorrido postorden ABB del mismo tamanio que el array");
+  dadoUnABBConElementos_SiSolicitoRecorrerPostOrdenConArrayDelMismoTamanioQueElABB_GuardaCorrectamenteLosElementos();
+  pa2m_nuevo_grupo("Pruebas recorrido postorden ABB de mayor tamanio que el array");
+  dadoUnABBConElementos_SiSolicitoRecorrerPostOrdenConArrayDeMayorTamanioQueElABB_GuardaCorrectamenteLosElementos();
+  pa2m_nuevo_grupo("Pruebas recorrido postorden ABB de menor tamanio que el array");
+  dadoUnABBConElementos_SiSolicitoRecorrerPostOrdenConArrayDeMenorTamanioQueElABB_GuardaCorrectamenteLosElementos();
+  pa2m_nuevo_grupo("Pruebas iterador interno con ABB NULL");
+  dadoUnABBNull_SiSolicitoIterarInternamenteTodosLosElementosEnTodosLosOrdenesPosibles_RetornaElResultadoCorrecto();
+  pa2m_nuevo_grupo("Pruebas iterador interno con ABB Vacio");
+  dadoUnABBVacio_SiSolicitoIterarInternamenteTodosLosElementosEnTodosLosOrdenesPosibles_RetornaElResultadoCorrecto();
+  pa2m_nuevo_grupo("Pruebas iterador interno con ABB Con elementos, pero sin funcion Visitar");
+  dadoUnABBConElementos_SiSolicitoIterarInternamenteTodosLosElementosEnTodosLosOrdenesPosiblesSinUnaFuncionVisitar_RetornaElResultadoCorrecto();
+  pa2m_nuevo_grupo("Pruebas iterador interno con ABB Con elementos, informando funcion Visitar que recorre todos los elementos");
   dadoUnABBConElementos_SiSolicitoIterarInternamenteTodosLosElementosEnTodosLosOrdenesPosiblesConUnaFuncionVisitar_RetornaElResultadoCorrecto();
   pa2m_nuevo_grupo("Pruebas iterador interno con ABB Con elementos, informando funcion Visitar que recorre cinco elementos");
-  // dadoUnABBConElementos_SiSolicitoIterarInternamenteCincoElementosEnTodosLosOrdenesPosiblesConUnaFuncionVisitar_RetornaElResultadoCorrecto();
-  // pa2m_nuevo_grupo("Pruebas iterador interno con ABB Con elementos, informando funcion Visitar que recorre hasta encontrar el elemento de valor 5, Existiendo el elemento en el ABB");
-  // dadoUnABBConElementos_SiSolicitoIterarInternamenteHastaEncontrarUnElementoQueExisteEnElABBEnTodosLosOrdenesPosiblesConUnaFuncionVisitar_RetornaElResultadoCorrecto();
-  // pa2m_nuevo_grupo("Pruebas iterador interno con ABB Con elementos, informando funcion Visitar que recorre hasta encontrar el elemento de valor 5, No Existiendo el elemento en el ABB");
-  // dadoUnABBConElementos_SiSolicitoIterarInternamenteHastaEncontrarUnElementoQueNoExisteEnElABBEnTodosLosOrdenesPosiblesConUnaFuncionVisitar_RetornaElResultadoCorrecto();
+  dadoUnABBConElementos_SiSolicitoIterarInternamenteCincoElementosEnTodosLosOrdenesPosiblesConUnaFuncionVisitar_RetornaElResultadoCorrecto();
+  pa2m_nuevo_grupo("Pruebas iterador interno con ABB Con elementos, informando funcion Visitar que recorre hasta encontrar el elemento de valor 5, Existiendo el elemento en el ABB");
+  dadoUnABBConElementos_SiSolicitoIterarInternamenteHastaEncontrarUnElementoQueExisteEnElABBEnTodosLosOrdenesPosiblesConUnaFuncionVisitar_RetornaElResultadoCorrecto();
+  pa2m_nuevo_grupo("Pruebas iterador interno con ABB Con elementos, informando funcion Visitar que recorre hasta encontrar el elemento de valor 5, No Existiendo el elemento en el ABB");
+  dadoUnABBConElementos_SiSolicitoIterarInternamenteHastaEncontrarUnElementoQueNoExisteEnElABBEnTodosLosOrdenesPosiblesConUnaFuncionVisitar_RetornaElResultadoCorrecto();
+  pa2m_nuevo_grupo("Pruebas ABB creacion con comparador de estructuras en Heap - Iteracion de datos y se deja destruccion a cargo del usuario");
+  dadoUnABBConElementosDeTipoStringCreadosEnElHeap_SiSolicitoOperarSobreLosElementosYLuegoDestruirElArbolSinFuncionDestruccion_PermiteOperarSobreLosElementosYLuegoDestruirElArbolCorrectamente();
+  pa2m_nuevo_grupo("Pruebas ABB creacion con comparador de estructuras en Heap - Iteracion de datos y se envia funcion destruccion");
+  dadoUnABBConElementosDeTipoStringCreadosEnElHeap_SiSolicitoOperarSobreLosElementosYLuegoDestruirElArbolConFuncionDestruccion_PermiteOperarSobreLosElementosYLuegoDestruirElArbolCorrectamente();
 
 
   return pa2m_mostrar_reporte();
