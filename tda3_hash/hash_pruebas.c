@@ -90,13 +90,13 @@ void dadoUnHashConElementos_SiObtengoValorDeElementosQueSiExistenEnElHash_Recibo
 void dadoUnHashConElementos_SiInsertoElementosEnElHashQueColisionen_RSeInsertanCorrectamente() {
   hash_t* hash = hash_crear(NULL, CANTIDAD_MINIMA);
 
-  const char* clave_1 = "102624";
+  const char* clave_1 = "pepe";
   const char* valor_1 = "MAURO CUQUEJO";
-  const char* clave_2 = "102625";
+  const char* clave_2 = "pepa";
   const char* valor_2 = "JORGITO PEREZ";
-  const char* clave_3 = "102626";
+  const char* clave_3 = "pepo";
   const char* valor_3 = "MAXIMO COSSETTI";
-  const char* clave_4 = "102627";
+  const char* clave_4 = "pipo";
   const char* valor_4 = "PEDRO ROSEMBLAT";
 
   hash_insertar(hash, clave_1, &valor_1);
