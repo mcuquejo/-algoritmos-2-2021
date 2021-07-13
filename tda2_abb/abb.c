@@ -1,5 +1,10 @@
 #include "abb.h"
 
+#define NODO_INSERTADO_CORRECTAMENTE (arbol->nodo_raiz) ? 0 : -1
+#define NODO_ES_HOJA (!nodo->derecha && !nodo->izquierda)
+#define NODO_TIENE_UN_HIJO ((nodo->derecha != NULL && !nodo->izquierda) || (!nodo->derecha && nodo->izquierda != NULL))
+#define NODO_TIENE_DOS_HIJOS (nodo->derecha != NULL && nodo->izquierda != NULL)
+
 nodo_abb_t* nodo_crear() {
     nodo_abb_t* nodo = calloc(1, sizeof(nodo_abb_t));
     return nodo;
@@ -39,19 +44,19 @@ int arbol_insertar(abb_t* arbol, void* elemento){
     if(!arbol)
         return -1;
     arbol->nodo_raiz = nodo_insertar(arbol, arbol->nodo_raiz, elemento);
-    return (!arbol->nodo_raiz) ? -1 : 0;
+    return NODO_INSERTADO_CORRECTAMENTE;
 }
 
 bool es_hoja(nodo_abb_t* nodo) {
-    return (!nodo->derecha && !nodo->izquierda);
+    return NODO_ES_HOJA;
 }
 
 bool tiene_un_hijo(nodo_abb_t* nodo) {
-    return ((nodo->derecha != NULL && !nodo->izquierda) || (!nodo->derecha && nodo->izquierda != NULL));
+    return NODO_TIENE_UN_HIJO;
 }
 
 bool tiene_dos_hijos(nodo_abb_t* nodo) {
-    return (nodo->derecha != NULL && nodo->izquierda != NULL);
+    return NODO_TIENE_DOS_HIJOS;
 }
 
 nodo_abb_t* _buscar_predecesor_inorden(nodo_abb_t* nodo, nodo_abb_t** extraido) {
@@ -155,7 +160,7 @@ void* arbol_raiz(abb_t* arbol){
 bool arbol_vacio(abb_t* arbol){
     if (!arbol)
         return true;
-    return (!arbol->nodo_raiz);
+    return !(arbol->nodo_raiz);
 }
 
 
