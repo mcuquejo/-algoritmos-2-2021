@@ -3,9 +3,15 @@
 #include "hash.h"
 #include <stdio.h>
 
+#define SETEO_CAPACIDAD (capacidad_inicial >= TAM_MINIMO_HASH) ? capacidad_inicial : TAM_MINIMO_HASH
+#define HASH_ELEMENTO_OBTENIDO (hash->tabla[posicion]) ? hash->tabla[posicion]->valor : NULL
+#define HASH_CONTIENE_CLAVE hash_obtener(hash, clave) != NULL
+#define HASH_CANTIDAD (hash) ? hash->cantidad : 0
+
 const int ERROR = -1;
 const int EXITO = 0;
 const int TAM_MINIMO_HASH = 3;
+const bool DESTRUIR_VALOR = true;
 
 
 typedef struct par {
@@ -32,12 +38,12 @@ long fnv_hashing(const char* clave) {
 }
 
 
-char* duplicar_string(const char* s){
-  if(!s)
+char* strdup_c99(const char* string){
+  if(!string)
     return NULL;
-  char* p = malloc(strlen(s)+1);
-  strcpy(p,s);
-  return p;
+  char* copia = malloc(strlen(string) + 1);
+  strcpy(copia, string);
+  return copia;
 }
 
 
@@ -45,7 +51,7 @@ par_t* par_crear(const char* clave, void* valor) {
   par_t* par = calloc(1, sizeof(par_t));
   if(!par)
     return NULL;
-  par->clave = duplicar_string(clave);
+  par->clave = strdup_c99(clave);
   if(!par->clave) {
       free(par);
       return NULL;
@@ -54,10 +60,11 @@ par_t* par_crear(const char* clave, void* valor) {
   return par;
 }
 
-void borrar_tabla(par_t** tabla, size_t capacidad, hash_destruir_dato_t destructor, bool borrar_valor) {
+
+void borrar_tabla(par_t** tabla, size_t capacidad, hash_destruir_dato_t destructor, bool destruir_valor) {
     for(size_t i = 0; i < capacidad; i++) {
     if(tabla[i]){
-        if(borrar_valor && destructor) {
+        if(destruir_valor && destructor) {
         destructor(tabla[i]->valor);
         }
         free((void *) tabla[i]->clave);
@@ -67,14 +74,15 @@ void borrar_tabla(par_t** tabla, size_t capacidad, hash_destruir_dato_t destruct
   free(tabla);
 }
 
+
 hash_t* hash_crear(hash_destruir_dato_t destruir_elemento, size_t capacidad_inicial){
   hash_t* hash = calloc(1, sizeof(hash_t));
   if(!hash)
     return NULL;
   hash->destructor = destruir_elemento;
-  hash->capacidad = (capacidad_inicial >= TAM_MINIMO_HASH) ? capacidad_inicial : TAM_MINIMO_HASH;
-  hash->tabla = calloc(capacidad_inicial, sizeof(par_t));
-  if(!hash->tabla){
+  hash->capacidad = SETEO_CAPACIDAD;
+  hash->tabla = calloc(capacidad_inicial, sizeof(par_t*));
+  if(!hash->tabla) {
     free(hash);
     return NULL;
   }
@@ -83,22 +91,17 @@ hash_t* hash_crear(hash_destruir_dato_t destruir_elemento, size_t capacidad_inic
 
 
 size_t nueva_posicion(hash_t* hash, size_t tope, size_t posicion, const char* clave) {
-    posicion++;
-    if (posicion >= tope)
-        posicion = 0;
+    posicion = (posicion + 1) % tope;
 
-    while(hash->tabla[posicion] && strcmp(hash->tabla[posicion]->clave, clave) != 0) {
-        posicion++;
-        if (posicion >= tope)
-        posicion = 0;
-    }
+    while(hash->tabla[posicion] && strcmp(hash->tabla[posicion]->clave, clave) != 0)
+        posicion = (posicion + 1) % tope;
     return posicion;
 }
 
 bool rehashear(hash_t* hash) {
     par_t** par_aux = hash->tabla;
     size_t cant_aux = hash->cantidad;
-    size_t cap_aux = (hash->capacidad) ? hash->capacidad : 0;
+    size_t cap_aux = hash->capacidad;
 
     hash->tabla = calloc(hash->capacidad * 2, sizeof(par_t));
     if(!hash->tabla) {
@@ -111,9 +114,9 @@ bool rehashear(hash_t* hash) {
 
     for(size_t i = 0; i < cap_aux; i++) {
         if (par_aux[i]) {
-            int resultado = hash_insertar(hash, par_aux[i]->clave, par_aux[i]->valor);
-            if (resultado == ERROR){
-                borrar_tabla(hash->tabla, hash->capacidad, hash->destructor, false);
+            int resultado_rehash = hash_insertar(hash, par_aux[i]->clave, par_aux[i]->valor);
+            if (resultado_rehash == ERROR) {
+                borrar_tabla(hash->tabla, hash->capacidad, hash->destructor, !DESTRUIR_VALOR);
                 hash->capacidad = cap_aux;
                 hash->cantidad = cant_aux;
                 hash->tabla = par_aux;
@@ -122,7 +125,7 @@ bool rehashear(hash_t* hash) {
         }
     }
 
-    borrar_tabla(par_aux, cap_aux, hash->destructor, false);
+    borrar_tabla(par_aux, cap_aux, hash->destructor, !DESTRUIR_VALOR);
 
     return true;
 }
@@ -154,8 +157,10 @@ int hash_insertar(hash_t* hash, const char* clave, void* elemento) {
             hash->destructor(valor_aux);
         return EXITO;
     }
-
+    printf("CLAVE QUE COLISIONA: %s\n", clave);
+    printf("Posicion original: %zu\n", posicion);
     posicion = nueva_posicion(hash, hash->capacidad, posicion, clave);
+    printf("Posicion nueva: %zu\n", posicion);
 
     if (!hash->tabla[posicion]) {
         par_t* par = par_crear(clave, elemento);
@@ -173,8 +178,91 @@ int hash_insertar(hash_t* hash, const char* clave, void* elemento) {
   return EXITO;
 }
 
+//me está faltando contemplar el caso en el que la posicion nueva a insertar
+//ya se encuentre ocupada, entonces deberia buscar una nueva posicion a partir de ahi e insertar en dicha posicion.
+void actualizar_elementos(hash_t* hash, size_t posicion, size_t tope) {
+  posicion = (posicion + 1) % tope;
+  // printf("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
+  while(hash->tabla[posicion]) {
+    (hash->tabla[posicion]) ? printf("actualizar_elementos hash[%zu] -> clave: %s - valor: %s\n", posicion, hash->tabla[posicion]->clave, *(char**)hash->tabla[posicion]->valor) : printf("actualizar_elementos hash[%zu] -> clave: NULL - valor: NULL\n", posicion);
+    size_t posicion_nueva = fnv_hashing(hash->tabla[posicion]->clave) % tope;
+    if(posicion_nueva != posicion) {
+      if (hash->tabla[posicion_nueva]){
+        posicion_nueva = nueva_posicion(hash, hash->capacidad, posicion_nueva, hash->tabla[posicion]->clave);
+      }
+      if(posicion_nueva != posicion) {
+        hash->tabla[posicion_nueva] = hash->tabla[posicion];
+        hash->tabla[posicion] = NULL;
+      }
+
+    }
+
+    // printf("posicion: %zu - posicion nueva = %zu\n", posicion, posicion_nueva);
+    posicion = (posicion + 1) % tope;
+    //avanzo hasta encontrar:
+    //proximo espacio vacio o
+  //una clave que pueda ser movida a ese espacio vacio que teniamos
+  }
+  printf("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
+}
+
 int hash_quitar(hash_t* hash, const char* clave) {
-    return 0;
+  //si el hash es null o no paso una clave, falla
+  if(!hash || !clave)
+        return ERROR;
+
+  //Se procede a eliminar el elemento
+
+  //bsuco la posicion donde deberia estar
+  size_t posicion = fnv_hashing(clave) % hash->capacidad;
+
+  //si no hay un elemento ahi, salgo.
+  if(!hash->tabla[posicion])
+      return ERROR;
+
+  //sino, me fijo que sea la clave que busco.
+  if (strcmp(hash->tabla[posicion]->clave, clave) == 0) {
+    //libero el par
+    //si hay destructor primero libero el valor en esa posicion
+    if( hash->destructor)
+      hash->destructor(hash->tabla[posicion]->valor);
+    //luego libero la clave.
+    free((void*)hash->tabla[posicion]->clave);
+    //por ultimo libero el par.
+    free(hash->tabla[posicion]);
+    hash->tabla[posicion] = NULL;
+    //ahora reduzco la cantidad de elementos
+    hash->cantidad--;
+    printf("encontré la posicion a eliminar sin tener que buscar y la borro\n");
+    actualizar_elementos(hash, posicion, hash->capacidad);
+    return EXITO;
+  }
+
+  //como no encontré la clave, procedo a buscar una nueva posicion.
+
+  printf("Posicion original que busco para eliminar: %zu\n", posicion);
+  posicion = nueva_posicion(hash, hash->capacidad, posicion, clave);
+  printf("Posicion nueva que busco para eliminar: %zu\n", posicion);
+
+  //si no hay un elemento ahi, salgo.
+  if(!hash->tabla[posicion])
+      return ERROR;
+
+  if (strcmp(hash->tabla[posicion]->clave, clave) == 0) {
+    //libero el par
+    if(hash->destructor)
+      hash->destructor(hash->tabla[posicion]->valor);
+    free((void*)hash->tabla[posicion]->clave);
+    free((void*) hash->tabla[posicion]);
+    hash->tabla[posicion] = NULL;
+    hash->cantidad--;
+    actualizar_elementos(hash, posicion, hash->capacidad);
+    return EXITO;
+  }
+  //avanzo hasta encontrar:
+  //proximo espacio vacio o
+  //una clave que pueda ser movida a ese espacio vacio que teniamos
+  return EXITO;
 }
 
 void* hash_obtener(hash_t* hash, const char* clave) {
@@ -182,6 +270,7 @@ void* hash_obtener(hash_t* hash, const char* clave) {
         return NULL;
 
     size_t posicion = fnv_hashing(clave) % hash->capacidad;
+
     if(!hash->tabla[posicion])
         return NULL;
 
@@ -190,32 +279,49 @@ void* hash_obtener(hash_t* hash, const char* clave) {
 
     posicion = nueva_posicion(hash, hash->capacidad, posicion, clave);
 
-    return (hash->tabla[posicion]) ? hash->tabla[posicion]->valor : NULL;
-}
-
-size_t hash_cantidad(hash_t* hash) {
-  return (hash) ? hash->cantidad : 0;
+    return HASH_ELEMENTO_OBTENIDO;
 }
 
 
 bool hash_contiene(hash_t* hash, const char* clave) {
-    return hash_obtener(hash, clave) != NULL;
+    return HASH_CONTIENE_CLAVE;
 }
 
+
+size_t hash_cantidad(hash_t* hash) {
+  return HASH_CANTIDAD;
+}
+
+
 void hash_destruir(hash_t* hash) {
-  borrar_tabla(hash->tabla, hash->capacidad, hash->destructor, true);
+  if(!hash)
+    return;
+  borrar_tabla(hash->tabla, hash->capacidad, hash->destructor, DESTRUIR_VALOR);
   free(hash);
 }
 
-size_t hash_con_cada_clave(hash_t* hash, bool (*funcion)(hash_t* hash, const char* clave, void* aux), void* aux){
-  return 0;
+size_t hash_con_cada_clave(hash_t* hash, bool (*funcion)(hash_t* hash, const char* clave, void* aux), void* aux) {
+  size_t contador = 0;
+  size_t posicion = 0;
+  bool continuar = true;
+  if (!hash || !funcion)
+    return contador;
+
+  while(posicion < hash->capacidad && continuar){
+    if(hash->tabla[posicion]) {
+      continuar = funcion(hash, hash->tabla[posicion]->clave, aux);
+      contador++;
+    }
+    posicion++;
+  }
+
+  return contador;
 }
 
 void hash_imprimir(hash_t* hash) {
     if(hash){
         for(size_t i = 0; i < hash->capacidad; i++) {
-            (hash->tabla[i]) ? printf("posicion %zu -> clave: %s - valor: %s\n", i, hash->tabla[i]->clave, *(char**)hash->tabla[i]->valor) : printf("no hay elemento en la posicion %zu\n", i);
-
+            (hash->tabla[i]) ? printf("hash[%zu] -> clave: %s - valor: %s\n", i, hash->tabla[i]->clave, *(char**)hash->tabla[i]->valor) : printf("hash[%zu] -> clave: NULL - valor: NULL\n", i);
         }
     }
 }
