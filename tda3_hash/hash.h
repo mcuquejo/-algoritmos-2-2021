@@ -86,5 +86,5 @@ void hash_destruir(hash_t* hash);
  */
 size_t hash_con_cada_clave(hash_t* hash, bool (*funcion)(hash_t* hash, const char* clave, void* aux), void* aux);
 
-void hash_imprimir(hash_t* hash);
+
 #endif /* __HASH_H__ */
