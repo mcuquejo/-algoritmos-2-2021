@@ -12,6 +12,8 @@ const int ERROR = -1;
 const int EXITO = 0;
 const int TAM_MINIMO_HASH = 3;
 const bool DESTRUIR_VALOR = true;
+const long FNV_offset_basis = 2166136261;
+const long FNV_prime = 16777619;
 
 
 typedef struct par {
@@ -28,13 +30,13 @@ struct hash {
 
 
 long fnv_hashing(const char* clave) {
-  long h = 1469591039346656037;
+  long hash = FNV_offset_basis;
   int n = strlen(clave);
   for (size_t i = 0; i < n; i++) {
-    h *= 1099511628211;
-    h ^= clave[i];
+    hash *= FNV_prime;
+    hash ^= clave[i];
   }
-  return h;
+  return hash;
 }
 
 
@@ -81,7 +83,7 @@ hash_t* hash_crear(hash_destruir_dato_t destruir_elemento, size_t capacidad_inic
     return NULL;
   hash->destructor = destruir_elemento;
   hash->capacidad = SETEO_CAPACIDAD;
-  hash->tabla = calloc(capacidad_inicial, sizeof(par_t*));
+  hash->tabla = calloc(hash->capacidad, sizeof(par_t*));
   if(!hash->tabla) {
     free(hash);
     return NULL;
@@ -134,7 +136,7 @@ int hash_insertar(hash_t* hash, const char* clave, void* elemento) {
     if(!hash || !clave)
         return ERROR;
 
-    if((hash->cantidad + 1) / hash->capacidad >= 0.75){
+    if(!hash_contiene(hash, clave) && (hash->cantidad + 1) / hash->capacidad >= 0.75){
         bool exito = rehashear(hash);
         if (!exito)
             return ERROR;
@@ -179,6 +181,7 @@ int hash_insertar(hash_t* hash, const char* clave, void* elemento) {
 
 void actualizar_elementos(hash_t* hash, size_t posicion, size_t tope) {
   posicion = (posicion + 1) % tope;
+
   while(hash->tabla[posicion]) {
     size_t posicion_nueva = fnv_hashing(hash->tabla[posicion]->clave) % tope;
     if(posicion_nueva != posicion) {
@@ -190,7 +193,6 @@ void actualizar_elementos(hash_t* hash, size_t posicion, size_t tope) {
         hash->tabla[posicion] = NULL;
       }
     }
-
     posicion = (posicion + 1) % tope;
   }
 }
@@ -201,8 +203,9 @@ int hash_quitar(hash_t* hash, const char* clave) {
 
   size_t posicion = fnv_hashing(clave) % hash->capacidad;
 
-  if(!hash->tabla[posicion])
+  if(!hash->tabla[posicion]){
       return ERROR;
+  }
 
   if (strcmp(hash->tabla[posicion]->clave, clave) == 0) {
     if(hash->destructor)
@@ -217,19 +220,17 @@ int hash_quitar(hash_t* hash, const char* clave) {
 
   posicion = nueva_posicion(hash, hash->capacidad, posicion, clave);
 
-  if(!hash->tabla[posicion])
+  if(!hash->tabla[posicion] || strcmp(hash->tabla[posicion]->clave, clave) != 0)
       return ERROR;
 
-  if (strcmp(hash->tabla[posicion]->clave, clave) == 0) {
-    if(hash->destructor)
-      hash->destructor(hash->tabla[posicion]->valor);
-    free((void*)hash->tabla[posicion]->clave);
-    free((void*) hash->tabla[posicion]);
-    hash->tabla[posicion] = NULL;
-    hash->cantidad--;
-    actualizar_elementos(hash, posicion, hash->capacidad);
-    return EXITO;
-  }
+  if(hash->destructor)
+    hash->destructor(hash->tabla[posicion]->valor);
+  free((void*)hash->tabla[posicion]->clave);
+  free((void*) hash->tabla[posicion]);
+  hash->tabla[posicion] = NULL;
+  hash->cantidad--;
+  actualizar_elementos(hash, posicion, hash->capacidad);
+
   return EXITO;
 }
 
@@ -271,13 +272,13 @@ void hash_destruir(hash_t* hash) {
 size_t hash_con_cada_clave(hash_t* hash, bool (*funcion)(hash_t* hash, const char* clave, void* aux), void* aux) {
   size_t contador = 0;
   size_t posicion = 0;
-  bool continuar = true;
+  bool detener = false;
   if (!hash || !funcion)
     return contador;
 
-  while(posicion < hash->capacidad && continuar){
+  while(posicion < hash->capacidad && !detener){
     if(hash->tabla[posicion]) {
-      continuar = funcion(hash, hash->tabla[posicion]->clave, aux);
+      detener = funcion(hash, hash->tabla[posicion]->clave, aux);
       contador++;
     }
     posicion++;

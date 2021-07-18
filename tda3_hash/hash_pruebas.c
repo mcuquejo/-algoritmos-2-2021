@@ -6,6 +6,13 @@
 #define CANTIDAD_MINIMA 3
 #define CANTIDAD 10
 
+void dadoUnHashNull_SiCreoUnHashDeUnElemento_ElHashSeCreaConTresElementos() {
+  hash_t* hash = hash_crear(NULL, 1);
+  pa2m_afirmar(hash, "El hash no es NULL. Se creo correctamente");
+  pa2m_afirmar(hash_cantidad(hash) == 0, "El hash se crea vacio");
+  hash_destruir(hash);
+}
+
 void dadoUnHashNull_SiCreoUnHash_ElHashSeCreaCorrectamente() {
   hash_t* hash = hash_crear(NULL, CANTIDAD);
   pa2m_afirmar(hash, "El hash no es NULL. Se creo correctamente");
@@ -198,14 +205,14 @@ void dadoUnHashConElementos_SiEliminoElementos_LosElementosSeEliminanCorrectamen
 
 bool recorrer_todos_los_elementos(hash_t* hash, const char* clave, void* aux) {
   (*(size_t*)aux)++;
-  return true;
+  return false;
 }
 
 bool recorrer_algunos_elementos(hash_t* hash, const char* clave, void* aux) {
   (*(size_t*)aux)++;
   if((*(size_t*)aux) == 3)
-    return false;
-  return true;
+    return true;
+  return false;
 }
 
 void dadoUnHashNull_SiIteroElHash_DevuelveCero(){
@@ -395,10 +402,50 @@ void dadoUnHashConElementosEnHeap_SiSolicitoRealizarOperacionesSobreElHash_Permi
   hash_destruir(hash);
 }
 
+void dadoUnHashVacio_SiSeInsertanElementosDeFormaMasiva_LosElementosSeInsertanDeFormaCorrecta(){
+  hash_t* hash = hash_crear(free, 8);
+
+  char clave_string[20];
+  for(int clave=1; clave <= 500; clave++) {
+    sprintf(clave_string, "%i", clave);
+    hash_insertar(hash, clave_string, dup_string(clave_string));
+  }
+
+  bool comparacion_exitosa = true;
+  int clave = 1;
+  while (comparacion_exitosa && clave <= 500) {
+    sprintf(clave_string, "%i", clave);
+    comparacion_exitosa = strcmp((char*)hash_obtener(hash, clave_string), clave_string) == 0;
+    clave++;
+  }
+  pa2m_afirmar(comparacion_exitosa, "Las 500 claves se obtuvieron correctamente");
+
+  size_t contador = 0;
+  pa2m_afirmar(hash_con_cada_clave(hash, recorrer_todos_los_elementos, &contador) == 500, "se recorrieron correctamente los 500 elementos con el iterador");
+  pa2m_afirmar(contador == 500, "El contador se actualizo correctamente");
+
+  int eliminacion_exitosa = 0;
+  clave = 1;
+  while (eliminacion_exitosa != -1 && clave <= 200) {
+    sprintf(clave_string, "%i", clave);
+    eliminacion_exitosa = hash_quitar(hash, clave_string);
+    clave++;
+  }
+  pa2m_afirmar(eliminacion_exitosa != -1, "Se eliminaron correctamente 200 claves");
+
+  contador = 0;
+  pa2m_afirmar(hash_cantidad(hash) == 300, "El hash contiene 300 elementos");
+  pa2m_afirmar(hash_con_cada_clave(hash, recorrer_todos_los_elementos, &contador) == 300, "se recorrieron correctamente los 300 elementos con el iterador");
+  pa2m_afirmar(contador == 300, "El contador se actualizo correctamente");
+
+  hash_destruir(hash);
+}
+
 int main(){
 
   pa2m_nuevo_grupo("Pruebas Creacion Hash");
   dadoUnHashNull_SiCreoUnHash_ElHashSeCreaCorrectamente();
+  dadoUnHashNull_SiCreoUnHashDeUnElemento_ElHashSeCreaConTresElementos();
   pa2m_nuevo_grupo("Pruebas Operar sobre Hash NULL o Hash sin elementos");
   dadoUnHashNull_SiIntentoRealizarOperacionesSobreElHash_NoPermiteRealizarOperaciones();
   dadoUnHashVacio_SiIntentoRealizarOperacionesSobreElHash_NoPermiteRealizarOperaciones();
@@ -427,5 +474,7 @@ int main(){
   dadoUnHashConElementos_SiIteroSinFuncionVisitar_NoPermiteIterar();
   pa2m_nuevo_grupo("Pruebas operaciones Hash con elementos en Heap");
   dadoUnHashConElementosEnHeap_SiSolicitoRealizarOperacionesSobreElHash_PermiteOperarCorrectamente();
+  pa2m_nuevo_grupo("Pruebas operaciones Hash insercion masiva con elementos en Heap");
+  dadoUnHashVacio_SiSeInsertanElementosDeFormaMasiva_LosElementosSeInsertanDeFormaCorrecta();
   return pa2m_mostrar_reporte();
 }

@@ -207,3 +207,11 @@ size_t hash_con_cada_clave(hash_t* hash, bool (*funcion)(hash_t* hash, const cha
   return 0;
 }
 
+void hash_imprimir(hash_t* hash) {
+    if(hash){
+        for(size_t i = 0; i < hash->capacidad_total; i++) {
+            (hash->elementos[i]) ? printf("posicion %zu -> clave: %s - valor: %s\n", i, hash->elementos[i]->clave, (char*)hash->elementos[i]->valor) : printf("no hay elemento en la posicion %zu\n", i);
+
+        }
+    }
+}
