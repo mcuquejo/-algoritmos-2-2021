@@ -4,6 +4,7 @@
         "hash_abierto.h": "c",
         "hash_cerrado.h": "c",
         "stdlib.h": "c",
-        "hash.h": "c"
+        "hash.h": "c",
+        "lista.h": "c"
     }
 }
