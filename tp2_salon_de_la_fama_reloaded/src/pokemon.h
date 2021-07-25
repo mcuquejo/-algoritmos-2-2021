@@ -1,0 +1,1 @@
+typedef struct _pokemon_t pokemon_t;
