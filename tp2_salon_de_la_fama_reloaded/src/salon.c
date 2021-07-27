@@ -5,7 +5,7 @@
 #include <string.h>
 #include "abb.h"
 #include "utils.h"
-#include "comandos.h"
+#include "menu.h"
 
 #define FORMATO_ESCRITURA_ENTRENADOR "%s;%i\n"
 #define FORMATO_ESCRITURA_POKEMON "%s;%i;%i;%i;%i;%i\n"
@@ -19,15 +19,106 @@ const int SALON_ERROR = -1;
 
 struct _salon_t{
     abb_t* entrenadores;
+    menu_t* menu_salon;
 };
 
 int comparar_por_nombre(void* elemento1, void* elemento2) {
-
   return strcmp(entrenador_obtener_nombre((entrenador_t*)elemento1), entrenador_obtener_nombre((entrenador_t*)elemento2));
 }
 
 int comparar_por_victorias(void* elemento1, void* elemento2) {
   return entrenador_obtener_victorias((entrenador_t*)elemento1) - entrenador_obtener_victorias((entrenador_t*)elemento2);
+}
+
+//aca deberia ver si no falla
+bool imprimir_pokemones(void* pokemon, void* archivo) {
+    if(pokemon)
+        fprintf(*(FILE**)archivo, FORMATO_ESCRITURA_POKEMON, pokemon_obtener_nombre((pokemon_t*)pokemon), pokemon_obtener_nivel((pokemon_t*)pokemon),pokemon_obtener_defensa((pokemon_t*)pokemon), pokemon_obtener_fuerza((pokemon_t*)pokemon), pokemon_obtener_inteligencia((pokemon_t*)pokemon), pokemon_obtener_velocidad((pokemon_t*)pokemon));
+    return true;
+}
+
+//aca deberia ver si no falla
+bool imprimir_entrenadores(void* entrenador, void* archivo) {
+    if(entrenador) {
+        fprintf(*(FILE**)archivo, FORMATO_ESCRITURA_ENTRENADOR, entrenador_obtener_nombre((entrenador_t*)entrenador), entrenador_obtener_victorias((entrenador_t*)entrenador));
+        lista_con_cada_elemento((lista_t*)entrenador_obtener_equipo((entrenador_t*)entrenador), imprimir_pokemones, archivo);
+    }
+    return false;
+}
+
+bool recorrer_entrenadores(void* entrenador, void* extra) {
+    if(entrenador) {
+        printf("el entrenador es: %s\n", entrenador_obtener_nombre(entrenador));
+
+        lista_encolar((lista_t*)extra, (entrenador_t*)entrenador);
+    }
+    return false;
+}
+
+
+bool salon_entrenadores(int argc, char* argv[], void* contexto) {
+    salon_t* salon = contexto;
+
+    //ESTO ESTA MAL. SOLO ES PARA MOSTRAR QUE SE EJECUTA ALGO CUANDO INVOCO AL COMANDO.
+    printf("salon: %s\n", entrenador_obtener_nombre(*(entrenador_t**)salon->entrenadores->nodo_raiz->elemento));
+    return false;
+}
+
+bool salon_equipo(int argc, char* argv[], void* contexto) {
+    salon_t* salon = contexto;
+    //ESTO ESTA MAL. SOLO ES PARA MOSTRAR QUE SE EJECUTA ALGO CUANDO INVOCO AL COMANDO.
+    printf("salon: %s\n", entrenador_obtener_nombre(*(entrenador_t**)salon->entrenadores->nodo_raiz->elemento));
+    return false;
+}
+
+bool salon_reglas(int argc, char* argv[], void* contexto) {
+    salon_t* salon = contexto;
+    //ESTO ESTA MAL. SOLO ES PARA MOSTRAR QUE SE EJECUTA ALGO CUANDO INVOCO AL COMANDO.
+    printf("salon: %s\n", entrenador_obtener_nombre(*(entrenador_t**)salon->entrenadores->nodo_raiz->elemento));
+    return false;
+}
+
+bool salon_comparar(int argc, char* argv[], void* contexto) {
+    salon_t* salon = contexto;
+    //ESTO ESTA MAL. SOLO ES PARA MOSTRAR QUE SE EJECUTA ALGO CUANDO INVOCO AL COMANDO.
+    printf("salon: %s\n", entrenador_obtener_nombre(*(entrenador_t**)salon->entrenadores->nodo_raiz->elemento));
+    return false;
+}
+
+bool salon_agregar_pokemon(int argc, char* argv[], void* contexto) {
+    salon_t* salon = contexto;
+    //ESTO ESTA MAL. SOLO ES PARA MOSTRAR QUE SE EJECUTA ALGO CUANDO INVOCO AL COMANDO.
+    printf("salon: %s\n", entrenador_obtener_nombre(*(entrenador_t**)salon->entrenadores->nodo_raiz->elemento));
+    return false;
+}
+
+bool salon_quitar_pokemon(int argc, char* argv[], void* contexto) {
+    salon_t* salon = contexto;
+    //ESTO ESTA MAL. SOLO ES PARA MOSTRAR QUE SE EJECUTA ALGO CUANDO INVOCO AL COMANDO.
+    printf("salon: %s\n", entrenador_obtener_nombre(*(entrenador_t**)salon->entrenadores->nodo_raiz->elemento));
+    return false;
+}
+
+bool salon_guardar(int argc, char* argv[], void* contexto) {
+    salon_t* salon = contexto;
+    //ESTO ESTA MAL. SOLO ES PARA MOSTRAR QUE SE EJECUTA ALGO CUANDO INVOCO AL COMANDO.
+    printf("salon: %s\n", entrenador_obtener_nombre(*(entrenador_t**)salon->entrenadores->nodo_raiz->elemento));
+    return false;
+}
+
+
+menu_t* salon_crear_menu() {
+    menu_t* menu = menu_crear();
+    if(!menu)
+        return NULL;
+    menu_agregar_comando(menu, "ENTRENADORES", "Mostrar Entrenadores. Se pueden agregar criterios de búsqueda", salon_entrenadores);
+    menu_agregar_comando(menu, "EQUIPO", "Mostrar equipo de un entrenador", salon_equipo);
+    menu_agregar_comando(menu, "REGLAS", "Mostrar Reglas disponibles de Combate", salon_reglas);
+    menu_agregar_comando(menu, "COMPARAR", "Permite comparar equipos de dos entrenadores y definir, segun las reglas de Combate, quién ganaría un encuentro", salon_comparar);
+    menu_agregar_comando(menu, "AGREGAR_POKEMON", "Permite agregar un pokemon al equipo de un Entrenador", salon_agregar_pokemon);
+    menu_agregar_comando(menu, "QUITAR_POKEMON", "Permite quitar un pokemon al equipo de un Entrenador", salon_quitar_pokemon);
+    menu_agregar_comando(menu, "GUARDAR", "Guarda el Salon de la Fama Pokemon a un Archivo", salon_guardar);
+    return menu;
 }
 
 /**
@@ -40,6 +131,12 @@ salon_t* salon_crear() {
         return NULL;
     salon->entrenadores = arbol_crear(comparar_por_victorias, entrenador_destruir);
     if(!salon->entrenadores) {
+        free(salon);
+        return NULL;
+    }
+    salon->menu_salon = salon_crear_menu();
+    if(!salon->menu_salon) {
+        arbol_destruir(salon->entrenadores);
         free(salon);
         return NULL;
     }
@@ -173,22 +270,7 @@ salon_t* salon_leer_archivo(const char* nombre_archivo) {
     return salon;
 }
 
-//aca deberia ver si no falla
-bool imprimir_pokemones(void* pokemon, void* archivo) {
-    if(pokemon)
-        fprintf(*(FILE**)archivo, FORMATO_ESCRITURA_POKEMON, pokemon_obtener_nombre((pokemon_t*)pokemon), pokemon_obtener_nivel((pokemon_t*)pokemon),pokemon_obtener_defensa((pokemon_t*)pokemon), pokemon_obtener_fuerza((pokemon_t*)pokemon), pokemon_obtener_inteligencia((pokemon_t*)pokemon), pokemon_obtener_velocidad((pokemon_t*)pokemon));
-    return true;
-}
 
-
-//aca deberia ver si no falla
-bool imprimir_entrenadores(void* entrenador, void* archivo) {
-    if(entrenador) {
-        fprintf(*(FILE**)archivo, FORMATO_ESCRITURA_ENTRENADOR, entrenador_obtener_nombre((entrenador_t*)entrenador), entrenador_obtener_victorias((entrenador_t*)entrenador));
-        lista_con_cada_elemento((lista_t*)entrenador_obtener_equipo((entrenador_t*)entrenador), imprimir_pokemones, archivo);
-    }
-    return false;
-}
 
 int salon_guardar_archivo(salon_t* salon, const char* nombre_archivo){
     if(!salon)
@@ -218,16 +300,6 @@ salon_t* salon_agregar_entrenador(salon_t* salon, entrenador_t* entrenador){
     return salon;
 }
 
-
-bool recorrer_entrenadores(void* entrenador, void* extra) {
-    if(entrenador) {
-        printf("el entrenador es: %s\n", entrenador_obtener_nombre(entrenador));
-
-        lista_encolar((lista_t*)extra, (entrenador_t*)entrenador);
-    }
-    return false;
-}
-
 lista_t* salon_filtrar_entrenadores(salon_t* salon , bool (*f)(entrenador_t*, void*), void* extra){
     if(!salon || !f)
         return NULL;
@@ -252,73 +324,26 @@ lista_t* salon_filtrar_entrenadores(salon_t* salon , bool (*f)(entrenador_t*, vo
     return lista_final;
 }
 
-bool salon_entrenadores(int argc, char* argv[], void* contexto) {
-    salon_t* salon = contexto;
-    printf("salon: %s\n", entrenador_obtener_nombre((entrenador_t*)salon->entrenadores->nodo_raiz));
-    return false;
-}
-
-bool salon_equipo(int argc, char* argv[], void* contexto) {
-    salon_t* salon = contexto;
-    printf("salon: %s\n", entrenador_obtener_nombre((entrenador_t*)salon->entrenadores->nodo_raiz));
-    return false;
-}
-
-bool salon_reglas(int argc, char* argv[], void* contexto) {
-    salon_t* salon = contexto;
-    printf("salon: %s\n", entrenador_obtener_nombre((entrenador_t*)salon->entrenadores->nodo_raiz));
-    return false;
-}
-
-bool salon_comparar(int argc, char* argv[], void* contexto) {
-    salon_t* salon = contexto;
-    printf("salon: %s\n", entrenador_obtener_nombre((entrenador_t*)salon->entrenadores->nodo_raiz));
-    return false;
-}
-
-bool salon_agregar_pokemon(int argc, char* argv[], void* contexto) {
-    salon_t* salon = contexto;
-    printf("salon: %s\n", entrenador_obtener_nombre((entrenador_t*)salon->entrenadores->nodo_raiz));
-    return false;
-}
-
-bool salon_quitar_pokemon(int argc, char* argv[], void* contexto) {
-    salon_t* salon = contexto;
-    printf("salon: %s\n", entrenador_obtener_nombre((entrenador_t*)salon->entrenadores->nodo_raiz));
-    return false;
-}
-
-bool salon_guardar(int argc, char* argv[], void* contexto) {
-    salon_t* salon = contexto;
-    printf("salon: %s\n", entrenador_obtener_nombre((entrenador_t*)salon->entrenadores->nodo_raiz));
-    return false;
-}
-
-void salon_inicializar_comandos() {
-    menu_t* menu = menu_crear();
-    agregar_comando(menu, "ENTRENADORES", "Mostrar Entrenadores. Se pueden agregar criterios de búsqueda", salon_entrenadores);
-    agregar_comando(menu, "EQUIPO", "Mostrar equipo de un entrenador", salon_equipo);
-    agregar_comando(menu, "REGLAS", "Mostrar Reglas disponibles de Combate", salon_reglas);
-    agregar_comando(menu, "COMPARAR", "Permite comparar equipos de dos entrenadores y definir, segun las reglas de Combate, quién ganaría un encuentro", salon_comparar);
-    agregar_comando(menu, "AGREGAR_POKEMON", "Permite agregar un pokemon al equipo de un Entrenador", salon_agregar_pokemon);
-    agregar_comando(menu, "QUITAR_POKEMON", "Permite quitar un pokemon al equipo de un Entrenador", salon_quitar_pokemon);
-    agregar_comando(menu, "GUARDAR", "Guarda el Salon de la Fama Pokemon a un Archivo", salon_guardar);
-}
-
 char* salon_ejecutar_comando(salon_t* salon, const char* comando) {
     if(!salon || !comando)
         return NULL;
-    printf("se ejecutó el comando: %s", comando);
+
+    printf("se ejecutó el comando: %s\n", comando);
+
     char* resultado = calloc(1, sizeof(char) * 100);
     if(!resultado)
         return NULL;
-    strcpy(resultado, comando);
+
+    //funcion de prueba. Tengo que ajustar el comando para que reciba un puntero char (extra), donde voy a ir concatenando los resultados
+    menu_procesar_opcion(salon->menu_salon, comando, &salon);
     return resultado;
 }
+
 
 void salon_destruir(salon_t* salon) {
     if(salon) {
         arbol_destruir(salon->entrenadores);
+        menu_destruir(salon->menu_salon);
         free(salon);
     }
 

@@ -34,6 +34,9 @@ void probarQueFuncioneMasoMeno() {
     lista = salon_filtrar_entrenadores(salon, filtrar_entrenadores_por_victorias, &cantidad_victorias);
     printf("cantidad de entrenadores que cumplieron con esta condicion (100 victorias): %zu\n", lista_elementos(lista));
 
+    char* resultado = salon_ejecutar_comando(salon, "ENTRENADORES");
+
+    free(resultado);
     lista_destruir(lista);
 
     salon_destruir(salon);

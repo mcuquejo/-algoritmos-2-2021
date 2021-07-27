@@ -13,6 +13,7 @@
         "utils.h": "c",
         "abb.h": "c",
         "pokemon.h": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "menu.h": "c"
     }
 }
