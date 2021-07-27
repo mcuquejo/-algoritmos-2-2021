@@ -1,11 +1,10 @@
 #ifndef SALON_H
 #define SALON_H
 
-#define MAX_NOMBRE_POKEMON    10
 #define MAX_NOMBRE_ENTRENADOR 30
 
 typedef struct{
-    char nombre[MAX_NOMBRE_POKEMON];
+    char* nombre;
     int nivel;
     int fuerza;
     int inteligencia;

@@ -5,6 +5,14 @@
         "hash_cerrado.h": "c",
         "stdlib.h": "c",
         "hash.h": "c",
-        "lista.h": "c"
+        "lista.h": "c",
+        "salon.h": "c",
+        "entrenador.h": "c",
+        "util.h": "c",
+        "stdio.h": "c",
+        "utils.h": "c",
+        "abb.h": "c",
+        "pokemon.h": "c",
+        "stdbool.h": "c"
     }
 }

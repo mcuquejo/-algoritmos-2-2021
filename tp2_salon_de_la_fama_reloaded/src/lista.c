@@ -1,10 +1,11 @@
 #include "lista.h"
 #include <stdlib.h>
 
-lista_t* lista_crear(){
+lista_t* lista_crear(lista_liberar_elemento destructor){
     lista_t* lista = calloc(1, sizeof(lista_t));
     if(!lista)
         return NULL;
+    lista->destructor = destructor;
     return lista;
 }
 
@@ -12,7 +13,7 @@ lista_t* lista_crear(){
  * Crea un nodo reservando el espacio necesario en memoria.
  * Devuelve un puntero al nodo creado o NULL en caso de error.
  */
-nodo_t* nodo_crear(void* elemento) {
+nodo_t* lista_nodo_crear(void* elemento) {
     nodo_t* nodo = calloc(1, sizeof(nodo_t));
     if (!nodo)
         return NULL;
@@ -23,7 +24,7 @@ nodo_t* nodo_crear(void* elemento) {
 int lista_insertar(lista_t* lista, void* elemento){
     if(!lista)
         return -1;
-    nodo_t* nodo = nodo_crear(elemento);
+    nodo_t* nodo = lista_nodo_crear(elemento);
     if(!nodo)
         return -1;
     if (lista_vacia(lista)) {
@@ -47,7 +48,7 @@ int lista_insertar_al_inicio(lista_t* lista, void* elemento) {
     if(lista_vacia(lista))
         return lista_insertar(lista, elemento);
 
-    nodo_t* nodo = nodo_crear(elemento);
+    nodo_t* nodo = lista_nodo_crear(elemento);
     if(!nodo)
         return -1;
     nodo->siguiente = lista->nodo_inicio;
@@ -72,7 +73,7 @@ int lista_insertar_en_posicion(lista_t* lista, void* elemento, size_t posicion){
         return lista_insertar_al_inicio(lista, elemento);
     if(posicion >= lista_elementos(lista))
         return lista_insertar(lista, elemento);
-    nodo_t* nodo_nuevo = nodo_crear(elemento);
+    nodo_t* nodo_nuevo = lista_nodo_crear(elemento);
     if(!nodo_nuevo)
         return -1;
 
@@ -103,7 +104,8 @@ int lista_borrar_primero(lista_t* lista) {
         lista->nodo_inicio = NULL;
         lista->nodo_fin = NULL;
     }
-
+    if(lista->destructor)
+        lista->destructor(nodo_auxiliar->elemento);
     free(nodo_auxiliar);
     return 0;
 }
@@ -117,11 +119,15 @@ int lista_borrar(lista_t* lista){
     if (lista->nodo_inicio != lista->nodo_fin) {
         nodo_t* nodo_anterior_auxiliar = obtener_nodo_anterior_posicion(lista->nodo_inicio, lista->cantidad - 1);
         nodo_anterior_auxiliar->siguiente = lista->nodo_fin->siguiente;
+        if(lista->destructor)
+            lista->destructor(lista->nodo_fin->elemento);
         free(lista->nodo_fin);
         lista->nodo_fin = nodo_anterior_auxiliar;
         if (lista_elementos(lista) == 1)
             lista->nodo_fin = lista->nodo_inicio;
     } else {
+        if(lista->destructor)
+            lista->destructor(lista->nodo_fin->elemento);
         free(lista->nodo_fin);
         lista->nodo_inicio = NULL;
         lista->nodo_fin = NULL;
@@ -146,6 +152,8 @@ int lista_borrar_de_posicion(lista_t* lista, size_t posicion){
     nodo_t* nodo_auxiliar_anterior = obtener_nodo_anterior_posicion(lista->nodo_inicio, posicion);
     nodo_t* nodo_auxiliar_a_borrar = nodo_auxiliar_anterior->siguiente;
     nodo_auxiliar_anterior->siguiente = nodo_auxiliar_a_borrar->siguiente;
+    if(lista->destructor)
+        lista->destructor(nodo_auxiliar_a_borrar->elemento);
     free(nodo_auxiliar_a_borrar);
     lista->cantidad--;
 
@@ -252,11 +260,12 @@ void lista_iterador_destruir(lista_iterador_t* iterador){
     free(iterador);
 }
 
-size_t _lista_con_cada_elemento(nodo_t* nodo, bool (*funcion)(void*, void*), void *contexto) {
+size_t _lista_con_cada_elemento(nodo_t* nodo, bool (*funcion)(void*, void*), void *contexto, bool* continuar) {
     if(!nodo)
         return 0;
-    if(funcion(nodo->elemento, contexto))
-        return 1 + _lista_con_cada_elemento(nodo->siguiente, funcion, contexto);
+    *continuar = funcion(nodo->elemento, contexto);
+    if(*continuar)
+        return 1 + _lista_con_cada_elemento(nodo->siguiente, funcion, contexto, continuar);
     return 1;
 }
 
@@ -264,7 +273,8 @@ size_t lista_con_cada_elemento(lista_t* lista, bool (*funcion)(void*, void*), vo
     if(!lista || !funcion || !contexto)
         return 0;
     nodo_t* nodo_actual = lista->nodo_inicio;
-    return _lista_con_cada_elemento(nodo_actual, funcion, contexto);
+    bool continuar = true;
+    return _lista_con_cada_elemento(nodo_actual, funcion, contexto, &continuar);
 }
 
 
