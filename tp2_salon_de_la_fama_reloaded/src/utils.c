@@ -8,6 +8,30 @@
 #define TAM_BUFFER_INI 512
 
 
+//me creo una funcion para concatenar el texto
+char* concat(char *s1, const char *s2) {
+    if(!s1) {
+        s1 = calloc(1, sizeof(strlen(s2) + 1));
+        strcpy(s1, s2);
+        return s1;
+    }
+
+    s1 = realloc(s1, sizeof(strlen(s1) + strlen(s2) + 1));
+
+    strcpy(s1, s2);
+    return s1;
+}
+
+char* concat2(const char *s1, const char *s2) {
+    const size_t len1 = strlen(s1);
+    const size_t len2 = strlen(s2);
+    char *result = malloc(len1 + len2 + 1); // +1 for the null-terminator
+    // in real code you would check for errors in malloc here
+    memcpy(result, s1, len1);
+    memcpy(result + len1, s2, len2 + 1); // +1 to copy the null-terminator
+    return result;
+}
+
 size_t vtrlen(void* ptr){
     if (!ptr)
         return 0;

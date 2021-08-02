@@ -3,18 +3,19 @@
 #include "menu.h"
 #include "utils.h"
 
+
 struct comando {
     const char* nombre;
     const char* documentacion;
-    ejecutar ejecutor; //antes de ejecutar el comando y hago un split, separo por un caracter, el comando es el primero y los n elementos son los argumentos del comando
-
+    ejecutar ejecutor;
+    hash_t* subcomandos;
 };
+
 
 struct menu {
-    const char* nombre_menu;
-    const char* ayuda;
     hash_t* comandos;
 };
+
 
 comando_t* comando_crear(const char* nombre, const char* documentacion, bool (*ejecutar)(int argc, char* argv[], void*)) {
     comando_t* comando = calloc(1, sizeof(comando_t));
@@ -23,6 +24,7 @@ comando_t* comando_crear(const char* nombre, const char* documentacion, bool (*e
     comando->nombre = nombre;
     comando->documentacion = documentacion;
     comando->ejecutor = ejecutar;
+
     return comando;
 }
 
@@ -30,6 +32,7 @@ void comando_destruir(void* comando) {
     if(comando)
         free(comando);
 }
+
 
 menu_t* menu_crear() {
     menu_t* menu = calloc(1, sizeof(menu_t));
@@ -46,14 +49,17 @@ menu_t* menu_crear() {
 
 void menu_agregar_comando(menu_t* menu, const char* nombre, const char* documentacion, bool (*ejecutar)(int argc, char* argv[], void*)) {
     comando_t* comando = comando_crear(nombre, documentacion, ejecutar);
+    if(!comando)
+        return;
     hash_insertar(menu->comandos, nombre, comando);
 
 }
 
+//ni siquiera es necesario que las funciones de ejecucion sean bool. No uso en ningun lado el resultado
 void menu_procesar_opcion(menu_t* menu, const char* linea, void* contexto) {
     char** argumentos = split(linea, ':');
     if(!argumentos) {
-        printf("No se que es eso\n");
+        printf("No se pudo ejecutar la opción\n");
         return;
     }
     comando_t* comando = hash_obtener(menu->comandos, argumentos[0]);

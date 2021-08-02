@@ -4,6 +4,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+char* concat(char *s1, const char *s2);
+
+char* concat2(const char *s1, const char *s2);
+
 /**
  * Dado un vector de punteros (funalizado en NULL), devuelve la cantidad de
  * punteros en el vector (sin contar el nulo al final).

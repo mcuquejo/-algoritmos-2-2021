@@ -5,9 +5,8 @@
 #include <stddef.h>
 
 /*
- * Destructor de elementos. Cada vez que un elemento deja el arbol
- * (arbol_borrar o arbol_destruir) se invoca al destructor pasandole
- * el elemento.
+ * Destructor de elementos. Cada vez que un elemento deja la lista
+ * se invoca al destructor pasandole el elemento.
  */
 typedef void (*lista_liberar_elemento)(void*);
 

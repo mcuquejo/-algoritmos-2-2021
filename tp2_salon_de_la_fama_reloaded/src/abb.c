@@ -1,4 +1,5 @@
 #include "abb.h"
+#include <stdio.h>
 
 #define NODO_INSERTADO_CORRECTAMENTE (arbol->nodo_raiz) ? 0 : -1
 #define NODO_ES_HOJA (!nodo->derecha && !nodo->izquierda)
