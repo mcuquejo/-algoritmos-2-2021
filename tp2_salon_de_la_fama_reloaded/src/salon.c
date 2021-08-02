@@ -201,44 +201,6 @@ bool recorrer_entrenadores(void *entrenador, void *extra)
 /****************************************************************************************************************************************
  * COMANDOS
  *****************************************************************************************************************************************/
-bool _salon_entrenadores(int argc, char *argv[], void *contexto)
-{
-    if (!argc || !argv || !contexto)
-        return false;
-    //yo ya se que el contexto es una lista con argumentos.
-    salon_t *salon = lista_elemento_en_posicion(*(lista_t **)contexto, 0);
-    char *resultado = lista_elemento_en_posicion(*(lista_t **)contexto, 1);
-
-    if (argc == 1)
-    { //solo se ejecuto el comando, sin parámetros.
-        //ahora puedo recorrer todos los entrenadores y concatenar en el char resultado sus nombres y victorias.
-        //misma nota que con los pokemons. Tal vez deberia hacer una funcion que recorra los entrenadores desde el archivo entrenador.c
-        abb_con_cada_elemento(salon->entrenadores, ABB_RECORRER_INORDEN, imprimir_entrenadores_en_pantalla, &resultado);
-    }
-    else if (argc == 2)
-    {
-        char **subcomando = split(argv[1], ',');
-        if (!subcomando)
-            return false;
-
-        if (vtrlen(subcomando) != 2)
-        {
-            printf("fallo al hacer el split del subcomando porque deberia tener maximo dos argumentos\n");
-            vtrfree(subcomando);
-            return false;
-        }
-
-        vtrfree(subcomando);
-    }
-    else
-    { //no pueden haber más de dos argumentos en esta instancia. Esto es un error y retorno un array NULL.
-        return false;
-    }
-
-    printf("el resultado, al finalizar la ejecucion del comando, es de:\n%s\n\n", resultado);
-    return false;
-}
-
 bool todos_los_entrenadores(entrenador_t *entrenador, void *extra)
 {
     return true;
@@ -297,8 +259,7 @@ bool salon_entrenadores(int argc, char *argv[], void *contexto)
 
     lista_t *entrenadores_filtrados = NULL;
     //ahora que tengo los argumentos, puedo verificar que funcion voy a usar para filtrar.
-    if (argc == 1)
-    {
+    if (argc == 1) {
         entrenadores_filtrados = salon_filtrar_entrenadores(salon, todos_los_entrenadores, &extra);
         lista_con_cada_elemento(entrenadores_filtrados, imprimir_entrenadores_en_pantalla_lista, &string_resultado);
     }
@@ -319,43 +280,25 @@ bool salon_entrenadores(int argc, char *argv[], void *contexto)
             return false;
         }
 
-        if (strcmp(subcomando[0], "victorias") == 0)
-        {
+        if (strcmp(subcomando[0], "victorias") == 0) {
             //extra va a ser una lista_t* que contenga lista_t[0] = cant_victorias (por ahora lo veo asi para mantener el mismo criterio para todas las llamadas)
             int cant_victorias = atoi(subcomando[1]);
             lista_encolar(extra, &cant_victorias);
             entrenadores_filtrados = salon_filtrar_entrenadores(salon, entrenadores_por_victoria, &extra);
             lista_con_cada_elemento(entrenadores_filtrados, imprimir_entrenadores_en_pantalla_lista_solo_nombre, &string_resultado);
-        }
-        else if (strcmp(subcomando[0], "pokemon") == 0)
-        {
+        } else if (strcmp(subcomando[0], "pokemon") == 0) {
             //extra va a ser una lista_t* que contenga lista_t[0] = nombre_pokemon, y lista_t[1] = cantidad_pokemones
             size_t cant_pokemones = 0;
-
-
             printf("el pokemon que busco es: %s\n", subcomando[1]);
             lista_encolar(extra, &subcomando[1]);
             lista_encolar(extra, &cant_pokemones);
             entrenadores_filtrados = salon_filtrar_entrenadores(salon, entrenadores_por_pokemon, &extra);
             lista_con_cada_elemento(entrenadores_filtrados, imprimir_entrenadores_en_pantalla_lista_solo_nombre, &string_resultado);
         }
-        else
-        {
-            printf("falla porque no se reconoce el comando\n");
-            lista_destruir(extra);
-            vtrfree(subcomando);
-            return false;
-        }
         vtrfree(subcomando);
-        lista_destruir(extra);
     }
-    else
-    {
-
-        lista_destruir(extra);
-        return false;
-    }
-
+    lista_destruir(extra);
+    lista_destruir(entrenadores_filtrados);
     return false;
 }
 
