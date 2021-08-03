@@ -128,7 +128,6 @@ bool imprimir_entrenadores_en_pantalla(void *entrenador, void *buffer)
     return false;
 }
 
-
 //el problema es que para lista necesito que retorne true, y para ABB, false. Sino, serían exactamente iguales!!!! (CAMBIAR)
 bool imprimir_entrenadores_en_pantalla_lista(void *entrenador, void *buffer)
 {
@@ -150,7 +149,6 @@ bool imprimir_entrenadores_en_pantalla_lista(void *entrenador, void *buffer)
     return true;
 }
 
-
 bool imprimir_entrenadores_en_pantalla_lista_solo_nombre(void *entrenador, void *buffer)
 {
     if (entrenador)
@@ -166,9 +164,6 @@ bool imprimir_entrenadores_en_pantalla_lista_solo_nombre(void *entrenador, void 
     }
     return true;
 }
-
-
-
 /****************************************************************************************************************************************
  * FUNCIONES PARA ARNAR STRINGS PARA LOS COMANDOS
  *****************************************************************************************************************************************/
@@ -211,7 +206,7 @@ bool verificar_pokemones(void *pokemon, void *extra)
     //extra va a ser una lista_t* que contenga lista_t[0] = nombre_pokemon, y lista_t[1] = cantidad_pokemones
     if (pokemon)
     {
-        char *nombre_pokemon = *(char**)lista_elemento_en_posicion(*(lista_t **)extra, 0);
+        char *nombre_pokemon = *(char **)lista_elemento_en_posicion(*(lista_t **)extra, 0);
         size_t *cantidad_pokemones = (size_t *)lista_elemento_en_posicion(*(lista_t **)extra, 1);
 
         if (strcasecmp(nombre_pokemon, pokemon_obtener_nombre((pokemon_t *)pokemon)) == 0)
@@ -223,22 +218,22 @@ bool verificar_pokemones(void *pokemon, void *extra)
     return true;
 }
 
+//extra va a ser una lista_t* que contenga lista_t[0] = nombre_pokemon, y lista_t[1] = cantidad_pokemones
 bool entrenadores_por_pokemon(entrenador_t *entrenador, void *extra)
 {
-    //extra va a ser una lista_t* que contenga lista_t[0] = nombre_pokemon, y lista_t[1] = cantidad_pokemones
     lista_t *equipo = entrenador_obtener_equipo(entrenador);
     lista_con_cada_elemento(equipo, verificar_pokemones, extra);
     size_t *cantidad_pokemones = (size_t *)lista_elemento_en_posicion(*(lista_t **)extra, 1);
-    return *cantidad_pokemones > 0;
+    return (*cantidad_pokemones > 0);
 }
 
+//extra va a ser una lista_t* que contenga lista_t[0] = cant_victorias (por ahora lo veo asi para mantener el mismo criterio para todas las llamadas)
 bool entrenadores_por_victoria(entrenador_t *entrenador, void *extra)
 {
-    //extra va a ser una lista_t* que contenga lista_t[0] = cant_victorias (por ahora lo veo asi para mantener el mismo criterio para todas las llamadas)
     int cant_victorias = entrenador_obtener_victorias(entrenador);
 
     int *cant_victorias_requeridas = (int *)lista_elemento_en_posicion(*(lista_t **)extra, 0);
-    return cant_victorias >= *cant_victorias_requeridas;
+    return (cant_victorias >= *cant_victorias_requeridas);
 }
 
 bool salon_entrenadores(int argc, char *argv[], void *contexto)
@@ -259,7 +254,8 @@ bool salon_entrenadores(int argc, char *argv[], void *contexto)
 
     lista_t *entrenadores_filtrados = NULL;
     //ahora que tengo los argumentos, puedo verificar que funcion voy a usar para filtrar.
-    if (argc == 1) {
+    if (argc == 1)
+    {
         entrenadores_filtrados = salon_filtrar_entrenadores(salon, todos_los_entrenadores, &extra);
         lista_con_cada_elemento(entrenadores_filtrados, imprimir_entrenadores_en_pantalla_lista, &string_resultado);
     }
@@ -280,13 +276,16 @@ bool salon_entrenadores(int argc, char *argv[], void *contexto)
             return false;
         }
 
-        if (strcmp(subcomando[0], "victorias") == 0) {
+        if (strcmp(subcomando[0], "victorias") == 0)
+        {
             //extra va a ser una lista_t* que contenga lista_t[0] = cant_victorias (por ahora lo veo asi para mantener el mismo criterio para todas las llamadas)
             int cant_victorias = atoi(subcomando[1]);
             lista_encolar(extra, &cant_victorias);
             entrenadores_filtrados = salon_filtrar_entrenadores(salon, entrenadores_por_victoria, &extra);
             lista_con_cada_elemento(entrenadores_filtrados, imprimir_entrenadores_en_pantalla_lista_solo_nombre, &string_resultado);
-        } else if (strcmp(subcomando[0], "pokemon") == 0) {
+        }
+        else if (strcmp(subcomando[0], "pokemon") == 0)
+        {
             //extra va a ser una lista_t* que contenga lista_t[0] = nombre_pokemon, y lista_t[1] = cantidad_pokemones
             size_t cant_pokemones = 0;
             printf("el pokemon que busco es: %s\n", subcomando[1]);
@@ -362,9 +361,20 @@ bool salon_quitar_pokemon(int argc, char *argv[], void *contexto)
 
 bool salon_guardar(int argc, char *argv[], void *contexto)
 {
-    salon_t *salon = contexto;
-    //ESTO ESTA MAL. SOLO ES PARA MOSTRAR QUE SE EJECUTA ALGO CUANDO INVOCO AL COMANDO.
-    printf("salon: %s\n", entrenador_obtener_nombre(*(entrenador_t **)salon->entrenadores->nodo_raiz->elemento));
+    if (!argc || !argv || !contexto || argc != 2)
+        return false;
+    salon_t *salon = lista_elemento_en_posicion(*(lista_t **)contexto, 0);
+    char *resultado = lista_elemento_en_posicion(*(lista_t **)contexto, 1);
+
+    char path[1024] = "salones/";
+
+    strcpy(path + strlen(path), argv[1]);
+
+    int guardado_exitoso = salon_guardar_archivo(salon, path);
+
+    if (guardado_exitoso != -1)
+        strcpy(resultado, "OK\n");
+
     return false;
 }
 /****************************************************************************************************************************************
