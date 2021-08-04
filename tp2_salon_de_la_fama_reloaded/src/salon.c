@@ -343,19 +343,67 @@ bool salon_comparar(int argc, char *argv[], void *contexto)
     return false;
 }
 
+pokemon_t *parsear_pokemon(char **campos);
+
+bool agregar_pokemon_o_destruir(entrenador_t *entrenador, pokemon_t *pokemon);
+
 bool salon_agregar_pokemon(int argc, char *argv[], void *contexto)
 {
-    salon_t *salon = contexto;
-    //ESTO ESTA MAL. SOLO ES PARA MOSTRAR QUE SE EJECUTA ALGO CUANDO INVOCO AL COMANDO.
-    printf("salon: %s\n", entrenador_obtener_nombre(*(entrenador_t **)salon->entrenadores->nodo_raiz->elemento));
+    if (!argc || !argv || !contexto || argc != 2)
+        return false;
+    salon_t *salon = lista_elemento_en_posicion(*(lista_t **)contexto, 0);
+    char *resultado = lista_elemento_en_posicion(*(lista_t **)contexto, 1);
+
+    char **subcomando = split(argv[1], ',');
+    if (!subcomando)
+    {
+        return false;
+    }
+
+    if (vtrlen(subcomando) != 7)
+    {
+        printf("fallo al hacer el split del subcomando porque deberia tener maximo siete argumentos\n");
+        vtrfree(subcomando);
+        return false;
+    }
+
+    entrenador_t *auxiliar_para_buscar_entrenador = entrenador_crear((char *)subcomando[0], 0);
+    entrenador_t *entrenador_buscado = arbol_buscar(salon->entrenadores, auxiliar_para_buscar_entrenador);
+    if (!entrenador_buscado)
+        return false;
+    printf("los datos del entrenador encontrado son: %s\n", entrenador_obtener_nombre(entrenador_buscado));
+
+    pokemon_t *pokemon_creado = parsear_pokemon(subcomando + 1);
+    if (!pokemon_creado)
+        return false;
+
+    //probablemente esto deberia estar dentro del pokemon, para mantener algun tipo de separacion. No es una lista, es un equipo de pokemones, para el salón.
+    bool agregado_fallido = agregar_pokemon_o_destruir(entrenador_buscado, pokemon_creado);
+
+    if (!agregado_fallido)
+        strcpy(resultado, "OK\n");
+
+    entrenador_destruir(auxiliar_para_buscar_entrenador);
+
     return false;
 }
 
 bool salon_quitar_pokemon(int argc, char *argv[], void *contexto)
 {
-    salon_t *salon = contexto;
-    //ESTO ESTA MAL. SOLO ES PARA MOSTRAR QUE SE EJECUTA ALGO CUANDO INVOCO AL COMANDO.
-    printf("salon: %s\n", entrenador_obtener_nombre(*(entrenador_t **)salon->entrenadores->nodo_raiz->elemento));
+    if (!argc || !argv || !contexto || argc != 2)
+        return false;
+    salon_t *salon = lista_elemento_en_posicion(*(lista_t **)contexto, 0);
+    char *resultado = lista_elemento_en_posicion(*(lista_t **)contexto, 1);
+
+    char path[1024] = "salones/";
+
+    strcpy(path + strlen(path), argv[1]);
+
+    int guardado_exitoso = salon_guardar_archivo(salon, path);
+
+    if (guardado_exitoso != -1)
+        strcpy(resultado, "OK\n");
+
     return false;
 }
 
