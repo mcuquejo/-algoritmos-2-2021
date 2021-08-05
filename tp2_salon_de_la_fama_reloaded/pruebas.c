@@ -135,6 +135,17 @@ void probarQueFuncioneMasoMeno()
         free(resultado9);
     }
 
+    char *resultado10 = salon_ejecutar_comando(salon, "COMPARAR:Stephi,Lucas,nombreregla");
+    if (!resultado10)
+    {
+        printf("el resultado 10 es NULL\n");
+    }
+    else
+    {
+        printf("el resultado 10 fue:\n%s\n", resultado10);
+        free(resultado10);
+    }
+
     lista_destruir(lista);
 
     salon_destruir(salon);

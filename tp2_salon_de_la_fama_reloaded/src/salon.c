@@ -337,9 +337,55 @@ bool salon_reglas(int argc, char *argv[], void *contexto)
 
 bool salon_comparar(int argc, char *argv[], void *contexto)
 {
-    salon_t *salon = contexto;
-    //ESTO ESTA MAL. SOLO ES PARA MOSTRAR QUE SE EJECUTA ALGO CUANDO INVOCO AL COMANDO.
-    printf("salon: %s\n", entrenador_obtener_nombre(*(entrenador_t **)salon->entrenadores->nodo_raiz->elemento));
+    if (!argc || !argv || !contexto || argc != 2)
+        return false;
+    salon_t *salon = lista_elemento_en_posicion(*(lista_t **)contexto, 0);
+    char *resultado = lista_elemento_en_posicion(*(lista_t **)contexto, 1);
+
+    char **subcomando = split(argv[1], ',');
+    if (!subcomando)
+    {
+        return false;
+    }
+
+    if (vtrlen(subcomando) != 3)
+    {
+        printf("fallo al hacer el split del subcomando porque deberia tener maximo tres argumentos\n");
+        vtrfree(subcomando);
+        return false;
+    }
+
+    printf("el entrenador que estoy buscando es: %s\n", (char *)subcomando[0]);
+    entrenador_t *auxiliar_para_buscar_entrenador_1 = entrenador_crear((char *)subcomando[0], 0);
+    entrenador_t *entrenador_buscado_1 = arbol_buscar(salon->entrenadores, auxiliar_para_buscar_entrenador_1);
+    if (!entrenador_buscado_1)
+    {
+        entrenador_destruir(auxiliar_para_buscar_entrenador_1);
+        vtrfree(subcomando);
+        return false;
+    }
+    printf("los datos del entrenador encontrado son: %s\n", entrenador_obtener_nombre(entrenador_buscado_1));
+
+    printf("el entrenador que estoy buscando_2 es: %s\n", (char *)subcomando[1]);
+    entrenador_t *auxiliar_para_buscar_entrenador_2 = entrenador_crear((char *)subcomando[1], 0);
+    entrenador_t *entrenador_buscado_2 = arbol_buscar(salon->entrenadores, auxiliar_para_buscar_entrenador_2);
+    if (!entrenador_buscado_2)
+    {
+        entrenador_destruir(auxiliar_para_buscar_entrenador_1);
+        entrenador_destruir(auxiliar_para_buscar_entrenador_2);
+        vtrfree(subcomando);
+        return false;
+    }
+    printf("los datos del entrenador encontrado son: %s\n", entrenador_obtener_nombre(entrenador_buscado_2));
+
+    int guardado_exitoso = 1;
+
+    if (guardado_exitoso != -1)
+        strcpy(resultado, "OK\n");
+
+    entrenador_destruir(auxiliar_para_buscar_entrenador_1);
+    entrenador_destruir(auxiliar_para_buscar_entrenador_2);
+    vtrfree(subcomando);
     return false;
 }
 
