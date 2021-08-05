@@ -343,8 +343,8 @@ bool salon_comparar(int argc, char *argv[], void *contexto)
     return false;
 }
 
+//se agrega firma de funciones por ser necesarias para ejecutar el comando.
 pokemon_t *parsear_pokemon(char **campos);
-
 bool agregar_pokemon_o_destruir(entrenador_t *entrenador, pokemon_t *pokemon);
 
 bool salon_agregar_pokemon(int argc, char *argv[], void *contexto)
@@ -370,12 +370,18 @@ bool salon_agregar_pokemon(int argc, char *argv[], void *contexto)
     entrenador_t *auxiliar_para_buscar_entrenador = entrenador_crear((char *)subcomando[0], 0);
     entrenador_t *entrenador_buscado = arbol_buscar(salon->entrenadores, auxiliar_para_buscar_entrenador);
     if (!entrenador_buscado)
+    {
+        vtrfree(subcomando);
         return false;
+    }
     printf("los datos del entrenador encontrado son: %s\n", entrenador_obtener_nombre(entrenador_buscado));
 
     pokemon_t *pokemon_creado = parsear_pokemon(subcomando + 1);
     if (!pokemon_creado)
+    {
+        vtrfree(subcomando);
         return false;
+    }
 
     //probablemente esto deberia estar dentro del pokemon, para mantener algun tipo de separacion. No es una lista, es un equipo de pokemones, para el salón.
     bool agregado_fallido = agregar_pokemon_o_destruir(entrenador_buscado, pokemon_creado);
@@ -384,8 +390,39 @@ bool salon_agregar_pokemon(int argc, char *argv[], void *contexto)
         strcpy(resultado, "OK\n");
 
     entrenador_destruir(auxiliar_para_buscar_entrenador);
-
+    vtrfree(subcomando);
     return false;
+}
+
+bool obtener_posicion_pokemon(void *pokemon, void *extra)
+{
+    //extra va a ser una lista_t* que contenga lista_t[0] = nombre_pokemon, y lista_t[1] = posicion_pokemon
+    if (pokemon)
+    {
+        char *nombre_pokemon = (char *)lista_elemento_en_posicion(*(lista_t **)extra, 0);
+        int *posicion_pokemon = (int *)lista_elemento_en_posicion(*(lista_t **)extra, 1);
+
+        printf("nombre_pokemon: %s\n", nombre_pokemon);
+        printf("obtener_nombre_pokemon: %s\n", pokemon_obtener_nombre((pokemon_t *)pokemon));
+
+        if (strcasecmp(nombre_pokemon, pokemon_obtener_nombre((pokemon_t *)pokemon)) == 0)
+        {
+            return false;
+        }
+        (*posicion_pokemon)++;
+    }
+    return true;
+}
+
+//extra va a ser una lista_t* que contenga lista_t[0] = nombre_pokemon, y lista_t[1] = posicion_pokemon
+void buscar_pokemon(entrenador_t *entrenador, void *extra)
+{
+    lista_t *equipo = entrenador_obtener_equipo(entrenador);
+
+    size_t cant_elementos_recorridos = lista_con_cada_elemento(equipo, obtener_posicion_pokemon, extra);
+    int *posicion_pokemon = (int *)lista_elemento_en_posicion(*(lista_t **)extra, 1);
+    if (!cant_elementos_recorridos)
+        *posicion_pokemon = -1;
 }
 
 bool salon_quitar_pokemon(int argc, char *argv[], void *contexto)
@@ -395,15 +432,49 @@ bool salon_quitar_pokemon(int argc, char *argv[], void *contexto)
     salon_t *salon = lista_elemento_en_posicion(*(lista_t **)contexto, 0);
     char *resultado = lista_elemento_en_posicion(*(lista_t **)contexto, 1);
 
-    char path[1024] = "salones/";
+    char **subcomando = split(argv[1], ',');
+    if (!subcomando)
+    {
+        return false;
+    }
 
-    strcpy(path + strlen(path), argv[1]);
+    if (vtrlen(subcomando) != 2)
+    {
+        printf("fallo al hacer el split del subcomando porque deberia tener maximo dos argumentos\n");
+        vtrfree(subcomando);
+        return false;
+    }
 
-    int guardado_exitoso = salon_guardar_archivo(salon, path);
+    entrenador_t *auxiliar_para_buscar_entrenador = entrenador_crear((char *)subcomando[0], 0);
+    entrenador_t *entrenador_buscado = arbol_buscar(salon->entrenadores, auxiliar_para_buscar_entrenador);
+    if (!entrenador_buscado)
+    {
+        entrenador_destruir(auxiliar_para_buscar_entrenador);
+        vtrfree(subcomando);
+        return false;
+    }
+    printf("los datos del entrenador encontrado son: %s\n", entrenador_obtener_nombre(entrenador_buscado));
 
-    if (guardado_exitoso != -1)
+    if (lista_elementos(entrenador_obtener_equipo(entrenador_buscado)) <= 1)
+    {
+        vtrfree(subcomando);
+        return false;
+    }
+
+    int pos_pokemon = 0;
+    lista_t *lista_auxiliar = lista_crear(NULL);
+    lista_encolar(lista_auxiliar, subcomando[1]);
+    lista_encolar(lista_auxiliar, &pos_pokemon);
+    buscar_pokemon(entrenador_buscado, &lista_auxiliar);
+
+    int borrado_exitoso = lista_borrar_de_posicion(entrenador_obtener_equipo(entrenador_buscado), (size_t)pos_pokemon);
+
+    if (borrado_exitoso != -1)
         strcpy(resultado, "OK\n");
 
+    entrenador_destruir(auxiliar_para_buscar_entrenador);
+    vtrfree(subcomando);
+    lista_destruir(lista_auxiliar);
     return false;
 }
 
