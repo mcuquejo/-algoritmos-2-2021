@@ -169,14 +169,6 @@ bool imprimir_entrenadores_en_pantalla_lista_solo_nombre(void *entrenador, void 
  *****************************************************************************************************************************************/
 
 /****************************************************************************************************************************************
- * FUNCIONES PARA REGLAS DE COMBATE
- *****************************************************************************************************************************************/
-
-/****************************************************************************************************************************************
- * FUNCIONES PARA REGLAS DE COMBATE
- *****************************************************************************************************************************************/
-
-/****************************************************************************************************************************************
  * FUNCIONES PARA FILTRAR ENTRENADORES
  *****************************************************************************************************************************************/
 bool recorrer_entrenadores(void *entrenador, void *extra)
@@ -193,6 +185,68 @@ bool recorrer_entrenadores(void *entrenador, void *extra)
  * FUNCIONES PARA FILTRAR ENTRENADORES
  *****************************************************************************************************************************************/
 
+/****************************************************************************************************************************************
+ * FUNCIONES PARA REGLAS DE COMBATE
+ *****************************************************************************************************************************************/
+int enfrentamiento_clasico(void *pokemon, void *rival, void *extra)
+{
+    double stats_pokemon = 0.8 * pokemon_obtener_nivel((pokemon_t *)pokemon) + pokemon_obtener_fuerza((pokemon_t *)pokemon) + 2 * pokemon_obtener_velocidad((pokemon_t *)pokemon);
+    double stats_rival = 0.8 * pokemon_obtener_nivel((pokemon_t *)rival) + pokemon_obtener_fuerza((pokemon_t *)rival) + 2 * pokemon_obtener_velocidad((pokemon_t *)rival);
+    int resultado_batalla = (int)(stats_pokemon - stats_rival);
+    *(int *)extra = (resultado_batalla >= 0) ? 1 : 2;
+    return (resultado_batalla >= 0) ? 1 : 2;
+}
+
+int enfrentamiento_moderno(void *pokemon, void *rival, void *extra)
+{
+    pokemon_obtener_nivel((pokemon_t *)pokemon);
+    double stats_pokemon = 0.5 * pokemon_obtener_nivel((pokemon_t *)pokemon) + 0.9 * pokemon_obtener_defensa((pokemon_t *)pokemon) + 3 * pokemon_obtener_inteligencia((pokemon_t *)pokemon);
+    double stats_rival = 0.5 * pokemon_obtener_nivel((pokemon_t *)rival) + 0.9 * pokemon_obtener_defensa((pokemon_t *)rival) + 3 * pokemon_obtener_inteligencia((pokemon_t *)rival);
+    int resultado_batalla = (int)(stats_pokemon - stats_rival);
+    *(int *)extra = (resultado_batalla >= 0) ? 1 : 2;
+    return (resultado_batalla >= 0) ? 1 : 2;
+}
+/****************************************************************************************************************************************
+ * FUNCIONES PARA REGLAS DE COMBATE
+ *****************************************************************************************************************************************/
+
+//me creo iterador entrenador 1
+//me creo iterador entrenador 2
+
+//variable que guarda resultado
+//while iterador entrenador 1 and iterador entrenador 2
+//variable = enfrentamiento
+//1, actualizo entrenador 1, 2 actualizo entrenador 2
+//strcpy(resultado, resultado + \n)
+
+bool enfrentar_entrenadores(salon_t *salon, entrenador_t *entrenador_1, entrenador_t *entrenador_2, char* regla, void *resultado)
+{
+
+    lista_iterador_t *iterador_equipo_1 = lista_iterador_crear(entrenador_obtener_equipo(entrenador_1));
+    lista_iterador_t *iterador_equipo_2 = lista_iterador_crear(entrenador_obtener_equipo(entrenador_2));
+    int resultado_enfrentamiento = 0;
+    while (lista_iterador_tiene_siguiente(iterador_equipo_1) && lista_iterador_tiene_siguiente(iterador_equipo_2))
+    {
+        printf("estoy recorriendo el while de comparacion\n");
+        menu_procesar_regla(salon->reglas, regla, lista_iterador_elemento_actual(iterador_equipo_1), lista_iterador_elemento_actual(iterador_equipo_2), &resultado_enfrentamiento);
+        if (resultado_enfrentamiento == 1)
+        {
+            lista_iterador_avanzar(iterador_equipo_2);
+        }
+        else
+        {
+            lista_iterador_avanzar(iterador_equipo_1);
+        }
+        printf("el resultado del enfrentamiento (estoy en el while), fue: %i\n", resultado_enfrentamiento);
+        size_t longitud = strlen(*(char **)resultado) + 3; //longitud del "%s\n\0"
+        char resultado_enfrentamiento_char[longitud];
+        sprintf(resultado_enfrentamiento_char, "%s%i\n", *(char **)resultado, resultado_enfrentamiento);
+        strcpy(*(char **)resultado, resultado_enfrentamiento_char);
+    }
+    lista_iterador_destruir(iterador_equipo_1);
+    lista_iterador_destruir(iterador_equipo_2);
+    return true;
+}
 /****************************************************************************************************************************************
  * COMANDOS
  *****************************************************************************************************************************************/
@@ -378,10 +432,10 @@ bool salon_comparar(int argc, char *argv[], void *contexto)
     }
     printf("los datos del entrenador encontrado son: %s\n", entrenador_obtener_nombre(entrenador_buscado_2));
 
-    int guardado_exitoso = 1;
+    bool guardado_exitoso = enfrentar_entrenadores(salon, entrenador_buscado_1, entrenador_buscado_2, (char *)subcomando[2], &resultado);
 
-    if (guardado_exitoso != -1)
-        strcpy(resultado, "OK\n");
+    if (!guardado_exitoso)
+        return false;
 
     entrenador_destruir(auxiliar_para_buscar_entrenador_1);
     entrenador_destruir(auxiliar_para_buscar_entrenador_2);
@@ -549,24 +603,6 @@ bool salon_guardar(int argc, char *argv[], void *contexto)
 /****************************************************************************************************************************************
  * CREACION MENU REGLAS
  *****************************************************************************************************************************************/
-int enfrentamiento_clasico(void *pokemon, void *rival, void *extra)
-{
-    pokemon_obtener_nivel((pokemon_t *)pokemon);
-    double stats_pokemon = 0.8 * pokemon_obtener_nivel((pokemon_t *)pokemon) + pokemon_obtener_fuerza((pokemon_t *)pokemon) + 2 * pokemon_obtener_velocidad((pokemon_t *)pokemon);
-    double stats_rival = 0.8 * pokemon_obtener_nivel((pokemon_t *)rival) + pokemon_obtener_fuerza((pokemon_t *)rival) + 2 * pokemon_obtener_velocidad((pokemon_t *)rival);
-    int resultado_batalla = (int)(stats_pokemon - stats_rival);
-    return (resultado_batalla == 0) ? 1 : resultado_batalla;
-}
-
-int enfrentamiento_moderno(void *pokemon, void *rival, void *extra)
-{
-    pokemon_obtener_nivel((pokemon_t *)pokemon);
-    double stats_pokemon = 0.5 * pokemon_obtener_nivel((pokemon_t *)pokemon) + 0.9 * pokemon_obtener_defensa((pokemon_t *)pokemon) + 3 * pokemon_obtener_inteligencia((pokemon_t *)pokemon);
-    double stats_rival = 0.5 * pokemon_obtener_nivel((pokemon_t *)rival) + 0.9 * pokemon_obtener_defensa((pokemon_t *)rival) + 3 * pokemon_obtener_inteligencia((pokemon_t *)rival);
-    int resultado_batalla = (int)(stats_pokemon - stats_rival);
-    return (resultado_batalla == 0) ? 1 : resultado_batalla;
-}
-
 menu_reglas_t *salon_crear_menu_reglas()
 {
     menu_reglas_t *menu_reglas = menu_reglas_crear();
