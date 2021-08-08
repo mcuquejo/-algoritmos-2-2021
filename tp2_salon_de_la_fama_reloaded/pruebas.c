@@ -860,6 +860,95 @@ void dadoUnSalonNull_SiSolicitoEjecutarComandoGuardar_NoPermiteEjecutarComando()
     salon_destruir(salon);
 }
 
+void dadoUnSalon_SiSolicitoEjecutarComandoGuardarMalEscrito_NoPermiteEjecutarComando()
+{
+    salon_t *salon = NULL;
+    salon = salon_leer_archivo("salones/salon_estandar.txt");
+    char *resultado = salon_ejecutar_comando(salon, "GUARDA:archivo_salon_comando_mal.txt");
+    pa2m_afirmar(!resultado, "Devuelve NULL al ejecutar el comando GUARDA:archivo_salon_comando_mal.txt en un salon");
+
+    if (resultado)
+        free(resultado);
+
+    // resultado = salon_ejecutar_comando(salon, "GUARDAR:archivo_salon_comando_mal.txt,rw");
+    // pa2m_afirmar(!resultado, "Devuelve NULL al ejecutar el comando GUARDAR:archivo_salon_comando_mal.txt,rw en un salon");
+
+    // if (resultado)
+    //     free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "GUARDAR:");
+    pa2m_afirmar(!resultado, "Devuelve NULL al ejecutar el comando GUARDAR: en un salon");
+
+    if (resultado)
+        free(resultado);
+
+    // resultado = salon_ejecutar_comando(salon, "GUARDAR:archivo_salon_comando_mal.txt,");
+    // pa2m_afirmar(!resultado, "Devuelve NULL al ejecutar el comando GUARDAR:archivo_salon_comando_mal.txt, en un salon");
+
+    // if (resultado)
+    //     free(resultado);
+
+    // resultado = salon_ejecutar_comando(salon, "GUARDAR:,archivo_salon_comando_mal.txt");
+    // pa2m_afirmar(!resultado, "Devuelve NULL al ejecutar el comando GUARDAR:,archivo_salon_comando_mal.txt en un salon");
+
+    // if (resultado)
+    //     free(resultado);
+
+    salon_destruir(salon);
+}
+
+void dadoUnSalon_SiSolicitoEjecutarComandoGuardar_PermiteEjecutarComandoCorrectamente()
+{
+    salon_t *salon = NULL;
+    salon = salon_leer_archivo("salones/salon_estandar.txt");
+    char *resultado = salon_ejecutar_comando(salon, "GUARDAR:archivo_salon_comando_correcto.txt");
+    pa2m_afirmar(strcmp(resultado, "OK\n") == 0, "Devuelve \'OK\\n\' al ejecutar el comando GUARDAR:archivo_salon_comando_correcto.txt en un salon");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "QUITAR_POKEMON:Mariano,Lapras");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "GUARDAR:archivo_salon_comando_correcto_modificado.txt");
+    pa2m_afirmar(strcmp(resultado, "OK\n") == 0, "Devuelve \'OK\\n\' al ejecutar el comando GUARDAR:archivo_salon_comando_correcto_modificado.txt en un salon");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "AGREGAR_POKEMON:Mariano,scyther,10, 10, 10, 10, 10");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "GUARDAR:archivo_salon_comando_correcto_modificado_2.txt");
+    pa2m_afirmar(strcmp(resultado, "OK\n") == 0, "Devuelve \'OK\\n\' al ejecutar el comando GUARDAR:archivo_salon_comando_correcto_modificado_2.txt en un salon");
+
+    if (resultado)
+        free(resultado);
+
+    salon_destruir(salon);
+}
+
+void dadoUnSalonNull_SiSolicitoEjecutarComandoComparar_NoPermiteEjecutarComando()
+{
+    salon_t *salon = NULL;
+    char *resultado = salon_ejecutar_comando(salon, "COMPARAR:Mariano,Lucas,CLASICO");
+    pa2m_afirmar(!resultado, "Devuelve NULL al ejecutar el comando COMPARAR:Mariano,Lucas,CLASICO en un salon NULL");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "COMPARAR:Mariano,Lucas,MODERNO");
+    pa2m_afirmar(!resultado, "Devuelve NULL al ejecutar el comando COMPARAR:Mariano,Lucas,MODERNO en un salon NULL");
+
+    if (resultado)
+        free(resultado);
+    salon_destruir(salon);
+}
+
 int main()
 {
 
@@ -980,11 +1069,20 @@ int main()
     pa2m_nuevo_grupo("Pruebas Ejecutar Comandos GUARDAR: en salon NULL");
     dadoUnSalonNull_SiSolicitoEjecutarComandoGuardar_NoPermiteEjecutarComando();
 
-    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos GUARDAR: mal escrito en salon");
-    // dadoUnSalon_SiSolicitoEjecutarComandoQuitarPokemonMalEscrito_NoPermiteEjecutarComando();
+    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos GUARDAR: mal escrito en salon");
+    dadoUnSalon_SiSolicitoEjecutarComandoGuardarMalEscrito_NoPermiteEjecutarComando();
 
-    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos GUARDAR: en salon");
-    // dadoUnSalon_SiSolicitoEjecutarComandoQuitarPokemon_PermiteEjecutarComandoCorrectamente();
+    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos GUARDAR: en salon");
+    dadoUnSalon_SiSolicitoEjecutarComandoGuardar_PermiteEjecutarComandoCorrectamente();
+
+    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos COMPARAR: en salon NULL");
+    dadoUnSalonNull_SiSolicitoEjecutarComandoComparar_NoPermiteEjecutarComando();
+
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos COMPARAR: mal escrito en salon");
+    // dadoUnSalon_SiSolicitoEjecutarComandoCompararMalEscrito_NoPermiteEjecutarComando();
+
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos COMPARAR: (clásico) en salon");
+    // dadoUnSalon_SiSolicitoEjecutarComandoComparar_PermiteEjecutarComandoCorrectamente();
 
     return pa2m_mostrar_reporte();
 }

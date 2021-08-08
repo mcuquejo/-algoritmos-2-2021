@@ -572,9 +572,23 @@ bool salon_quitar_pokemon(int argc, char *argv[], void *contexto)
 
 bool salon_guardar(int argc, char *argv[], void *contexto)
 {
-    if (!argc || !argv || !contexto || argc != 2)
+    if (!argc || !argv || !contexto)
         return false;
+
+    bool *error = lista_elemento_en_posicion(*(lista_t **)contexto, 2);
+
+    if (argc != 2 || strlen(argv[1]) == 0) {
+        *error = true;
+        return false;
+    }
+
+    //yo ya se que el contexto es una lista con argumentos.
     salon_t *salon = lista_elemento_en_posicion(*(lista_t **)contexto, 0);
+    if (!salon) {
+        *error = true;
+        return false;
+    }
+
     char *resultado = lista_elemento_en_posicion(*(lista_t **)contexto, 1);
 
     char path[1024] = "salones/";
