@@ -10,126 +10,6 @@ bool filtrar_entrenadores_por_victorias(entrenador_t *entrenador, void *cant_vic
     return entrenador_obtener_victorias(entrenador) > *(int *)cant_victorias;
 }
 
-void probarQueFuncioneMasoMeno()
-{
-    salon_t *salon = salon_leer_archivo("salones/salon_estandar.txt");
-    entrenador_t *entrenador = entrenador_crear("MAURO", 10);
-    pokemon_t *pokemon = pokemon_crear("PIKACHU", 10, 10, 10, 10, 10);
-    entrenador_cargar_pokemon(entrenador, pokemon);
-    salon_agregar_entrenador(salon, entrenador);
-
-    int cant_entrenadores = salon_guardar_archivo(salon, "salones/salon_salida.txt");
-
-    printf("se guardaron %i entrenadores en el archivo\n", cant_entrenadores);
-    int cantidad_victorias = 10;
-    lista_t *lista = salon_filtrar_entrenadores(salon, filtrar_entrenadores_por_victorias, &cantidad_victorias);
-    printf("cantidad de entrenadores que cumplieron con esta condicion (10 victorias): %zu\n", lista_elementos(lista));
-
-    lista_destruir(lista);
-
-    cantidad_victorias = 50;
-    lista = salon_filtrar_entrenadores(salon, filtrar_entrenadores_por_victorias, &cantidad_victorias);
-    printf("cantidad de entrenadores que cumplieron con esta condicion (50 victorias): %zu\n", lista_elementos(lista));
-
-    lista_destruir(lista);
-
-    cantidad_victorias = 100;
-    lista = salon_filtrar_entrenadores(salon, filtrar_entrenadores_por_victorias, &cantidad_victorias);
-    printf("cantidad de entrenadores que cumplieron con esta condicion (100 victorias): %zu\n", lista_elementos(lista));
-
-    char *resultado = salon_ejecutar_comando(salon, "ENTRENADORES");
-    if (!resultado) {
-        printf("el resultado es NULL\n");
-    } else {
-        printf("el resultado fue:\n%s\n", resultado);
-        free(resultado);
-    }
-
-    char *resultado2 = salon_ejecutar_comando(salon, "EQUIPO:Mariano");
-    if (!resultado2) {
-        printf("el resultado 2 es NULL\n");
-    } else {
-        printf("el resultado2 fue:\n%s\n", resultado2);
-        free(resultado2);
-    }
-
-    char *resultado3 = salon_ejecutar_comando(salon, "REGLAS");
-    if (!resultado3) {
-        printf("el resultado 3 es NULL\n");
-    } else {
-        printf("el resultado 3 fue:\n%s\n", resultado3);
-        free(resultado3);
-    }
-
-    char *resultado4 = salon_ejecutar_comando(salon, "ENTRENADORES:pepe:josefo");
-    if (!resultado4) {
-        printf("el resultado 4 es NULL\n");
-    } else {
-        printf("el resultado 4 fue:\n%s\n", resultado4);
-        free(resultado4);
-    }
-
-    char *resultado5 = salon_ejecutar_comando(salon, "ENTRENADORES:pokemon,Pikachu");
-    if (!resultado5) {
-        printf("el resultado 5 es NULL\n");
-    } else {
-        printf("el resultado 5 fue:\n%s\n", resultado5);
-        free(resultado5);
-    }
-
-    char *resultado6 = salon_ejecutar_comando(salon, "AGREGAR_POKEMON:Stephi,slither,10,10,10,10,10");
-    if (!resultado6) {
-        printf("el resultado 6 es NULL\n");
-    } else {
-        printf("el resultado 6 fue:\n%s\n", resultado6);
-        free(resultado6);
-    }
-
-    char *resultado7 = salon_ejecutar_comando(salon, "GUARDAR:josefo.txt");
-    if (!resultado7) {
-        printf("el resultado 7 es NULL\n");
-    } else {
-        printf("el resultado 7 fue:\n%s\n", resultado7);
-        free(resultado7);
-    }
-
-    char *resultado8 = salon_ejecutar_comando(salon, "QUITAR_POKEMON:Stephi,slither");
-    if (!resultado8) {
-        printf("el resultado 8 es NULL\n");
-    } else {
-        printf("el resultado 8 fue:\n%s\n", resultado8);
-        free(resultado8);
-    }
-
-    char *resultado9 = salon_ejecutar_comando(salon, "GUARDAR:josefo_sin_slither.txt");
-    if (!resultado9) {
-        printf("el resultado 9 es NULL\n");
-    } else {
-        printf("el resultado 9 fue:\n%s\n", resultado9);
-        free(resultado9);
-    }
-
-    char *resultado10 = salon_ejecutar_comando(salon, "COMPARAR:Stephi,Lucas,nombreregla");
-    if (!resultado10) {
-        printf("el resultado 10 es NULL\n");
-    } else {
-        printf("el resultado 10 fue:\n%s\n", resultado10);
-        free(resultado10);
-    }
-
-    char *resultado11 = salon_ejecutar_comando(salon, "COMPARAR:Stephi,Lucas,CLASICO");
-    if (!resultado10) {
-        printf("el resultado 11 es NULL\n");
-    } else {
-        printf("el resultado 11 fue:\n%s\n", resultado11);
-        free(resultado11);
-    }
-
-    lista_destruir(lista);
-
-    salon_destruir(salon);
-}
-
 void dadoUnSalonNull_siLeoUnArchivoValido_SeCreaUnSalonDeFormaCorrecta()
 {
     salon_t *salon = NULL;
@@ -700,6 +580,12 @@ void dadoUnSalon_SiSolicitoEjecutarComandoAgregarPokemonMalEscrito_NoPermiteEjec
     if (resultado)
         free(resultado);
 
+    resultado = salon_ejecutar_comando(salon, "AGREGAR_POKEMON:,Stephi,scyther,a,b,c,d,e");
+    pa2m_afirmar(!resultado, "Devuelve NULL al ejecutar el comando AGREGAR_POKEMON:,Stephi,scyther,a, b, c, d, e en un salon");
+
+    if (resultado)
+        free(resultado);
+
     salon_destruir(salon);
 }
 
@@ -738,7 +624,7 @@ void dadoUnSalon_SiSolicitoEjecutarComandoAgregarPokemon_PermiteEjecutarComandoC
 
     resultado = salon_ejecutar_comando(salon, "EQUIPO:MAURO");
 
-    pa2m_afirmar(strcmp(resultado, "PIKACHU,10,10,10,10,10\n") == 0, "Devuelve correctamente los pokemones de MAURO antes de agregar un pokemon nuevo");
+    pa2m_afirmar(strcmp(resultado, "PIKACHU,10,10,10,10,10\n") == 0, "Devuelve correctamente los pokemones de MAURO (Entrenador recien creado) antes de agregar un pokemon nuevo");
 
     if (resultado)
         free(resultado);
@@ -757,6 +643,220 @@ void dadoUnSalon_SiSolicitoEjecutarComandoAgregarPokemon_PermiteEjecutarComandoC
     if (resultado)
         free(resultado);
 
+    resultado = salon_ejecutar_comando(salon, "AGREGAR_POKEMON:Reynaldo,scyther,10, 10, 10, 10, 10");
+
+    pa2m_afirmar(strcmp(resultado, "") == 0, "Devuelve correctamente el string \'\' al ejecutar el comando AGREGAR_POKEMON:Reynaldo,scyther,10, 10, 10, 10 en un salon");
+
+    if (resultado)
+        free(resultado);
+
+    salon_destruir(salon);
+}
+
+void dadoUnSalonNull_SiSolicitoEjecutarComandoQuitarPokemon_NoPermiteEjecutarComando()
+{
+    salon_t *salon = NULL;
+    char *resultado = salon_ejecutar_comando(salon, "QUITAR_POKEMON:Pucci,Gengar");
+    pa2m_afirmar(!resultado, "Devuelve NULL al ejecutar el comando QUITAR_POKEMON:Pucci,Gengar en un salon NULL");
+
+    if (resultado)
+        free(resultado);
+    salon_destruir(salon);
+}
+
+void dadoUnSalon_SiSolicitoEjecutarComandoQuitarPokemonMalEscrito_NoPermiteEjecutarComando()
+{
+    salon_t *salon = NULL;
+    salon = salon_leer_archivo("salones/salon_estandar.txt");
+    char *resultado = salon_ejecutar_comando(salon, "QUITAR_POKEMO:Pucci,Gengar");
+    pa2m_afirmar(!resultado, "Devuelve NULL al ejecutar el comando QUITAR_POKEMO:Pucci,Gengar en un salon");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "QUITAR_POKEMON:Lucas,Nidoking,Zapdos");
+    pa2m_afirmar(!resultado, "Devuelve NULL al ejecutar el comando QUITAR_POKEMON:Lucas,Nidoking,Zapdos en un salon");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "QUITAR_POKEMON:Mariano");
+    pa2m_afirmar(!resultado, "Devuelve NULL al ejecutar el comando QUITAR_POKEMON:Mariano en un salon");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "QUITAR_POKEMON:Lucas,Nidoking,");
+    pa2m_afirmar(!resultado, "Devuelve NULL al ejecutar el comando QUITAR_POKEMON:Lucas,Nidoking, en un salon");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "QUITAR_POKEMON:,Dani,Barboach");
+    pa2m_afirmar(!resultado, "Devuelve NULL al ejecutar el comando QUITAR_POKEMON:,Dani,Barboach en un salon");
+
+    if (resultado)
+        free(resultado);
+
+    salon_destruir(salon);
+}
+
+void dadoUnSalon_SiSolicitoEjecutarComandoQuitarPokemon_PermiteEjecutarComandoCorrectamente()
+{
+
+    salon_t *salon = NULL;
+    salon = salon_leer_archivo("salones/salon_estandar.txt");
+
+    char *resultado = salon_ejecutar_comando(salon, "EQUIPO:Mariano");
+
+    pa2m_afirmar(strcmp(resultado, "Lapras,46,47,18,29,40\nArticuno,21,12,60,14,15\nDragonair,71,92,71,34,25\nLapras,81,22,90,7,35\n") == 0, "Devuelve correctamente los pokemones de Mariano antes de quitar uno");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "QUITAR_POKEMON:Mariano,Chikorita");
+
+    pa2m_afirmar(strcmp(resultado, "") == 0, "Devuelve correctamente el string \'\' al ejecutar el comando QUITAR_POKEMON:Mariano,Chikorita en un salon");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "EQUIPO:Mariano");
+
+    pa2m_afirmar(strcmp(resultado, "Lapras,46,47,18,29,40\nArticuno,21,12,60,14,15\nDragonair,71,92,71,34,25\nLapras,81,22,90,7,35\n") == 0, "Devuelve correctamente los pokemones de Mariano despues de intentar quitar uno que no estaba en el equipo");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "QUITAR_POKEMON:Mariano,Lapras");
+
+    pa2m_afirmar(strcmp(resultado, "OK\n") == 0, "Devuelve correctamente el string \'OK\\n\' al ejecutar el comando QUITAR_POKEMON:Mariano,Lapras en un salon");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "EQUIPO:Mariano");
+
+    pa2m_afirmar(strcmp(resultado, "Articuno,21,12,60,14,15\nDragonair,71,92,71,34,25\nLapras,81,22,90,7,35\n") == 0, "Devuelve correctamente los pokemones de Mariano despues de eliminar uno");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "QUITAR_POKEMON:Mariano,Lapras");
+
+    pa2m_afirmar(strcmp(resultado, "OK\n") == 0, "Devuelve correctamente el string \'OK\\n\' al ejecutar el comando QUITAR_POKEMON:Mariano,Lapras en un salon");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "EQUIPO:Mariano");
+
+    pa2m_afirmar(strcmp(resultado, "Articuno,21,12,60,14,15\nDragonair,71,92,71,34,25\n") == 0, "Devuelve correctamente los pokemones de Mariano despues de eliminar uno");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "QUITAR_POKEMON:Mariano,Dragonair");
+
+    pa2m_afirmar(strcmp(resultado, "OK\n") == 0, "Devuelve correctamente el string \'OK\\n\' al ejecutar el comando QUITAR_POKEMON:Mariano,Dragonair en un salon");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "EQUIPO:Mariano");
+
+    pa2m_afirmar(strcmp(resultado, "Articuno,21,12,60,14,15\n") == 0, "Devuelve correctamente los pokemones de Mariano despues de eliminar uno");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "QUITAR_POKEMON:Mariano,Articuno");
+
+    pa2m_afirmar(strcmp(resultado, "") == 0, "Devuelve correctamente el string \'\' al ejecutar el comando QUITAR_POKEMON:Mariano,Articuno en un salon, porque un entrenador no puede quedar sin pokemones");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "EQUIPO:Mariano");
+
+    pa2m_afirmar(strcmp(resultado, "Articuno,21,12,60,14,15\n") == 0, "Devuelve correctamente los pokemones de Mariano despues de intentar eliminar uno");
+
+    if (resultado)
+        free(resultado);
+
+    entrenador_t *entrenador = entrenador_crear("MAURO", 10);
+    pokemon_t *pokemon = pokemon_crear("PIKACHU", 10, 10, 10, 10, 10);
+    entrenador_cargar_pokemon(entrenador, pokemon);
+
+    salon_agregar_entrenador(salon, entrenador);
+
+    resultado = salon_ejecutar_comando(salon, "EQUIPO:MAURO");
+
+    pa2m_afirmar(strcmp(resultado, "PIKACHU,10,10,10,10,10\n") == 0, "Devuelve correctamente los pokemones de MAURO (Entrenador recien creado) antes de intentar eliminar un pokemon");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "QUITAR_POKEMON:MAURO,PIKACHU");
+
+    pa2m_afirmar(strcmp(resultado, "") == 0, "Devuelve correctamente el string \'\' al ejecutar el comando QUITAR_POKEMON:MAURO,PIKACHU en un salon, porque no se puede dejar sin pokemones a un entrenador");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "EQUIPO:MAURO");
+
+    pa2m_afirmar(strcmp(resultado, "PIKACHU,10,10,10,10,10\n") == 0, "Devuelve correctamente los pokemones de MAURO despues de intentar eliminar un pokemon");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "AGREGAR_POKEMON:MAURO,scyther,10, 10, 10, 10, 10");
+
+    pa2m_afirmar(strcmp(resultado, "OK\n") == 0, "Devuelve correctamente el string \'OK\\n\' al ejecutar el comando AGREGAR_POKEMON:MAURO,scyther,10, 10, 10, 10, 10 en un salon");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "EQUIPO:MAURO");
+
+    pa2m_afirmar(strcmp(resultado, "PIKACHU,10,10,10,10,10\nscyther,10,10,10,10,10\n") == 0, "Devuelve correctamente los pokemones de MAURO despues de agregar un pokemon nuevo");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "QUITAR_POKEMON:MAURO,scyther");
+
+    pa2m_afirmar(strcmp(resultado, "OK\n") == 0, "Devuelve correctamente el string \'OK\\n\' al ejecutar el comando QUITAR_POKEMON:MAURO,PIKACHU en un salon");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "EQUIPO:MAURO");
+
+    pa2m_afirmar(strcmp(resultado, "PIKACHU,10,10,10,10,10\n") == 0, "Devuelve correctamente los pokemones de MAURO despues de eliminar un pokemon");
+
+    if (resultado)
+        free(resultado);
+
+    resultado = salon_ejecutar_comando(salon, "QUITAR_POKEMON:Tai,Agumon");
+
+    pa2m_afirmar(strcmp(resultado, "") == 0, "Devuelve correctamente el string \'\' al ejecutar el comando QUITAR_POKEMON:Tai,Agumon en un salon, porque te equivocaste de serie >:( (y porque no existe en el salon)");
+
+    if (resultado)
+        free(resultado);
+
+    salon_destruir(salon);
+}
+
+void dadoUnSalonNull_SiSolicitoEjecutarComandoGuardar_NoPermiteEjecutarComando()
+{
+    salon_t *salon = NULL;
+    char *resultado = salon_ejecutar_comando(salon, "GUARDAR:salones/guardar_comando_salon_null.txt");
+    pa2m_afirmar(!resultado, "Devuelve NULL al ejecutar el comando GUARDAR:guardar_comando_salon_null.txt en un salon NULL");
+
+    if (resultado)
+        free(resultado);
     salon_destruir(salon);
 }
 
@@ -867,6 +967,24 @@ int main()
 
     pa2m_nuevo_grupo("Pruebas Ejecutar Comandos AGREGAR_POKEMON: en salon");
     dadoUnSalon_SiSolicitoEjecutarComandoAgregarPokemon_PermiteEjecutarComandoCorrectamente();
+
+    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos QUITAR_POKEMON: en salon NULL");
+    dadoUnSalonNull_SiSolicitoEjecutarComandoQuitarPokemon_NoPermiteEjecutarComando();
+
+    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos QUITAR_POKEMON: mal escrito en salon");
+    dadoUnSalon_SiSolicitoEjecutarComandoQuitarPokemonMalEscrito_NoPermiteEjecutarComando();
+
+    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos QUITAR_POKEMON: en salon");
+    dadoUnSalon_SiSolicitoEjecutarComandoQuitarPokemon_PermiteEjecutarComandoCorrectamente();
+
+    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos GUARDAR: en salon NULL");
+    dadoUnSalonNull_SiSolicitoEjecutarComandoGuardar_NoPermiteEjecutarComando();
+
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos GUARDAR: mal escrito en salon");
+    // dadoUnSalon_SiSolicitoEjecutarComandoQuitarPokemonMalEscrito_NoPermiteEjecutarComando();
+
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos GUARDAR: en salon");
+    // dadoUnSalon_SiSolicitoEjecutarComandoQuitarPokemon_PermiteEjecutarComandoCorrectamente();
 
     return pa2m_mostrar_reporte();
 }
