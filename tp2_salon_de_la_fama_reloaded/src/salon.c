@@ -52,10 +52,10 @@ bool validar_entrenadores(void *entrenador, void *extra)
         size_t cant_pokemon = lista_elementos(entrenador_obtener_equipo((entrenador_t *)entrenador));
         if (cant_pokemon == 0) {
             *(bool *)extra = true;
-            return false;
+            return true;
         }
     }
-    return true;
+    return false;
 }
 
 /****************************************************************************************************************************************
@@ -244,8 +244,9 @@ bool verificar_pokemones(void *pokemon, void *extra)
 bool entrenadores_por_pokemon(entrenador_t *entrenador, void *extra)
 {
     lista_t *equipo = entrenador_obtener_equipo(entrenador);
-    lista_con_cada_elemento(equipo, verificar_pokemones, extra);
     size_t *cantidad_pokemones = (size_t *)lista_elemento_en_posicion(*(lista_t **)extra, 1);
+    *cantidad_pokemones = 0;
+    lista_con_cada_elemento(equipo, verificar_pokemones, extra);
     return (*cantidad_pokemones > 0);
 }
 
@@ -264,8 +265,14 @@ bool salon_entrenadores(int argc, char *argv[], void *contexto)
     if (!argc || !argv || !contexto)
         return false;
 
+    bool *error = lista_elemento_en_posicion(*(lista_t **)contexto, 2);
+
     //contexto es una lista_t*, cuyo primer elemento es el salon
     salon_t *salon = lista_elemento_en_posicion(*(lista_t **)contexto, 0);
+    if (!salon) {
+        *error = true;
+        return false;
+    }
 
     //contexto es una lista_t*, cuyo segundo elemento es un char* en donde voy a concatenar los entrenadores.
     char *string_resultado = lista_elemento_en_posicion(*(lista_t **)contexto, 1);
@@ -283,12 +290,14 @@ bool salon_entrenadores(int argc, char *argv[], void *contexto)
         char **subcomando = split(argv[1], ',');
         if (!subcomando) {
             lista_destruir(extra);
+            *error = true;
             return false;
         }
 
-        if (vtrlen(subcomando) != 2) {
+        if (vtrlen(subcomando) != 2 || strcmp(subcomando[0], "") == 0 || strcmp(subcomando[1], "") == 0) {
             lista_destruir(extra);
             vtrfree(subcomando);
+            *error = true;
             return false;
         }
 
@@ -305,6 +314,8 @@ bool salon_entrenadores(int argc, char *argv[], void *contexto)
             lista_encolar(extra, &cant_pokemones);
             entrenadores_filtrados = salon_filtrar_entrenadores(salon, entrenadores_por_pokemon, &extra);
             lista_con_cada_elemento(entrenadores_filtrados, imprimir_entrenadores_en_pantalla_lista_solo_nombre, &string_resultado);
+        } else {
+            *error = true;
         }
         vtrfree(subcomando);
     }
@@ -318,14 +329,18 @@ bool salon_equipo(int argc, char *argv[], void *contexto)
     if (!argc || !argv || !contexto)
         return false;
 
+    bool *error = lista_elemento_en_posicion(*(lista_t **)contexto, 2);
+
     //yo ya se que el contexto es una lista con argumentos.
     salon_t *salon = lista_elemento_en_posicion(*(lista_t **)contexto, 0);
+    if (!salon) {
+        *error = true;
+        return false;
+    }
     char *resultado = lista_elemento_en_posicion(*(lista_t **)contexto, 1);
 
     entrenador_t *auxiliar_para_buscar_entrenador = entrenador_crear((char *)argv[1], 0);
     entrenador_t *entrenador_buscado = arbol_buscar(salon->entrenadores, auxiliar_para_buscar_entrenador);
-    if (!entrenador_buscado)
-        return false;
 
     //probablemente esto deberia estar dentro del pokemon, para mantener algun tipo de separacion. No es una lista, es un equipo de pokemones, para el salón.
     lista_con_cada_elemento(entrenador_obtener_equipo(entrenador_buscado), imprimir_pokemones_en_pantalla, &resultado);
@@ -336,8 +351,19 @@ bool salon_equipo(int argc, char *argv[], void *contexto)
 
 bool salon_reglas(int argc, char *argv[], void *contexto)
 {
+    if (!argc || !argv || !contexto)
+        return false;
+    bool *error = lista_elemento_en_posicion(*(lista_t **)contexto, 2);
+    if (argc != 1) {
+        *error = true;
+        return false;
+    }
     //yo ya se que el contexto es una lista con argumentos.
     salon_t *salon = lista_elemento_en_posicion(*(lista_t **)contexto, 0);
+    if (!salon) {
+        *error = true;
+        return false;
+    }
     char *resultado = lista_elemento_en_posicion(*(lista_t **)contexto, 1);
 
     menu_reglas_con_cada_elemento(salon->reglas, &resultado);
@@ -396,18 +422,32 @@ bool agregar_pokemon_o_destruir(entrenador_t *entrenador, pokemon_t *pokemon);
 
 bool salon_agregar_pokemon(int argc, char *argv[], void *contexto)
 {
-    if (!argc || !argv || !contexto || argc != 2)
+    if (!argc || !argv || !contexto)
         return false;
+
+    bool *error = lista_elemento_en_posicion(*(lista_t **)contexto, 2);
+    if (argc != 2) {
+        *error = true;
+        return false;
+    }
+    //yo ya se que el contexto es una lista con argumentos.
     salon_t *salon = lista_elemento_en_posicion(*(lista_t **)contexto, 0);
+    if (!salon) {
+        *error = true;
+        return false;
+    }
+
     char *resultado = lista_elemento_en_posicion(*(lista_t **)contexto, 1);
 
     char **subcomando = split(argv[1], ',');
     if (!subcomando) {
+        *error = true;
         return false;
     }
 
     if (vtrlen(subcomando) != 7) {
         vtrfree(subcomando);
+        *error = true;
         return false;
     }
 
@@ -539,8 +579,8 @@ menu_reglas_t *salon_crear_menu_reglas()
     if (!menu_reglas)
         return NULL;
 
-    menu_agregar_regla(menu_reglas, "CLASICO", "las reglas clásicas indican que un combate lo gana el Pokemon con el coeficiente de batalla mas alto en base al siguiente cálculo: 0.8 ∗ nivel + fuerza + 2 ∗ velocidad", enfrentamiento_clasico);
-    menu_agregar_regla(menu_reglas, "MODERNO", "las reglas modernas indican que un combate lo gana el Pokemon con el coeficiente de batalla mas alto en base al siguiente cálculo: 0.5 ∗ nivel + 0.9 ∗ defensa + 3 ∗ inteligencia", enfrentamiento_moderno);
+    menu_agregar_regla(menu_reglas, "CLASICO", "las reglas clásicas indican que un combate lo gana el Pokemon con el coeficiente de batalla mas alto en base al siguiente cálculo: 0.8 * nivel + fuerza + 2 * velocidad", enfrentamiento_clasico);
+    menu_agregar_regla(menu_reglas, "MODERNO", "las reglas modernas indican que un combate lo gana el Pokemon con el coeficiente de batalla mas alto en base al siguiente cálculo: 0.5 * nivel + 0.9 * defensa + 3 * inteligencia", enfrentamiento_moderno);
 
     return menu_reglas;
 }
@@ -708,11 +748,18 @@ salon_t *salon_leer_archivo(const char *nombre_archivo)
 int salon_guardar_archivo(salon_t *salon, const char *nombre_archivo)
 {
     if (!salon || !nombre_archivo) {
-        return -1;
+        return SALON_ERROR;
     }
+
+    bool no_se_puede_guardar = false;
+
+    abb_con_cada_elemento(salon->entrenadores, ABB_RECORRER_INORDEN, validar_entrenadores, &no_se_puede_guardar);
+
+    if (no_se_puede_guardar)
+        return SALON_ERROR;
     FILE *archivo_nuevo = fopen(nombre_archivo, "w");
     if (!archivo_nuevo) {
-        return -1;
+        return SALON_ERROR;
     }
 
     int cant_entrenadores_guardados = (int)abb_con_cada_elemento(salon->entrenadores, ABB_RECORRER_INORDEN, imprimir_entrenadores, &archivo_nuevo);
@@ -769,17 +816,22 @@ char *salon_ejecutar_comando(salon_t *salon, const char *comando)
     if (!resultado)
         return NULL;
 
+    //voy a tener que agregar un flag para verificar que no haya fallado la ejecucion del comando.
+    bool error = false;
+
     //creo una lista de argumentos, que va a servir para pasar el salon y el char a donde voy a guardar el texto
     lista_t *argumentos = lista_crear(NULL);
     lista_encolar(argumentos, salon);
     lista_encolar(argumentos, resultado);
+    lista_encolar(argumentos, &error);
 
     //menu_procesar_opcion va a recibir una lista de argumentos, que le va a pasar al comando. El comando sabe qué tiene que hacer.
     menu_procesar_opcion(salon->menu_salon, comando, &argumentos);
     lista_destruir(argumentos);
 
     //si al salir de la ejecucion, no se cargó un texto, retorno NULL y libero el char
-    if (strlen(resultado) == 0) {
+    // if (strlen(resultado) == 0) {
+    if (error) {
         free(resultado);
         return NULL;
     }
