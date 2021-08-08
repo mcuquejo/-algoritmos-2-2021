@@ -1,13 +1,13 @@
+#include "salon.h"
+#include "abb.h"
+#include "entrenador.h"
+#include "menu.h"
+#include "reglas.h"
+#include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
-#include "utils.h"
-#include "entrenador.h"
-#include "salon.h"
-#include "abb.h"
-#include "menu.h"
-#include "reglas.h"
 
 #define FORMATO_ESCRITURA_ENTRENADOR "%s;%i\n"
 #define FORMATO_ESCRITURA_ARCH_ENTRENADOR "%s%s,%i\n"
@@ -44,33 +44,41 @@ int comparar_por_victorias(void *elemento1, void *elemento2)
  * COMPARADORES ARBOL
  *****************************************************************************************************************************************/
 
+//voy a validar al momento de crear un salon leyendo un archivo que cada entrenador creado tenga al menos un pokemon
+//su algun entrenador tiene 0 pokemones, extra (error), pasa a ser true y corto el recorrido por el arbol
+bool validar_entrenadores(void *entrenador, void *extra)
+{
+    if (entrenador) {
+        size_t cant_pokemon = lista_elementos(entrenador_obtener_equipo((entrenador_t *)entrenador));
+        if (cant_pokemon == 0) {
+            *(bool *)extra = true;
+            return false;
+        }
+    }
+    return true;
+}
+
 /****************************************************************************************************************************************
  * FUNCIONES PARA IMPRIMIR EN ARCHIVO (SALON GUARDAR ARCHIVO)
  *****************************************************************************************************************************************/
 //aca deberia ver si no falla
 bool imprimir_pokemones(void *pokemon, void *archivo)
 {
-    if (pokemon)
-    {
-        printf("estoy guardando en archivo al pokemon: %s\n", pokemon_obtener_nombre((pokemon_t *)pokemon));
+    if (pokemon) {
         fprintf(*(FILE **)archivo, FORMATO_ESCRITURA_POKEMON, pokemon_obtener_nombre((pokemon_t *)pokemon), pokemon_obtener_nivel((pokemon_t *)pokemon), pokemon_obtener_defensa((pokemon_t *)pokemon), pokemon_obtener_fuerza((pokemon_t *)pokemon), pokemon_obtener_inteligencia((pokemon_t *)pokemon), pokemon_obtener_velocidad((pokemon_t *)pokemon));
         return true;
     }
-    printf("hubo error al guardar en archivo al pokemon\n");
     return false;
 }
 
 //aca deberia ver si no falla
 bool imprimir_entrenadores(void *entrenador, void *archivo)
 {
-    if (entrenador)
-    {
-        printf("estoy guardando en archivo al entrenador: %s\n", entrenador_obtener_nombre((entrenador_t *)entrenador));
+    if (entrenador) {
         fprintf(*(FILE **)archivo, FORMATO_ESCRITURA_ENTRENADOR, entrenador_obtener_nombre((entrenador_t *)entrenador), entrenador_obtener_victorias((entrenador_t *)entrenador));
         lista_con_cada_elemento((lista_t *)entrenador_obtener_equipo((entrenador_t *)entrenador), imprimir_pokemones, archivo);
         return false;
     }
-    printf("hubo error al guardar en archivo al entrenador\n");
     return true;
 }
 /****************************************************************************************************************************************
@@ -78,13 +86,11 @@ bool imprimir_entrenadores(void *entrenador, void *archivo)
  *****************************************************************************************************************************************/
 
 /****************************************************************************************************************************************
- * FUNCIONES PARA ARNAR STRINGS PARA LOS COMANDOS
- *****************************************************************************************************************************************/
+  * FUNCIONES PARA ARNAR STRINGS PARA LOS COMANDOS
+  *****************************************************************************************************************************************/
 bool imprimir_pokemones_en_pantalla(void *pokemon, void *buffer)
 {
-    if (pokemon)
-    {
-        //printf(FORMATO_ESCRITURA_ARCH_POKEMON, pokemon_obtener_nombre((pokemon_t*)pokemon), pokemon_obtener_nivel((pokemon_t*)pokemon),pokemon_obtener_defensa((pokemon_t*)pokemon), pokemon_obtener_fuerza((pokemon_t*)pokemon), pokemon_obtener_inteligencia((pokemon_t*)pokemon), pokemon_obtener_velocidad((pokemon_t*)pokemon));
+    if (pokemon) {
         char niv[10];
         sprintf(niv, "%i", pokemon_obtener_nivel((pokemon_t *)pokemon));
         char def[10];
@@ -95,35 +101,26 @@ bool imprimir_pokemones_en_pantalla(void *pokemon, void *buffer)
         sprintf(intel, "%i", pokemon_obtener_inteligencia((pokemon_t *)pokemon));
         char vel[10];
         sprintf(vel, "%i", pokemon_obtener_velocidad((pokemon_t *)pokemon));
-
         size_t longitud = strlen(*(char **)buffer) + strlen(pokemon_obtener_nombre((pokemon_t *)pokemon)) + strlen(niv) + strlen(def) + strlen(fue) + strlen(intel) + strlen(vel) + 2; //longitud del "%s;%i\n\0"
-        printf("la longitud obtenida del pokemon es: %zu\n", longitud);
         char texto_auxiliar[longitud];
         sprintf(texto_auxiliar, FORMATO_ESCRITURA_ARCH_POKEMON, *(char **)buffer, pokemon_obtener_nombre((pokemon_t *)pokemon), pokemon_obtener_nivel((pokemon_t *)pokemon), pokemon_obtener_defensa((pokemon_t *)pokemon), pokemon_obtener_fuerza((pokemon_t *)pokemon), pokemon_obtener_inteligencia((pokemon_t *)pokemon), pokemon_obtener_velocidad((pokemon_t *)pokemon));
-        printf("el texto auxiliar es:\n%s\nfin del texto auxiliar.\n\n", texto_auxiliar);
         //*(char**)buffer = realloc(*(char**)buffer, longitud);
         strcpy(*(char **)buffer, texto_auxiliar);
-        printf("el buffer actualizado es:\n%s\n\n", *(char **)buffer);
     }
     return true;
 }
 
 bool imprimir_entrenadores_en_pantalla(void *entrenador, void *buffer)
 {
-    if (entrenador)
-    {
+    if (entrenador) {
         //paso a char* el nro de victorias
         char victorias[10];
         sprintf(victorias, "%i", entrenador_obtener_victorias((entrenador_t *)entrenador));
-        printf("strlen del buffer por ahora es: %zu\n", strlen(*(char **)buffer));
         size_t longitud = strlen(*(char **)buffer) + strlen(entrenador_obtener_nombre((entrenador_t *)entrenador)) + strlen(victorias) + 2; //longitud del "%s;%i\n\0"
         char texto_auxiliar[longitud];
         sprintf(texto_auxiliar, FORMATO_ESCRITURA_ARCH_ENTRENADOR, *(char **)buffer, entrenador_obtener_nombre((entrenador_t *)entrenador), entrenador_obtener_victorias((entrenador_t *)entrenador));
-        printf("el texto auxiliar es:\n%s\nfin del texto auxiliar.\n\n", texto_auxiliar);
         //*(char**)buffer = realloc(*(char**)buffer, longitud);
         strcpy(*(char **)buffer, texto_auxiliar);
-        printf("el buffer actualizado es:\n%s\n\n", *(char **)buffer);
-        //lista_con_cada_elemento((lista_t*)entrenador_obtener_equipo((entrenador_t*)entrenador), imprimir_pokemones_en_pantalla, buffer);
     }
     return false;
 }
@@ -131,36 +128,27 @@ bool imprimir_entrenadores_en_pantalla(void *entrenador, void *buffer)
 //el problema es que para lista necesito que retorne true, y para ABB, false. Sino, serían exactamente iguales!!!! (CAMBIAR)
 bool imprimir_entrenadores_en_pantalla_lista(void *entrenador, void *buffer)
 {
-    if (entrenador)
-    {
+    if (entrenador) {
         //paso a char* el nro de victorias
         char victorias[10];
         sprintf(victorias, "%i", entrenador_obtener_victorias((entrenador_t *)entrenador));
-        printf("strlen del buffer por ahora es: %zu\n", strlen(*(char **)buffer));
         size_t longitud = strlen(*(char **)buffer) + strlen(entrenador_obtener_nombre((entrenador_t *)entrenador)) + strlen(victorias) + 2; //longitud del "%s;%i\n\0"
         char texto_auxiliar[longitud];
         sprintf(texto_auxiliar, FORMATO_ESCRITURA_ARCH_ENTRENADOR, *(char **)buffer, entrenador_obtener_nombre((entrenador_t *)entrenador), entrenador_obtener_victorias((entrenador_t *)entrenador));
-        printf("el texto auxiliar es:\n%s\nfin del texto auxiliar.\n\n", texto_auxiliar);
         //*(char**)buffer = realloc(*(char**)buffer, longitud);
         strcpy(*(char **)buffer, texto_auxiliar);
-        printf("el buffer actualizado es:\n%s\n\n", *(char **)buffer);
-        //lista_con_cada_elemento((lista_t*)entrenador_obtener_equipo((entrenador_t*)entrenador), imprimir_pokemones_en_pantalla, buffer);
     }
     return true;
 }
 
 bool imprimir_entrenadores_en_pantalla_lista_solo_nombre(void *entrenador, void *buffer)
 {
-    if (entrenador)
-    {
-        printf("strlen del buffer por ahora es: %zu\n", strlen(*(char **)buffer));
+    if (entrenador) {
         size_t longitud = strlen(*(char **)buffer) + strlen(entrenador_obtener_nombre((entrenador_t *)entrenador)) + 2; //longitud del "%s\n\0"
         char texto_auxiliar[longitud];
         sprintf(texto_auxiliar, FORMATO_ESCRITURA_ARCH_ENTRENADOR_SOLO_NOMBRE, *(char **)buffer, entrenador_obtener_nombre((entrenador_t *)entrenador));
-        printf("el texto auxiliar es:\n%s\nfin del texto auxiliar.\n\n", texto_auxiliar);
         //*(char**)buffer = realloc(*(char**)buffer, longitud);
         strcpy(*(char **)buffer, texto_auxiliar);
-        printf("el buffer actualizado es:\n%s\n\n", *(char **)buffer);
     }
     return true;
 }
@@ -169,14 +157,11 @@ bool imprimir_entrenadores_en_pantalla_lista_solo_nombre(void *entrenador, void 
  *****************************************************************************************************************************************/
 
 /****************************************************************************************************************************************
- * FUNCIONES PARA FILTRAR ENTRENADORES
- *****************************************************************************************************************************************/
+  * FUNCIONES PARA FILTRAR ENTRENADORES
+  *****************************************************************************************************************************************/
 bool recorrer_entrenadores(void *entrenador, void *extra)
 {
-    if (entrenador)
-    {
-        printf("el entrenador es: %s\n", entrenador_obtener_nombre(entrenador));
-
+    if (entrenador) {
         lista_encolar((lista_t *)extra, (entrenador_t *)entrenador);
     }
     return false;
@@ -186,8 +171,8 @@ bool recorrer_entrenadores(void *entrenador, void *extra)
  *****************************************************************************************************************************************/
 
 /****************************************************************************************************************************************
- * FUNCIONES PARA REGLAS DE COMBATE
- *****************************************************************************************************************************************/
+  * FUNCIONES PARA REGLAS DE COMBATE
+  *****************************************************************************************************************************************/
 int enfrentamiento_clasico(void *pokemon, void *rival, void *extra)
 {
     double stats_pokemon = 0.8 * pokemon_obtener_nivel((pokemon_t *)pokemon) + pokemon_obtener_fuerza((pokemon_t *)pokemon) + 2 * pokemon_obtener_velocidad((pokemon_t *)pokemon);
@@ -210,34 +195,19 @@ int enfrentamiento_moderno(void *pokemon, void *rival, void *extra)
  * FUNCIONES PARA REGLAS DE COMBATE
  *****************************************************************************************************************************************/
 
-//me creo iterador entrenador 1
-//me creo iterador entrenador 2
-
-//variable que guarda resultado
-//while iterador entrenador 1 and iterador entrenador 2
-//variable = enfrentamiento
-//1, actualizo entrenador 1, 2 actualizo entrenador 2
-//strcpy(resultado, resultado + \n)
-
-bool enfrentar_entrenadores(salon_t *salon, entrenador_t *entrenador_1, entrenador_t *entrenador_2, char* regla, void *resultado)
+bool enfrentar_entrenadores(salon_t *salon, entrenador_t *entrenador_1, entrenador_t *entrenador_2, char *regla, void *resultado)
 {
 
     lista_iterador_t *iterador_equipo_1 = lista_iterador_crear(entrenador_obtener_equipo(entrenador_1));
     lista_iterador_t *iterador_equipo_2 = lista_iterador_crear(entrenador_obtener_equipo(entrenador_2));
     int resultado_enfrentamiento = 0;
-    while (lista_iterador_tiene_siguiente(iterador_equipo_1) && lista_iterador_tiene_siguiente(iterador_equipo_2))
-    {
-        printf("estoy recorriendo el while de comparacion\n");
+    while (lista_iterador_tiene_siguiente(iterador_equipo_1) && lista_iterador_tiene_siguiente(iterador_equipo_2)) {
         menu_procesar_regla(salon->reglas, regla, lista_iterador_elemento_actual(iterador_equipo_1), lista_iterador_elemento_actual(iterador_equipo_2), &resultado_enfrentamiento);
-        if (resultado_enfrentamiento == 1)
-        {
+        if (resultado_enfrentamiento == 1) {
             lista_iterador_avanzar(iterador_equipo_2);
-        }
-        else
-        {
+        } else {
             lista_iterador_avanzar(iterador_equipo_1);
         }
-        printf("el resultado del enfrentamiento (estoy en el while), fue: %i\n", resultado_enfrentamiento);
         size_t longitud = strlen(*(char **)resultado) + 3; //longitud del "%s\n\0"
         char resultado_enfrentamiento_char[longitud];
         sprintf(resultado_enfrentamiento_char, "%s%i\n", *(char **)resultado, resultado_enfrentamiento);
@@ -258,13 +228,11 @@ bool todos_los_entrenadores(entrenador_t *entrenador, void *extra)
 bool verificar_pokemones(void *pokemon, void *extra)
 {
     //extra va a ser una lista_t* que contenga lista_t[0] = nombre_pokemon, y lista_t[1] = cantidad_pokemones
-    if (pokemon)
-    {
+    if (pokemon) {
         char *nombre_pokemon = *(char **)lista_elemento_en_posicion(*(lista_t **)extra, 0);
         size_t *cantidad_pokemones = (size_t *)lista_elemento_en_posicion(*(lista_t **)extra, 1);
 
-        if (strcasecmp(nombre_pokemon, pokemon_obtener_nombre((pokemon_t *)pokemon)) == 0)
-        {
+        if (strcasecmp(nombre_pokemon, pokemon_obtener_nombre((pokemon_t *)pokemon)) == 0) {
             (*cantidad_pokemones)++;
             return false;
         }
@@ -308,41 +276,31 @@ bool salon_entrenadores(int argc, char *argv[], void *contexto)
 
     lista_t *entrenadores_filtrados = NULL;
     //ahora que tengo los argumentos, puedo verificar que funcion voy a usar para filtrar.
-    if (argc == 1)
-    {
+    if (argc == 1) {
         entrenadores_filtrados = salon_filtrar_entrenadores(salon, todos_los_entrenadores, &extra);
         lista_con_cada_elemento(entrenadores_filtrados, imprimir_entrenadores_en_pantalla_lista, &string_resultado);
-    }
-    else if (argc == 2)
-    {
+    } else if (argc == 2) {
         char **subcomando = split(argv[1], ',');
-        if (!subcomando)
-        {
+        if (!subcomando) {
             lista_destruir(extra);
             return false;
         }
 
-        if (vtrlen(subcomando) != 2)
-        {
-            printf("fallo al hacer el split del subcomando porque deberia tener maximo dos argumentos\n");
+        if (vtrlen(subcomando) != 2) {
             lista_destruir(extra);
             vtrfree(subcomando);
             return false;
         }
 
-        if (strcmp(subcomando[0], "victorias") == 0)
-        {
+        if (strcmp(subcomando[0], "victorias") == 0) {
             //extra va a ser una lista_t* que contenga lista_t[0] = cant_victorias (por ahora lo veo asi para mantener el mismo criterio para todas las llamadas)
             int cant_victorias = atoi(subcomando[1]);
             lista_encolar(extra, &cant_victorias);
             entrenadores_filtrados = salon_filtrar_entrenadores(salon, entrenadores_por_victoria, &extra);
             lista_con_cada_elemento(entrenadores_filtrados, imprimir_entrenadores_en_pantalla_lista_solo_nombre, &string_resultado);
-        }
-        else if (strcmp(subcomando[0], "pokemon") == 0)
-        {
+        } else if (strcmp(subcomando[0], "pokemon") == 0) {
             //extra va a ser una lista_t* que contenga lista_t[0] = nombre_pokemon, y lista_t[1] = cantidad_pokemones
             size_t cant_pokemones = 0;
-            printf("el pokemon que busco es: %s\n", subcomando[1]);
             lista_encolar(extra, &subcomando[1]);
             lista_encolar(extra, &cant_pokemones);
             entrenadores_filtrados = salon_filtrar_entrenadores(salon, entrenadores_por_pokemon, &extra);
@@ -364,12 +322,10 @@ bool salon_equipo(int argc, char *argv[], void *contexto)
     salon_t *salon = lista_elemento_en_posicion(*(lista_t **)contexto, 0);
     char *resultado = lista_elemento_en_posicion(*(lista_t **)contexto, 1);
 
-    printf("el entrenador que estoy buscando es: %s\n", (char *)argv[1]);
     entrenador_t *auxiliar_para_buscar_entrenador = entrenador_crear((char *)argv[1], 0);
     entrenador_t *entrenador_buscado = arbol_buscar(salon->entrenadores, auxiliar_para_buscar_entrenador);
     if (!entrenador_buscado)
         return false;
-    printf("los datos del entrenador encontrado son: %s\n", entrenador_obtener_nombre(entrenador_buscado));
 
     //probablemente esto deberia estar dentro del pokemon, para mantener algun tipo de separacion. No es una lista, es un equipo de pokemones, para el salón.
     lista_con_cada_elemento(entrenador_obtener_equipo(entrenador_buscado), imprimir_pokemones_en_pantalla, &resultado);
@@ -397,40 +353,31 @@ bool salon_comparar(int argc, char *argv[], void *contexto)
     char *resultado = lista_elemento_en_posicion(*(lista_t **)contexto, 1);
 
     char **subcomando = split(argv[1], ',');
-    if (!subcomando)
-    {
+    if (!subcomando) {
         return false;
     }
 
-    if (vtrlen(subcomando) != 3)
-    {
-        printf("fallo al hacer el split del subcomando porque deberia tener maximo tres argumentos\n");
+    if (vtrlen(subcomando) != 3) {
         vtrfree(subcomando);
         return false;
     }
 
-    printf("el entrenador que estoy buscando es: %s\n", (char *)subcomando[0]);
     entrenador_t *auxiliar_para_buscar_entrenador_1 = entrenador_crear((char *)subcomando[0], 0);
     entrenador_t *entrenador_buscado_1 = arbol_buscar(salon->entrenadores, auxiliar_para_buscar_entrenador_1);
-    if (!entrenador_buscado_1)
-    {
+    if (!entrenador_buscado_1) {
         entrenador_destruir(auxiliar_para_buscar_entrenador_1);
         vtrfree(subcomando);
         return false;
     }
-    printf("los datos del entrenador encontrado son: %s\n", entrenador_obtener_nombre(entrenador_buscado_1));
 
-    printf("el entrenador que estoy buscando_2 es: %s\n", (char *)subcomando[1]);
     entrenador_t *auxiliar_para_buscar_entrenador_2 = entrenador_crear((char *)subcomando[1], 0);
     entrenador_t *entrenador_buscado_2 = arbol_buscar(salon->entrenadores, auxiliar_para_buscar_entrenador_2);
-    if (!entrenador_buscado_2)
-    {
+    if (!entrenador_buscado_2) {
         entrenador_destruir(auxiliar_para_buscar_entrenador_1);
         entrenador_destruir(auxiliar_para_buscar_entrenador_2);
         vtrfree(subcomando);
         return false;
     }
-    printf("los datos del entrenador encontrado son: %s\n", entrenador_obtener_nombre(entrenador_buscado_2));
 
     bool guardado_exitoso = enfrentar_entrenadores(salon, entrenador_buscado_1, entrenador_buscado_2, (char *)subcomando[2], &resultado);
 
@@ -455,30 +402,24 @@ bool salon_agregar_pokemon(int argc, char *argv[], void *contexto)
     char *resultado = lista_elemento_en_posicion(*(lista_t **)contexto, 1);
 
     char **subcomando = split(argv[1], ',');
-    if (!subcomando)
-    {
+    if (!subcomando) {
         return false;
     }
 
-    if (vtrlen(subcomando) != 7)
-    {
-        printf("fallo al hacer el split del subcomando porque deberia tener maximo siete argumentos\n");
+    if (vtrlen(subcomando) != 7) {
         vtrfree(subcomando);
         return false;
     }
 
     entrenador_t *auxiliar_para_buscar_entrenador = entrenador_crear((char *)subcomando[0], 0);
     entrenador_t *entrenador_buscado = arbol_buscar(salon->entrenadores, auxiliar_para_buscar_entrenador);
-    if (!entrenador_buscado)
-    {
+    if (!entrenador_buscado) {
         vtrfree(subcomando);
         return false;
     }
-    printf("los datos del entrenador encontrado son: %s\n", entrenador_obtener_nombre(entrenador_buscado));
 
     pokemon_t *pokemon_creado = parsear_pokemon(subcomando + 1);
-    if (!pokemon_creado)
-    {
+    if (!pokemon_creado) {
         vtrfree(subcomando);
         return false;
     }
@@ -497,16 +438,11 @@ bool salon_agregar_pokemon(int argc, char *argv[], void *contexto)
 bool obtener_posicion_pokemon(void *pokemon, void *extra)
 {
     //extra va a ser una lista_t* que contenga lista_t[0] = nombre_pokemon, y lista_t[1] = posicion_pokemon
-    if (pokemon)
-    {
+    if (pokemon) {
         char *nombre_pokemon = (char *)lista_elemento_en_posicion(*(lista_t **)extra, 0);
         int *posicion_pokemon = (int *)lista_elemento_en_posicion(*(lista_t **)extra, 1);
 
-        printf("nombre_pokemon: %s\n", nombre_pokemon);
-        printf("obtener_nombre_pokemon: %s\n", pokemon_obtener_nombre((pokemon_t *)pokemon));
-
-        if (strcasecmp(nombre_pokemon, pokemon_obtener_nombre((pokemon_t *)pokemon)) == 0)
-        {
+        if (strcasecmp(nombre_pokemon, pokemon_obtener_nombre((pokemon_t *)pokemon)) == 0) {
             return false;
         }
         (*posicion_pokemon)++;
@@ -533,30 +469,24 @@ bool salon_quitar_pokemon(int argc, char *argv[], void *contexto)
     char *resultado = lista_elemento_en_posicion(*(lista_t **)contexto, 1);
 
     char **subcomando = split(argv[1], ',');
-    if (!subcomando)
-    {
+    if (!subcomando) {
         return false;
     }
 
-    if (vtrlen(subcomando) != 2)
-    {
-        printf("fallo al hacer el split del subcomando porque deberia tener maximo dos argumentos\n");
+    if (vtrlen(subcomando) != 2) {
         vtrfree(subcomando);
         return false;
     }
 
     entrenador_t *auxiliar_para_buscar_entrenador = entrenador_crear((char *)subcomando[0], 0);
     entrenador_t *entrenador_buscado = arbol_buscar(salon->entrenadores, auxiliar_para_buscar_entrenador);
-    if (!entrenador_buscado)
-    {
+    if (!entrenador_buscado) {
         entrenador_destruir(auxiliar_para_buscar_entrenador);
         vtrfree(subcomando);
         return false;
     }
-    printf("los datos del entrenador encontrado son: %s\n", entrenador_obtener_nombre(entrenador_buscado));
 
-    if (lista_elementos(entrenador_obtener_equipo(entrenador_buscado)) <= 1)
-    {
+    if (lista_elementos(entrenador_obtener_equipo(entrenador_buscado)) <= 1) {
         vtrfree(subcomando);
         return false;
     }
@@ -601,8 +531,8 @@ bool salon_guardar(int argc, char *argv[], void *contexto)
  *****************************************************************************************************************************************/
 
 /****************************************************************************************************************************************
- * CREACION MENU REGLAS
- *****************************************************************************************************************************************/
+  * CREACION MENU REGLAS
+  *****************************************************************************************************************************************/
 menu_reglas_t *salon_crear_menu_reglas()
 {
     menu_reglas_t *menu_reglas = menu_reglas_crear();
@@ -619,8 +549,8 @@ menu_reglas_t *salon_crear_menu_reglas()
  *****************************************************************************************************************************************/
 
 /****************************************************************************************************************************************
- * CREACION MENU COMANDOS
- *****************************************************************************************************************************************/
+  * CREACION MENU COMANDOS
+  *****************************************************************************************************************************************/
 menu_t *salon_crear_menu()
 {
     menu_t *menu = menu_crear();
@@ -640,34 +570,31 @@ menu_t *salon_crear_menu()
  *****************************************************************************************************************************************/
 
 /****************************************************************************************************************************************
- * PRIMITIVAS SALON
- *****************************************************************************************************************************************/
+  * PRIMITIVAS SALON
+  *****************************************************************************************************************************************/
 /**
- * Creo el salon. Guardará un arbol de entrenadores por cantidad de victorias.
- * Para liberar a los entrenadores, uso su funcion de destruccion.
- **/
+   * Creo el salon. Guardará un arbol de entrenadores por cantidad de victorias.
+   * Para liberar a los entrenadores, uso su funcion de destruccion.
+   **/
 salon_t *salon_crear()
 {
     salon_t *salon = calloc(1, sizeof(salon_t));
     if (!salon)
         return NULL;
     salon->entrenadores = arbol_crear(comparar_por_nombre, entrenador_destruir);
-    if (!salon->entrenadores)
-    {
+    if (!salon->entrenadores) {
         free(salon);
         return NULL;
     }
     salon->menu_salon = salon_crear_menu();
-    if (!salon->menu_salon)
-    {
+    if (!salon->menu_salon) {
         arbol_destruir(salon->entrenadores);
         free(salon);
         return NULL;
     }
 
     salon->reglas = salon_crear_menu_reglas();
-    if (!salon->reglas)
-    {
+    if (!salon->reglas) {
         arbol_destruir(salon->entrenadores);
         menu_destruir(salon->menu_salon);
         free(salon);
@@ -680,6 +607,7 @@ pokemon_t *parsear_pokemon(char **campos)
 {
     if (!campos || !ES_POKEMON)
         return NULL;
+
     char *nombre = campos[0];
     int nvl = atoi(campos[1]);
     int def = atoi(campos[2]);
@@ -704,8 +632,7 @@ entrenador_t *parsear_entrenador(char **campos)
 bool agregar_entrenador_o_destruir(salon_t *salon, entrenador_t *entrenador)
 {
     int resultado = arbol_insertar(salon->entrenadores, entrenador);
-    if (resultado == SALON_ERROR)
-    {
+    if (resultado == SALON_ERROR) {
         entrenador_destruir(entrenador);
         return true;
     }
@@ -715,8 +642,7 @@ bool agregar_entrenador_o_destruir(salon_t *salon, entrenador_t *entrenador)
 bool agregar_pokemon_o_destruir(entrenador_t *entrenador, pokemon_t *pokemon)
 {
     int resultado = lista_encolar(entrenador_obtener_equipo(entrenador), pokemon);
-    if (resultado == SALON_ERROR)
-    {
+    if (resultado == SALON_ERROR) {
         pokemon_destruir(pokemon);
         return true;
     }
@@ -726,38 +652,34 @@ bool agregar_pokemon_o_destruir(entrenador_t *entrenador, pokemon_t *pokemon)
 bool cargar_archivo(salon_t *salon, FILE *archivo)
 {
     if (!salon || !archivo)
-        return false;
+        return true;
 
     char *linea = NULL;
     bool error = false;
     entrenador_t *ult_entrenador = NULL;
-    while (!error && (linea = fgets_alloc(archivo)) != NULL)
-    {
+    size_t *cant_lineas_leidas = 0;
+    while (!error && (linea = fgets_alloc(archivo)) != NULL) {
         char **campos = split(linea, ';');
 
         pokemon_t *pokemon = parsear_pokemon(campos);
         entrenador_t *entrenador = parsear_entrenador(campos);
 
-        if (pokemon != NULL)
-        {
+        if (pokemon != NULL) {
             error = agregar_pokemon_o_destruir(ult_entrenador, pokemon);
-        }
-        else if (entrenador != NULL)
-        {
+        } else if (entrenador != NULL) {
             error = agregar_entrenador_o_destruir(salon, entrenador);
             ult_entrenador = entrenador;
-        }
-        else
-        {
+        } else {
             error = true;
         }
 
         vtrfree(campos);
         free(linea);
+        cant_lineas_leidas++;
     }
+    if (cant_lineas_leidas == 0)
+        error = true;
 
-    if (error)
-        printf("dentro de cargar_archivo error es true\n");
     return error;
 }
 
@@ -770,14 +692,12 @@ salon_t *salon_leer_archivo(const char *nombre_archivo)
     salon_t *salon = salon_crear();
 
     bool no_se_pudo_leer = cargar_archivo(salon, archivo);
-    if (!no_se_pudo_leer)
-        printf("se pudo leer el archivo\n");
 
     fclosen(archivo);
 
-    if (no_se_pudo_leer)
-    {
-        printf("hubo un error en la lectura y se elimina el salon\n");
+    abb_con_cada_elemento(salon->entrenadores, ABB_RECORRER_INORDEN, validar_entrenadores, &no_se_pudo_leer);
+
+    if (no_se_pudo_leer) {
         salon_destruir(salon);
         return NULL;
     }
@@ -787,21 +707,15 @@ salon_t *salon_leer_archivo(const char *nombre_archivo)
 
 int salon_guardar_archivo(salon_t *salon, const char *nombre_archivo)
 {
-    if (!salon)
-    {
-        printf("error en salon porque era NULL\n");
+    if (!salon || !nombre_archivo) {
         return -1;
     }
     FILE *archivo_nuevo = fopen(nombre_archivo, "w");
-    if (!archivo_nuevo)
-    {
-        printf("error en creacion archivo nuevo\n");
+    if (!archivo_nuevo) {
         return -1;
     }
 
-    printf("estoy por procesar a los entrenadores\n");
     int cant_entrenadores_guardados = (int)abb_con_cada_elemento(salon->entrenadores, ABB_RECORRER_INORDEN, imprimir_entrenadores, &archivo_nuevo);
-    printf("terminé de procesar a los entrenadores\n");
 
     fclosen(archivo_nuevo);
     return (cant_entrenadores_guardados) ? cant_entrenadores_guardados : -1;
@@ -814,8 +728,7 @@ salon_t *salon_agregar_entrenador(salon_t *salon, entrenador_t *entrenador)
 
     int resultado = arbol_insertar(salon->entrenadores, entrenador);
 
-    if (resultado == SALON_ERROR)
-    {
+    if (resultado == SALON_ERROR) {
         entrenador_destruir(entrenador);
         return NULL;
     }
@@ -832,15 +745,12 @@ lista_t *salon_filtrar_entrenadores(salon_t *salon, bool (*f)(entrenador_t *, vo
     if (!lista_aux)
         return NULL;
 
-    int cant = (int)abb_con_cada_elemento(salon->entrenadores, ABB_RECORRER_INORDEN, recorrer_entrenadores, lista_aux);
-    printf("recorri %i elementos\n", cant);
+    abb_con_cada_elemento(salon->entrenadores, ABB_RECORRER_INORDEN, recorrer_entrenadores, lista_aux);
 
     lista_iterador_t *iterador_lista = lista_iterador_crear(lista_aux);
     lista_t *lista_final = lista_crear(NULL);
-    while (lista_iterador_tiene_siguiente(iterador_lista))
-    {
-        if (f(lista_iterador_elemento_actual(iterador_lista), extra))
-        {
+    while (lista_iterador_tiene_siguiente(iterador_lista)) {
+        if (f(lista_iterador_elemento_actual(iterador_lista), extra)) {
             lista_encolar(lista_final, lista_iterador_elemento_actual(iterador_lista));
         }
         lista_iterador_avanzar(iterador_lista);
@@ -854,8 +764,6 @@ char *salon_ejecutar_comando(salon_t *salon, const char *comando)
 {
     if (!salon || !comando)
         return NULL;
-
-    printf("se ejecutó el comando: %s\n", comando);
 
     char *resultado = calloc(1, sizeof(char) * 2048);
     if (!resultado)
@@ -871,8 +779,7 @@ char *salon_ejecutar_comando(salon_t *salon, const char *comando)
     lista_destruir(argumentos);
 
     //si al salir de la ejecucion, no se cargó un texto, retorno NULL y libero el char
-    if (strlen(resultado) == 0)
-    {
+    if (strlen(resultado) == 0) {
         free(resultado);
         return NULL;
     }
@@ -881,8 +788,7 @@ char *salon_ejecutar_comando(salon_t *salon, const char *comando)
 
 void salon_destruir(salon_t *salon)
 {
-    if (salon)
-    {
+    if (salon) {
         arbol_destruir(salon->entrenadores);
         menu_destruir(salon->menu_salon);
         menu_reglas_destruir(salon->reglas);
