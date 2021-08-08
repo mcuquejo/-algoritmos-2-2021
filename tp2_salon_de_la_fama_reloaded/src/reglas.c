@@ -1,8 +1,8 @@
 #include "reglas.h"
 #include "hash.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 #define FORMATO_ESCRITURA_ARCH_REGLA "%s%s,%s\n" //formato quedaria: texto anterior + nombre,descripcion\n
 
@@ -42,8 +42,7 @@ menu_reglas_t *menu_reglas_crear()
         return NULL;
 
     menu_reglas->reglas = hash_crear(regla_destruir, 10);
-    if (!menu_reglas->reglas)
-    {
+    if (!menu_reglas->reglas) {
         free(menu_reglas);
         return NULL;
     }
@@ -65,16 +64,13 @@ cuando tenga una app funcionando.
 **/
 bool imprimir_reglas_en_pantalla(hash_t *hash, const char *clave, void *aux)
 {
-    if (clave)
-    {
+    if (clave) {
         regla_t *regla = (regla_t *)hash_obtener(hash, clave);
         size_t longitud = strlen(*(char **)aux) + strlen(clave) + strlen(regla->descripcion) + 2;
         char texto_auxiliar[longitud];
         sprintf(texto_auxiliar, FORMATO_ESCRITURA_ARCH_REGLA, *(char **)aux, clave, regla->descripcion);
-        printf("el texto auxiliar es:\n%s\nfin del texto auxiliar.\n\n", texto_auxiliar);
         //*(char**)buffer = realloc(*(char**)buffer, longitud);
         strcpy(*(char **)aux, texto_auxiliar);
-        printf("el buffer actualizado es:\n%s\n\n", *(char **)aux);
     }
     return false;
 }
@@ -88,8 +84,7 @@ void menu_reglas_con_cada_elemento(menu_reglas_t *menu_reglas, void *resultado)
 void menu_procesar_regla(menu_reglas_t *menu_reglas, const char *regla_buscada, void *pokemon_1, void *pokemon_2, void *contexto)
 {
     regla_t *regla = hash_obtener(menu_reglas->reglas, regla_buscada);
-    if (regla)
-    {
+    if (regla) {
         regla->enfrentamiento(pokemon_1, pokemon_2, contexto);
     }
 }
