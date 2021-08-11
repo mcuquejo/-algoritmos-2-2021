@@ -1,6 +1,7 @@
 #include "salon.h"
 #include "abb.h"
 #include "entrenador.h"
+#include "gimnasios.h"
 #include "menu.h"
 #include "reglas.h"
 #include "utils.h"
@@ -8,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <time.h>
 
 #define FORMATO_ESCRITURA_ENTRENADOR "%s;%i\n"
 #define FORMATO_ESCRITURA_ARCH_ENTRENADOR "%s%s,%i\n"
@@ -26,6 +28,7 @@ struct _salon_t
     abb_t *entrenadores;
     menu_t *menu_salon;
     menu_reglas_t *reglas;
+    gimnasio_t **gimnasios;
 };
 
 /****************************************************************************************************************************************
@@ -175,34 +178,125 @@ bool recorrer_entrenadores(void *entrenador, void *extra)
   *****************************************************************************************************************************************/
 int enfrentamiento_clasico(void *pokemon, void *rival, void *extra)
 {
+    int *resultado = lista_elemento_en_posicion((lista_t *)extra, 1);
     double stats_pokemon = 0.8 * pokemon_obtener_nivel((pokemon_t *)pokemon) + pokemon_obtener_fuerza((pokemon_t *)pokemon) + 2 * pokemon_obtener_velocidad((pokemon_t *)pokemon);
     double stats_rival = 0.8 * pokemon_obtener_nivel((pokemon_t *)rival) + pokemon_obtener_fuerza((pokemon_t *)rival) + 2 * pokemon_obtener_velocidad((pokemon_t *)rival);
     int resultado_batalla = (int)(stats_pokemon - stats_rival);
-    *(int *)extra = (resultado_batalla >= 0) ? 1 : 2;
+    *(int *)resultado = (resultado_batalla >= 0) ? 1 : 2;
     return (resultado_batalla >= 0) ? 1 : 2;
 }
 
 int enfrentamiento_moderno(void *pokemon, void *rival, void *extra)
 {
+    int *resultado = lista_elemento_en_posicion((lista_t *)extra, 1);
+
     pokemon_obtener_nivel((pokemon_t *)pokemon);
     double stats_pokemon = 0.5 * pokemon_obtener_nivel((pokemon_t *)pokemon) + 0.9 * pokemon_obtener_defensa((pokemon_t *)pokemon) + 3 * pokemon_obtener_inteligencia((pokemon_t *)pokemon);
     double stats_rival = 0.5 * pokemon_obtener_nivel((pokemon_t *)rival) + 0.9 * pokemon_obtener_defensa((pokemon_t *)rival) + 3 * pokemon_obtener_inteligencia((pokemon_t *)rival);
     int resultado_batalla = (int)(stats_pokemon - stats_rival);
-    *(int *)extra = (resultado_batalla >= 0) ? 1 : 2;
+    *(int *)resultado = (resultado_batalla >= 0) ? 1 : 2;
     return (resultado_batalla >= 0) ? 1 : 2;
 }
+
+int enfrentamiento_con_suerte(void *pokemon, void *rival, void *extra)
+{
+    int *resultado = lista_elemento_en_posicion((lista_t *)extra, 1);
+
+    srand((unsigned int)time(NULL));
+    pokemon_obtener_nivel((pokemon_t *)pokemon);
+    double stats_pokemon = 0.5 * pokemon_obtener_nivel((pokemon_t *)pokemon) + 0.9 * pokemon_obtener_defensa((pokemon_t *)pokemon) + 3 * pokemon_obtener_inteligencia((pokemon_t *)pokemon);
+    double stats_rival = 0.5 * pokemon_obtener_nivel((pokemon_t *)rival) + 0.9 * pokemon_obtener_defensa((pokemon_t *)rival) + 3 * pokemon_obtener_inteligencia((pokemon_t *)rival);
+    double suma_ataque_pokemon = 0;
+    double suma_ataque_rival = 0;
+    for (size_t i = 0; i < 10; i++) {
+        int suerte_pokemon = rand() % 10;
+        int suerte_rival = rand() % 10;
+        suma_ataque_pokemon += stats_pokemon * suerte_pokemon;
+        suma_ataque_rival += stats_rival * suerte_rival;
+    }
+
+    int resultado_batalla = (int)(suma_ataque_pokemon - suma_ataque_rival);
+
+    *resultado = (resultado_batalla >= 0) ? 1 : 2;
+    return (resultado_batalla >= 0) ? 1 : 2;
+}
+
+int enfrentamiento_gimnasio(void *pokemon, void *rival, void *extra)
+{
+    salon_t *salon = lista_elemento_en_posicion((lista_t *)extra, 0);
+    int *resultado = lista_elemento_en_posicion((lista_t *)extra, 1);
+
+    int *gimnasio_pokemon = lista_elemento_en_posicion((lista_t *)extra, 2);
+    if (!gimnasio_pokemon)
+        *gimnasio_pokemon = rand() % 2;
+
+    int *gimnasio_rival = lista_elemento_en_posicion((lista_t *)extra, 3);
+    if (!gimnasio_rival)
+        *gimnasio_rival = rand() % 2;
+
+    gimnasio_t **gimnasios = salon->gimnasios;
+
+    double stats_pokemon = 0.8 * pokemon_obtener_nivel((pokemon_t *)pokemon) + pokemon_obtener_fuerza((pokemon_t *)pokemon) + 2 * pokemon_obtener_velocidad((pokemon_t *)pokemon);
+
+    stats_pokemon = stats_pokemon * gimnasio_obtener_efectividad_rival(gimnasios[*gimnasio_pokemon], gimnasio_obtener_tipo(gimnasios[*gimnasio_rival]));
+
+    double stats_rival = 0.8 * pokemon_obtener_nivel((pokemon_t *)rival) + pokemon_obtener_fuerza((pokemon_t *)rival) + 2 * pokemon_obtener_velocidad((pokemon_t *)rival);
+
+    stats_rival = stats_rival * gimnasio_obtener_efectividad_rival(gimnasios[*gimnasio_rival], gimnasio_obtener_tipo(gimnasios[*gimnasio_pokemon]));
+
+    int resultado_batalla = (int)(stats_pokemon - stats_rival);
+    *(int *)resultado = (resultado_batalla >= 0) ? 1 : 2;
+    return (resultado_batalla >= 0) ? 1 : 2;
+}
+
+int enfrentamiento_enfrentaditto(void *pokemon, void *rival, void *extra)
+{
+    salon_t *salon = lista_elemento_en_posicion((lista_t *)extra, 0);
+    int *resultado = lista_elemento_en_posicion((lista_t *)extra, 1);
+
+    int *gimnasio_pokemon = lista_elemento_en_posicion((lista_t *)extra, 2);
+    *gimnasio_pokemon = rand() % 2;
+
+    int *gimnasio_rival = lista_elemento_en_posicion((lista_t *)extra, 3);
+    *gimnasio_rival = rand() % 2;
+
+    gimnasio_t **gimnasios = salon->gimnasios;
+
+    double stats_pokemon = 0.8 * pokemon_obtener_nivel((pokemon_t *)pokemon) + pokemon_obtener_fuerza((pokemon_t *)pokemon) + 2 * pokemon_obtener_velocidad((pokemon_t *)pokemon);
+
+    stats_pokemon = stats_pokemon * gimnasio_obtener_efectividad_rival(gimnasios[*gimnasio_pokemon], gimnasio_obtener_tipo(gimnasios[*gimnasio_rival]));
+
+    double stats_rival = 0.8 * pokemon_obtener_nivel((pokemon_t *)rival) + pokemon_obtener_fuerza((pokemon_t *)rival) + 2 * pokemon_obtener_velocidad((pokemon_t *)rival);
+
+    stats_rival = stats_rival * gimnasio_obtener_efectividad_rival(gimnasios[*gimnasio_rival], gimnasio_obtener_tipo(gimnasios[*gimnasio_pokemon]));
+
+    int resultado_batalla = (int)(stats_pokemon - stats_rival);
+    *(int *)resultado = (resultado_batalla >= 0) ? 1 : 2;
+    return (resultado_batalla >= 0) ? 1 : 2;
+}
+
 /****************************************************************************************************************************************
  * FUNCIONES PARA REGLAS DE COMBATE
  *****************************************************************************************************************************************/
 
-bool enfrentar_entrenadores(salon_t *salon, entrenador_t *entrenador_1, entrenador_t *entrenador_2, char *regla, void *resultado)
+bool enfrentar_entrenadores(salon_t *salon, entrenador_t *entrenador_1, entrenador_t *entrenador_2, char *regla, void *resultado, bool *error)
 {
 
     lista_iterador_t *iterador_equipo_1 = lista_iterador_crear(entrenador_obtener_equipo(entrenador_1));
     lista_iterador_t *iterador_equipo_2 = lista_iterador_crear(entrenador_obtener_equipo(entrenador_2));
     int resultado_enfrentamiento = 0;
+    lista_t *lista_contexto = lista_crear(NULL);
+    if (!lista_contexto)
+        return false;
+
+    int gimnasio_pokemon = rand() % 2;
+    int gimnasio_rival = rand() % 2;
+    lista_encolar(lista_contexto, salon);
+    lista_encolar(lista_contexto, &resultado_enfrentamiento);
+    lista_encolar(lista_contexto, &gimnasio_pokemon);
+    lista_encolar(lista_contexto, &gimnasio_rival);
     while (lista_iterador_tiene_siguiente(iterador_equipo_1) && lista_iterador_tiene_siguiente(iterador_equipo_2)) {
-        menu_procesar_regla(salon->reglas, regla, lista_iterador_elemento_actual(iterador_equipo_1), lista_iterador_elemento_actual(iterador_equipo_2), &resultado_enfrentamiento);
+        menu_procesar_regla(salon->reglas, regla, lista_iterador_elemento_actual(iterador_equipo_1), lista_iterador_elemento_actual(iterador_equipo_2), lista_contexto, error);
         if (resultado_enfrentamiento == 1) {
             lista_iterador_avanzar(iterador_equipo_2);
         } else {
@@ -215,6 +309,7 @@ bool enfrentar_entrenadores(salon_t *salon, entrenador_t *entrenador_1, entrenad
     }
     lista_iterador_destruir(iterador_equipo_1);
     lista_iterador_destruir(iterador_equipo_2);
+    lista_destruir(lista_contexto);
     return true;
 }
 /****************************************************************************************************************************************
@@ -330,6 +425,10 @@ bool salon_equipo(int argc, char *argv[], void *contexto)
         return false;
 
     bool *error = lista_elemento_en_posicion(*(lista_t **)contexto, 2);
+    if (argc != 2) {
+        *error = true;
+        return false;
+    }
 
     //yo ya se que el contexto es una lista con argumentos.
     salon_t *salon = lista_elemento_en_posicion(*(lista_t **)contexto, 0);
@@ -341,6 +440,12 @@ bool salon_equipo(int argc, char *argv[], void *contexto)
 
     entrenador_t *auxiliar_para_buscar_entrenador = entrenador_crear((char *)argv[1], 0);
     entrenador_t *entrenador_buscado = arbol_buscar(salon->entrenadores, auxiliar_para_buscar_entrenador);
+
+    if (lista_vacia(entrenador_obtener_equipo(entrenador_buscado))) {
+        *error = true;
+        entrenador_destruir(auxiliar_para_buscar_entrenador);
+        return false;
+    }
 
     //probablemente esto deberia estar dentro del pokemon, para mantener algun tipo de separacion. No es una lista, es un equipo de pokemones, para el salón.
     lista_con_cada_elemento(entrenador_obtener_equipo(entrenador_buscado), imprimir_pokemones_en_pantalla, &resultado);
@@ -373,9 +478,21 @@ bool salon_reglas(int argc, char *argv[], void *contexto)
 
 bool salon_comparar(int argc, char *argv[], void *contexto)
 {
-    if (!argc || !argv || !contexto || argc != 2)
+    if (!argc || !argv || !contexto)
         return false;
+
+    bool *error = lista_elemento_en_posicion(*(lista_t **)contexto, 2);
+    if (argc != 2 || strcmp(argv[1], "") == 0) {
+        *error = true;
+        return false;
+    }
+    //yo ya se que el contexto es una lista con argumentos.
     salon_t *salon = lista_elemento_en_posicion(*(lista_t **)contexto, 0);
+    if (!salon) {
+        *error = true;
+        return false;
+    }
+
     char *resultado = lista_elemento_en_posicion(*(lista_t **)contexto, 1);
 
     char **subcomando = split(argv[1], ',');
@@ -383,7 +500,8 @@ bool salon_comparar(int argc, char *argv[], void *contexto)
         return false;
     }
 
-    if (vtrlen(subcomando) != 3) {
+    if (vtrlen(subcomando) != 3 || strcmp(subcomando[0], "") == 0 || strcmp(subcomando[1], "") == 0 || strcmp(subcomando[2], "") == 0) {
+        *error = true;
         vtrfree(subcomando);
         return false;
     }
@@ -391,6 +509,7 @@ bool salon_comparar(int argc, char *argv[], void *contexto)
     entrenador_t *auxiliar_para_buscar_entrenador_1 = entrenador_crear((char *)subcomando[0], 0);
     entrenador_t *entrenador_buscado_1 = arbol_buscar(salon->entrenadores, auxiliar_para_buscar_entrenador_1);
     if (!entrenador_buscado_1) {
+        *error = true;
         entrenador_destruir(auxiliar_para_buscar_entrenador_1);
         vtrfree(subcomando);
         return false;
@@ -399,15 +518,16 @@ bool salon_comparar(int argc, char *argv[], void *contexto)
     entrenador_t *auxiliar_para_buscar_entrenador_2 = entrenador_crear((char *)subcomando[1], 0);
     entrenador_t *entrenador_buscado_2 = arbol_buscar(salon->entrenadores, auxiliar_para_buscar_entrenador_2);
     if (!entrenador_buscado_2) {
+        *error = true;
         entrenador_destruir(auxiliar_para_buscar_entrenador_1);
         entrenador_destruir(auxiliar_para_buscar_entrenador_2);
         vtrfree(subcomando);
         return false;
     }
 
-    bool guardado_exitoso = enfrentar_entrenadores(salon, entrenador_buscado_1, entrenador_buscado_2, (char *)subcomando[2], &resultado);
+    bool comparacion_exitosa = enfrentar_entrenadores(salon, entrenador_buscado_1, entrenador_buscado_2, (char *)subcomando[2], &resultado, error);
 
-    if (!guardado_exitoso)
+    if (!comparacion_exitosa)
         return false;
 
     entrenador_destruir(auxiliar_para_buscar_entrenador_1);
@@ -454,17 +574,32 @@ bool salon_agregar_pokemon(int argc, char *argv[], void *contexto)
     entrenador_t *auxiliar_para_buscar_entrenador = entrenador_crear((char *)subcomando[0], 0);
     entrenador_t *entrenador_buscado = arbol_buscar(salon->entrenadores, auxiliar_para_buscar_entrenador);
 
+    if (!entrenador_buscado) {
+        entrenador_destruir(auxiliar_para_buscar_entrenador);
+        vtrfree(subcomando);
+        *error = true;
+        return false;
+    }
+
     pokemon_t *pokemon_creado = parsear_pokemon(subcomando + 1);
     if (!pokemon_creado) {
+        entrenador_destruir(auxiliar_para_buscar_entrenador);
         vtrfree(subcomando);
+        *error = true;
         return false;
     }
 
     //probablemente esto deberia estar dentro del pokemon, para mantener algun tipo de separacion. No es una lista, es un equipo de pokemones, para el salón.
     bool agregado_fallido = agregar_pokemon_o_destruir(entrenador_buscado, pokemon_creado);
 
-    if (!agregado_fallido)
-        strcpy(resultado, "OK\n");
+    if (agregado_fallido) {
+        entrenador_destruir(auxiliar_para_buscar_entrenador);
+        vtrfree(subcomando);
+        *error = true;
+        return false;
+    }
+
+    strcpy(resultado, STR_OK);
 
     entrenador_destruir(auxiliar_para_buscar_entrenador);
     vtrfree(subcomando);
@@ -532,6 +667,7 @@ bool salon_quitar_pokemon(int argc, char *argv[], void *contexto)
     entrenador_t *entrenador_buscado = arbol_buscar(salon->entrenadores, auxiliar_para_buscar_entrenador);
 
     if (lista_elementos(entrenador_obtener_equipo(entrenador_buscado)) <= 1) {
+        *error = true;
         entrenador_destruir(auxiliar_para_buscar_entrenador);
         vtrfree(subcomando);
         return false;
@@ -553,6 +689,7 @@ bool salon_quitar_pokemon(int argc, char *argv[], void *contexto)
     buscar_pokemon(entrenador_buscado, &lista_auxiliar);
 
     if (!encontrado) {
+        *error = true;
         lista_destruir(lista_auxiliar);
         entrenador_destruir(auxiliar_para_buscar_entrenador);
         vtrfree(subcomando);
@@ -561,8 +698,14 @@ bool salon_quitar_pokemon(int argc, char *argv[], void *contexto)
 
     int borrado_exitoso = lista_borrar_de_posicion(entrenador_obtener_equipo(entrenador_buscado), pos_pokemon);
 
-    if (borrado_exitoso != -1)
-        strcpy(resultado, "OK\n");
+    if (borrado_exitoso == -1) {
+        *error = true;
+        lista_destruir(lista_auxiliar);
+        entrenador_destruir(auxiliar_para_buscar_entrenador);
+        vtrfree(subcomando);
+        return false;
+    }
+    strcpy(resultado, STR_OK);
 
     entrenador_destruir(auxiliar_para_buscar_entrenador);
     vtrfree(subcomando);
@@ -591,14 +734,10 @@ bool salon_guardar(int argc, char *argv[], void *contexto)
 
     char *resultado = lista_elemento_en_posicion(*(lista_t **)contexto, 1);
 
-    char path[1024] = "salones/";
-
-    strcpy(path + strlen(path), argv[1]);
-
-    int guardado_exitoso = salon_guardar_archivo(salon, path);
+    int guardado_exitoso = salon_guardar_archivo(salon, argv[1]);
 
     if (guardado_exitoso != -1)
-        strcpy(resultado, "OK\n");
+        strcpy(resultado, STR_OK);
 
     return false;
 }
@@ -617,6 +756,9 @@ menu_reglas_t *salon_crear_menu_reglas()
 
     menu_agregar_regla(menu_reglas, "CLASICO", "las reglas clásicas indican que un combate lo gana el Pokemon con el coeficiente de batalla mas alto en base al siguiente cálculo: 0.8 * nivel + fuerza + 2 * velocidad", enfrentamiento_clasico);
     menu_agregar_regla(menu_reglas, "MODERNO", "las reglas modernas indican que un combate lo gana el Pokemon con el coeficiente de batalla mas alto en base al siguiente cálculo: 0.5 * nivel + 0.9 * defensa + 3 * inteligencia", enfrentamiento_moderno);
+    menu_agregar_regla(menu_reglas, "DIRTY_HARRY", "Los pokemones atacan 10 veces. La fuerza del ataque se calcula con el coeficiente de la batalla moderna pero afectado por un valor aleatorio de SUERTE (de 1 a 10)", enfrentamiento_con_suerte);
+    menu_agregar_regla(menu_reglas, "YANKENPON", "A cada entrenador se le asigna un Gimnasio aleatoriamente: AGUA FUEGO o PLANTA (el resto sale en el nuevo DLC: Salon de la fama ReReloaded. La venganza de Magikarp). Se aplican coeficientes Clasicos pero se le suma la efectividad por tipo de gimnasio. NEUTRAL: +0\% DEBIL: -10\% FUERTE: +10\%", enfrentamiento_gimnasio);
+    menu_agregar_regla(menu_reglas, "PELEADITTO", "Te cambiaron a tu equipo por Dittos y cada uno imita a un pokemon que puede ser de AGUA FUEGO o PLANTA (DLC proximamente: El Salon MejoraDitto - pls no me bajen puntos por esto D:). NEUTRAL: +0\% DEBIL: -10\% FUERTE: +10\%", enfrentamiento_enfrentaditto);
 
     return menu_reglas;
 }
@@ -676,6 +818,16 @@ salon_t *salon_crear()
         free(salon);
         return NULL;
     }
+
+    salon->gimnasios = gimnasio_inicializar_gimnasios();
+    if (!salon->gimnasios) {
+        arbol_destruir(salon->entrenadores);
+        menu_destruir(salon->menu_salon);
+        menu_reglas_destruir(salon->reglas);
+        free(salon);
+        return NULL;
+    }
+
     return salon;
 }
 
@@ -707,9 +859,12 @@ entrenador_t *parsear_entrenador(char **campos)
 
 bool agregar_entrenador_o_destruir(salon_t *salon, entrenador_t *entrenador)
 {
+    if (!salon || !entrenador)
+        return true;
+    entrenador_t *entrenador_auxiliar = entrenador;
     int resultado = arbol_insertar(salon->entrenadores, entrenador);
     if (resultado == SALON_ERROR) {
-        entrenador_destruir(entrenador);
+        entrenador_destruir(entrenador_auxiliar);
         return true;
     }
     return false;
@@ -717,9 +872,15 @@ bool agregar_entrenador_o_destruir(salon_t *salon, entrenador_t *entrenador)
 
 bool agregar_pokemon_o_destruir(entrenador_t *entrenador, pokemon_t *pokemon)
 {
+
+    if (!entrenador || !pokemon) {
+        pokemon_destruir(pokemon);
+        return true;
+    }
+    pokemon_t *pokemon_auxiliar = pokemon;
     int resultado = lista_encolar(entrenador_obtener_equipo(entrenador), pokemon);
     if (resultado == SALON_ERROR) {
-        pokemon_destruir(pokemon);
+        pokemon_destruir(pokemon_auxiliar);
         return true;
     }
     return false;
@@ -744,7 +905,8 @@ bool cargar_archivo(salon_t *salon, FILE *archivo)
             error = agregar_pokemon_o_destruir(ult_entrenador, pokemon);
         } else if (entrenador != NULL) {
             error = agregar_entrenador_o_destruir(salon, entrenador);
-            ult_entrenador = entrenador;
+            if (!error)
+                ult_entrenador = entrenador;
         } else {
             error = true;
         }
@@ -767,13 +929,14 @@ salon_t *salon_leer_archivo(const char *nombre_archivo)
     FILE *archivo = fopen(nombre_archivo, "r");
     salon_t *salon = salon_crear();
 
-    bool no_se_pudo_leer = cargar_archivo(salon, archivo);
+    bool error = cargar_archivo(salon, archivo);
 
     fclosen(archivo);
 
-    abb_con_cada_elemento(salon->entrenadores, ABB_RECORRER_INORDEN, validar_entrenadores, &no_se_pudo_leer);
+    if (!error)
+        abb_con_cada_elemento(salon->entrenadores, ABB_RECORRER_INORDEN, validar_entrenadores, &error);
 
-    if (no_se_pudo_leer) {
+    if (error) {
         salon_destruir(salon);
         return NULL;
     }
@@ -848,8 +1011,9 @@ char *salon_ejecutar_comando(salon_t *salon, const char *comando)
     if (!salon || !comando)
         return NULL;
 
-    char *resultado = calloc(1, sizeof(char) * 2048);
-    if (!resultado)
+    char *string_resultado = calloc(1, sizeof(char) * 2048);
+    //char *string_resultado = NULL;
+    if (!string_resultado)
         return NULL;
 
     //voy a tener que agregar un flag para verificar que no haya fallado la ejecucion del comando.
@@ -858,7 +1022,7 @@ char *salon_ejecutar_comando(salon_t *salon, const char *comando)
     //creo una lista de argumentos, que va a servir para pasar el salon y el char a donde voy a guardar el texto
     lista_t *argumentos = lista_crear(NULL);
     lista_encolar(argumentos, salon);
-    lista_encolar(argumentos, resultado);
+    lista_encolar(argumentos, string_resultado);
     lista_encolar(argumentos, &error);
 
     //menu_procesar_opcion va a recibir una lista de argumentos, que le va a pasar al comando. El comando sabe qué tiene que hacer.
@@ -868,10 +1032,10 @@ char *salon_ejecutar_comando(salon_t *salon, const char *comando)
     //si al salir de la ejecucion, no se cargó un texto, retorno NULL y libero el char
     // if (strlen(resultado) == 0) {
     if (error) {
-        free(resultado);
+        free(string_resultado);
         return NULL;
     }
-    return resultado;
+    return string_resultado;
 }
 
 void salon_destruir(salon_t *salon)
@@ -880,6 +1044,7 @@ void salon_destruir(salon_t *salon)
         arbol_destruir(salon->entrenadores);
         menu_destruir(salon->menu_salon);
         menu_reglas_destruir(salon->reglas);
+        gimnasio_destruir_gimnasios(salon->gimnasios);
         free(salon);
     }
 }
