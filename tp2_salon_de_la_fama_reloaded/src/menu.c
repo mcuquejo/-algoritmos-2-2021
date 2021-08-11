@@ -63,6 +63,7 @@ void menu_procesar_opcion(menu_t *menu, const char *linea, void *contexto)
 
     char **argumentos = split(linea, ':');
     if (!argumentos) {
+        *error = true;
         printf("No se pudo ejecutar la opción\n");
         return;
     }
