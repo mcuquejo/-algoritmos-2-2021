@@ -1,5 +1,6 @@
 #include "reglas.h"
 #include "hash.h"
+#include "lista.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -81,11 +82,13 @@ void menu_reglas_con_cada_elemento(menu_reglas_t *menu_reglas, void *resultado)
 }
 
 //ni siquiera es necesario que las funciones de ejecucion sean bool. No uso en ningun lado el resultado
-void menu_procesar_regla(menu_reglas_t *menu_reglas, const char *regla_buscada, void *pokemon_1, void *pokemon_2, void *contexto)
+void menu_procesar_regla(menu_reglas_t *menu_reglas, const char *regla_buscada, void *pokemon_1, void *pokemon_2, void *contexto, void *error)
 {
     regla_t *regla = hash_obtener(menu_reglas->reglas, regla_buscada);
     if (regla) {
         regla->enfrentamiento(pokemon_1, pokemon_2, contexto);
+    } else {
+        *(bool *)error = true;
     }
 }
 
