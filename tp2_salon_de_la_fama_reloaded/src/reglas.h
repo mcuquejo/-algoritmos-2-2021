@@ -14,4 +14,4 @@ void menu_reglas_con_cada_elemento(menu_reglas_t *menu_reglas, void *resultado);
 
 void menu_reglas_destruir(menu_reglas_t *menu_reglas);
 
-void menu_procesar_regla(menu_reglas_t *menu_reglas, const char *regla_buscada, void *pokemon_1, void *pokemon_2, void *contexto);
+void menu_procesar_regla(menu_reglas_t *menu_reglas, const char *regla_buscada, void *pokemon_1, void *pokemon_2, void *contexto, void *error);
