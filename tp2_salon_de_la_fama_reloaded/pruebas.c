@@ -1,6 +1,8 @@
 #include "pa2mm.h"
 #include "src/salon.h"
+#include "utils.h"
 #include <string.h>
+#include <stdbool.h>
 
 bool filtrar_entrenadores_por_victorias(entrenador_t *entrenador, void *cant_victorias)
 {
@@ -1276,152 +1278,557 @@ void dadoUnSalonConEntrenadores_siAgregoYQuitoPokemones_elSalonSeActualizaDeForm
     salon_destruir(salon2);
 }
 
+//va a recibir a un pokemon y un puntero a un string.
+void concatenar_resultado(pokemon_t *pokemon, char **resultado, char *separador)
+{
+    //inicializo los chars de los atributos del pokemon
+    char *char_nombre = pokemon_obtener_nombre(pokemon);
+
+    char char_niv[10];
+    sprintf(char_niv, "%i", pokemon_obtener_nivel(pokemon));
+
+    char char_fue[10];
+    sprintf(char_fue, "%i", pokemon_obtener_fuerza(pokemon));
+
+    char char_int[10];
+    sprintf(char_int, "%i", pokemon_obtener_inteligencia(pokemon));
+
+    char char_vel[10];
+    sprintf(char_vel, "%i", pokemon_obtener_velocidad(pokemon));
+
+    char char_def[10];
+    sprintf(char_def, "%i", pokemon_obtener_defensa(pokemon));
+
+    //inicializo un separador, pero va a venir por parámetro.
+    char *char_sep = separador;
+
+    //defino el tamaño del string que estoy concatenando
+    size_t tam_resultado = strlen(*resultado);
+
+    //defino el tamaño de los strings de los atributos del pokemon
+    size_t tam_nom = strlen(char_nombre);
+    size_t tam_niv = strlen(char_niv);
+    size_t tam_fue = strlen(char_fue);
+    size_t tam_int = strlen(char_int);
+    size_t tam_vel = strlen(char_vel);
+    size_t tam_def = strlen(char_def);
+    size_t tam_sep = strlen(char_sep);
+
+    //eso me da un tamaño total de string, al que le sumo el espacio de los separadores, el \n y el \0 final
+    size_t tam_total = tam_resultado + tam_nom + tam_niv + tam_fue + tam_int + tam_vel + tam_def + (tam_sep * 5) + 2;
+
+    //con esa informacion, me creo un buffer donde voy a almacenar ya concatenada toda la linea.
+    char buffer[tam_total];
+
+    //aca concateno un primer string que va a ser el resultado, sumado al siguiente pokemon, separado por el separador.
+    sprintf(buffer, "%s%s%s%s%s%s%s%s%s%s%s%s\n", *resultado, char_nombre, char_sep, char_niv, char_sep, char_fue, char_sep, char_int, char_sep, char_vel, char_sep, char_def);
+
+    //voy a reasignar memoria para el resultado, por el nuevo tamaño del string.
+    char *resultado_aux = realloc(*resultado, sizeof(char) * tam_total);
+
+    *resultado = resultado_aux;
+    if (!resultado_aux)
+    {
+        free(*resultado);
+        *resultado = NULL;
+        return;
+    }
+
+    //copio el buffer sobre el resultado
+    strcpy(*resultado, buffer);
+
+    //imprimo el resultado
+    printf("RESULTADO********************************:\n%s", *resultado);
+}
+
+bool concatenar_str(void **vector_str, size_t tam_buffer, char **salida_str, char *separador)
+{
+    if (!vector_str || !salida_str || !separador)
+    {
+        return false;
+    }
+
+    //defino el tamaño del vector, para saber cuantos elementos tengo que concatenar.
+    size_t tam_vtr = vtrlen(vector_str);
+
+    //defino el tamaño del string que estoy concatenando
+    size_t tam_salida_str = strlen(*salida_str);
+
+    //defino el tamaño del separador con el que voy a joinear los elementos
+    size_t tam_sep = strlen(separador);
+
+    //eso me da un tamaño total de string, al que le sumo el espacio de los separadores, el \n y el \0 final
+    size_t tam_total = tam_salida_str + tam_buffer + (tam_sep * tam_vtr) + 2;
+
+    //con esa informacion, me creo un buffer donde voy a almacenar ya concatenada toda la linea.
+    char buffer[tam_total];
+
+    strcpy(buffer, *salida_str);
+
+    size_t cant_separadores_a_insertar = tam_vtr - 1;
+
+    for (size_t i = 0; i < tam_vtr; i++)
+    {
+
+        strcat(buffer, (char *)vector_str[i]);
+
+        if (cant_separadores_a_insertar-- >= 1)
+            strcat(buffer, separador);
+        if (i == tam_vtr - 1)
+            strcat(buffer, "\n");
+    }
+
+    //voy a reasignar memoria para el resultado, por el nuevo tamaño del string.
+    char *resultado_aux = realloc(*salida_str, sizeof(char) * tam_total);
+
+    *salida_str = resultado_aux;
+    if (!resultado_aux)
+    {
+        free(*salida_str);
+        *salida_str = NULL;
+        return false;
+    }
+
+    //copio el buffer sobre el resultado
+    strcpy(*salida_str, buffer);
+
+    return true;
+}
+
+void concatenar_pokemon(pokemon_t *pokemon, char **resultado, char *separador)
+{
+    //inicializo los chars de los atributos del pokemon
+    char *char_nombre = pokemon_obtener_nombre(pokemon);
+
+    char char_niv[10];
+    sprintf(char_niv, "%i", pokemon_obtener_nivel(pokemon));
+
+    char char_fue[10];
+    sprintf(char_fue, "%i", pokemon_obtener_fuerza(pokemon));
+
+    char char_int[10];
+    sprintf(char_int, "%i", pokemon_obtener_inteligencia(pokemon));
+
+    char char_vel[10];
+    sprintf(char_vel, "%i", pokemon_obtener_velocidad(pokemon));
+
+    char char_def[10];
+    sprintf(char_def, "%i", pokemon_obtener_defensa(pokemon));
+
+    //defino el tamaño de los strings de los atributos del pokemon
+    size_t tam_nom = strlen(char_nombre);
+    size_t tam_niv = strlen(char_niv);
+    size_t tam_fue = strlen(char_fue);
+    size_t tam_int = strlen(char_int);
+    size_t tam_vel = strlen(char_vel);
+    size_t tam_def = strlen(char_def);
+
+    //eso me da un tamaño total de string, al que le sumo el espacio de los separadores, el \n y el \0 final
+    size_t tam_buffer = tam_nom + tam_niv + tam_fue + tam_int + tam_vel + tam_def + 2;
+    void **vector_pkm = NULL;
+
+    vector_pkm = vtradd(vector_pkm, char_nombre);
+    vector_pkm = vtradd(vector_pkm, char_niv);
+    vector_pkm = vtradd(vector_pkm, char_fue);
+    vector_pkm = vtradd(vector_pkm, char_int);
+    vector_pkm = vtradd(vector_pkm, char_vel);
+    vector_pkm = vtradd(vector_pkm, char_def);
+
+    //aca concateno un primer string que va a ser el resultado, sumado al siguiente pokemon, separado por el separador.
+    concatenar_str(vector_pkm, tam_buffer, resultado, separador);
+
+    free(vector_pkm);
+}
+
+void concatenar_entrenador(entrenador_t *entrenador, char **resultado, char *separador, bool mostrar_victorias)
+{
+    void **vector_entrenador = NULL;
+
+    //inicializo los chars de los atributos del pokemon
+    char *char_nombre = entrenador_obtener_nombre(entrenador);
+    size_t tam_nom = strlen(char_nombre);
+    vector_entrenador = vtradd(vector_entrenador, char_nombre);
+
+    //defino el tamaño de los strings de los atributos del pokemon
+    size_t tam_victorias = 0;
+    if (mostrar_victorias)
+    {
+        char char_victorias[10];
+        sprintf(char_victorias, "%i", entrenador_obtener_victorias(entrenador));
+        tam_victorias = strlen(char_victorias);
+        vector_entrenador = vtradd(vector_entrenador, char_victorias);
+    }
+
+    //eso me da un tamaño total de string, al que le sumo el espacio de los separadores, el \n y el \0 final
+    size_t tam_buffer = tam_nom + tam_victorias + 2;
+
+    //aca concateno un primer string que va a ser el resultado, sumado al siguiente pokemon, separado por el separador.
+    concatenar_str(vector_entrenador, tam_buffer, resultado, separador);
+
+    free(vector_entrenador);
+}
+
+void concatenar_entrenador_old(entrenador_t *entrenador, char **resultado, char *separador)
+{
+    //inicializo los chars de los atributos del entrenador
+    char *char_nombre = entrenador_obtener_nombre(entrenador);
+
+    char char_vic[10];
+    sprintf(char_vic, "%i", entrenador_obtener_victorias(entrenador));
+
+    //inicializo un separador, pero va a venir por parámetro.
+    char *char_sep = separador;
+
+    //defino el tamaño del string que estoy concatenando
+    size_t tam_resultado = strlen(*resultado);
+
+    //defino el tamaño de los strings de los atributos del entrenador
+    size_t tam_nom = strlen(char_nombre);
+    size_t tam_vic = strlen(char_vic);
+    size_t tam_sep = strlen(char_sep);
+
+    //eso me da un tamaño total de string, al que le sumo el espacio de los separadores, el \n y el \0 final
+    size_t tam_total = tam_resultado + tam_nom + tam_vic + +(tam_sep * 2) + 2;
+
+    //con esa informacion, me creo un buffer donde voy a almacenar ya concatenada toda la linea.
+    char buffer[tam_total];
+
+    //aca concateno un primer string que va a ser el resultado, sumado al siguiente pokemon, separado por el separador.
+    sprintf(buffer, "%s%s%s%s\n", *resultado, char_nombre, char_sep, char_vic);
+
+    //voy a reasignar memoria para el resultado, por el nuevo tamaño del string.
+    char *resultado_aux = realloc(*resultado, sizeof(char) * tam_total);
+
+    *resultado = resultado_aux;
+    if (!resultado_aux)
+    {
+        free(*resultado);
+        *resultado = NULL;
+        return;
+    }
+
+    //copio el buffer sobre el resultado
+    strcpy(*resultado, buffer);
+
+    //imprimo el resultado
+    printf("RESULTADO********************************:\n%s", *resultado);
+}
+
+void concatenar_entrenador_sin_victorias(entrenador_t *entrenador, char **resultado, char *separador)
+{
+    //inicializo los chars de los atributos del entrenador
+    char *char_nombre = entrenador_obtener_nombre(entrenador);
+
+    //inicializo un separador, pero va a venir por parámetro.
+    char *char_sep = separador;
+
+    //defino el tamaño del string que estoy concatenando
+    size_t tam_resultado = strlen(*resultado);
+
+    //defino el tamaño de los strings de los atributos del entrenador
+    size_t tam_nom = strlen(char_nombre);
+    size_t tam_sep = strlen(char_sep);
+
+    //eso me da un tamaño total de string, al que le sumo el espacio de los separadores, el \n y el \0 final
+    size_t tam_total = tam_resultado + tam_nom + (tam_sep * 2) + 2;
+
+    //con esa informacion, me creo un buffer donde voy a almacenar ya concatenada toda la linea.
+    char buffer[tam_total];
+
+    //aca concateno un primer string que va a ser el resultado, sumado al siguiente pokemon, separado por el separador.
+    sprintf(buffer, "%s%s%s\n", *resultado, char_nombre, char_sep);
+
+    //voy a reasignar memoria para el resultado, por el nuevo tamaño del string.
+    char *resultado_aux = realloc(*resultado, sizeof(char) * tam_total);
+
+    *resultado = resultado_aux;
+    if (!resultado_aux)
+    {
+        free(*resultado);
+        *resultado = NULL;
+        return;
+    }
+
+    //copio el buffer sobre el resultado
+    strcpy(*resultado, buffer);
+
+    //imprimo el resultado
+    printf("RESULTADO********************************:\n%s", *resultado);
+}
+
+void pruebasConcatPokemon()
+{
+
+    pokemon_t *pokemon = pokemon_crear("PIKACHU", 1, 2, 3, 4, 5);
+    pokemon_t *pokemon2 = pokemon_crear("CHARMANDER", 6, 7, 8, 9, 10);
+
+    //inicializo resultado a NULL.
+    char *resultado = malloc(sizeof(char) * 2);
+    //resultado por ahora es un string vacio
+    strcpy(resultado, "");
+
+    concatenar_resultado(pokemon, &resultado, ";");
+    concatenar_resultado(pokemon2, &resultado, ";");
+
+    pokemon_destruir(pokemon);
+    pokemon_destruir(pokemon2);
+    free(resultado);
+}
+
+void pruebasConcatPokemonNuevaFuncion()
+{
+    pokemon_t *pokemon = pokemon_crear("PIKACHU", 1, 2, 3, 4, 5);
+    pokemon_t *pokemon2 = pokemon_crear("CHARMANDER", 6, 7, 8, 9, 10);
+
+    //inicializo resultado a NULL.
+    char *resultado = malloc(sizeof(char) * 2);
+    //resultado por ahora es un string vacio
+    strcpy(resultado, "");
+
+    concatenar_pokemon(pokemon, &resultado, ";");
+    printf("el resultado es:\n%s", resultado);
+    concatenar_pokemon(pokemon2, &resultado, ";");
+
+    printf("el resultado es:\n%s", resultado);
+
+    pokemon_destruir(pokemon);
+    pokemon_destruir(pokemon2);
+    free(resultado);
+}
+
+void pruebasConcatEntrenador()
+{
+
+    entrenador_t *entrenador = entrenador_crear("PEPE", 10);
+    entrenador_t *entrenador2 = entrenador_crear("JORGE", 7);
+
+    //inicializo resultado a NULL.
+    char *resultado = malloc(sizeof(char) * 2);
+    //resultado por ahora es un string vacio
+    strcpy(resultado, "");
+
+    concatenar_entrenador_old(entrenador, &resultado, ";");
+    concatenar_entrenador_old(entrenador2, &resultado, ";");
+
+    entrenador_destruir(entrenador);
+    entrenador_destruir(entrenador2);
+    free(resultado);
+}
+
+void pruebasConcatEntrenadorNuevaFuncion()
+{
+
+    entrenador_t *entrenador = entrenador_crear("PEPE", 10);
+    entrenador_t *entrenador2 = entrenador_crear("JORGE", 7);
+
+    //inicializo resultado a NULL.
+    char *resultado = malloc(sizeof(char) * 2);
+    //resultado por ahora es un string vacio
+    strcpy(resultado, "");
+
+    concatenar_entrenador(entrenador, &resultado, ";", true);
+    printf("el resultado es:\n%s", resultado);
+    concatenar_entrenador(entrenador2, &resultado, ";", true);
+    printf("el resultado es:\n%s", resultado);
+
+    entrenador_destruir(entrenador);
+    entrenador_destruir(entrenador2);
+    free(resultado);
+}
+
+void pruebasConcatEntrenadorSinVictorias()
+{
+
+    entrenador_t *entrenador = entrenador_crear("PEPE", 10);
+    entrenador_t *entrenador2 = entrenador_crear("JORGE", 7);
+
+    //inicializo resultado a NULL.
+    char *resultado = malloc(sizeof(char) * 2);
+    //resultado por ahora es un string vacio
+    strcpy(resultado, "");
+
+    concatenar_entrenador_sin_victorias(entrenador, &resultado, "");
+    concatenar_entrenador_sin_victorias(entrenador2, &resultado, "");
+
+    entrenador_destruir(entrenador);
+    entrenador_destruir(entrenador2);
+    free(resultado);
+}
+
+void pruebasConcatEntrenadorSinVictoriasNuevaFuncion()
+{
+
+    entrenador_t *entrenador = entrenador_crear("PEPE", 10);
+    entrenador_t *entrenador2 = entrenador_crear("JORGE", 7);
+
+    //inicializo resultado a NULL.
+    char *resultado = malloc(sizeof(char) * 2);
+    //resultado por ahora es un string vacio
+    strcpy(resultado, "");
+
+    concatenar_entrenador(entrenador, &resultado, ";", false);
+    printf("el resultado es:\n%s", resultado);
+    concatenar_entrenador(entrenador2, &resultado, ";", false);
+    printf("el resultado es:\n%s", resultado);
+
+    entrenador_destruir(entrenador);
+    entrenador_destruir(entrenador2);
+    free(resultado);
+}
+
 int main()
 {
 
     pa2m_nuevo_grupo("Pruebas lectura Archivo Nulo");
     dadoUnSalonNull_siLeoUnArchivoNull_elSalonSigueSiendoNull();
 
-    pa2m_nuevo_grupo("Pruebas lectura Archivo que no existe");
-    dadoUnSalonNull_siLeoUnArchivoNoExistente_elSalonSigueSiendoNull();
+    // pa2m_nuevo_grupo("Pruebas lectura Archivo que no existe");
+    // dadoUnSalonNull_siLeoUnArchivoNoExistente_elSalonSigueSiendoNull();
 
-    pa2m_nuevo_grupo("Pruebas lectura Archivo que existe, pero está vacío");
-    dadoUnSalonNull_siLeoUnArchivoExistentePeroVacio_elSalonSigueSiendoNull();
+    // pa2m_nuevo_grupo("Pruebas lectura Archivo que existe, pero está vacío");
+    // dadoUnSalonNull_siLeoUnArchivoExistentePeroVacio_elSalonSigueSiendoNull();
 
-    pa2m_nuevo_grupo("Pruebas lectura Archivo que existe, pero tiene pokemones sin entrenador");
-    dadoUnSalonNull_siLeoUnArchivoExistenteConPokemonesSinEntrenador_elSalonSigueSiendoNull();
+    // pa2m_nuevo_grupo("Pruebas lectura Archivo que existe, pero tiene pokemones sin entrenador");
+    // dadoUnSalonNull_siLeoUnArchivoExistenteConPokemonesSinEntrenador_elSalonSigueSiendoNull();
 
-    pa2m_nuevo_grupo("Pruebas lectura Archivo que existe, pero tiene entrenador sin pokemones");
-    dadoUnSalonNull_siLeoUnArchivoExistenteConEntrenadorSinPokemones_elSalonSigueSiendoNull();
+    // pa2m_nuevo_grupo("Pruebas lectura Archivo que existe, pero tiene entrenador sin pokemones");
+    // dadoUnSalonNull_siLeoUnArchivoExistenteConEntrenadorSinPokemones_elSalonSigueSiendoNull();
 
-    pa2m_nuevo_grupo("Pruebas lectura Archivo que existe, pero tiene entrenadores repetidos");
-    dadoUnSalonNull_siLeoUnArchivoExistenteConEntrenadoresRepetidos_elSalonSigueSiendoNull();
+    // pa2m_nuevo_grupo("Pruebas lectura Archivo que existe, pero tiene entrenadores repetidos");
+    // dadoUnSalonNull_siLeoUnArchivoExistenteConEntrenadoresRepetidos_elSalonSigueSiendoNull();
 
-    pa2m_nuevo_grupo("Pruebas lectura Archivo valido");
-    dadoUnSalonNull_siLeoUnArchivoValido_SeCreaUnSalonDeFormaCorrecta();
+    // pa2m_nuevo_grupo("Pruebas lectura Archivo valido");
+    // dadoUnSalonNull_siLeoUnArchivoValido_SeCreaUnSalonDeFormaCorrecta();
 
-    pa2m_nuevo_grupo("Pruebas Guardar Archivo Nulo");
-    dadoUnSalonConEntrenadores_siGuardoAUnArchivoNull_elArchivoNoSeGuarda();
+    // pa2m_nuevo_grupo("Pruebas Guardar Archivo Nulo");
+    // dadoUnSalonConEntrenadores_siGuardoAUnArchivoNull_elArchivoNoSeGuarda();
 
-    pa2m_nuevo_grupo("Pruebas Guardar Archivo Nombre Invalido");
-    dadoUnSalonConEntrenadores_siGuardoAUnArchivoConUnPathInvalido_elArchivoNoSeGuarda();
+    // pa2m_nuevo_grupo("Pruebas Guardar Archivo Nombre Invalido");
+    // dadoUnSalonConEntrenadores_siGuardoAUnArchivoConUnPathInvalido_elArchivoNoSeGuarda();
 
-    pa2m_nuevo_grupo("Pruebas Guardar Archivo en ubicacion válida");
-    dadoUnSalonConEntrenadores_siGuardoAUnArchivoConUnPathValido_elArchivoSeGuardaCorrectamente();
+    // pa2m_nuevo_grupo("Pruebas Guardar Archivo en ubicacion válida");
+    // dadoUnSalonConEntrenadores_siGuardoAUnArchivoConUnPathValido_elArchivoSeGuardaCorrectamente();
 
-    pa2m_nuevo_grupo("Pruebas Guardar Archivo en ubicación válida, pero con salon NULL");
-    dadoUnSalonNull_siGuardoAUnArchivoConUnPathValido_NoPermiteGuardarPorqueElSalonEsNull();
+    // pa2m_nuevo_grupo("Pruebas Guardar Archivo en ubicación válida, pero con salon NULL");
+    // dadoUnSalonNull_siGuardoAUnArchivoConUnPathValido_NoPermiteGuardarPorqueElSalonEsNull();
 
-    pa2m_nuevo_grupo("Pruebas Agregar Entrenador a un salon NULL");
-    dadoUnSalonNull_siAgregoUnEntrenador_NoPermiteAgregarPorqueElSalonEsNull();
+    // pa2m_nuevo_grupo("Pruebas Agregar Entrenador a un salon NULL");
+    // dadoUnSalonNull_siAgregoUnEntrenador_NoPermiteAgregarPorqueElSalonEsNull();
 
-    pa2m_nuevo_grupo("Pruebas Agregar Entrenador NULL a un salon");
-    dadoUnSalon_siAgregoUnEntrenadorNull_NoPermiteAgregarPorqueElEntrenadorEsNull();
+    // pa2m_nuevo_grupo("Pruebas Agregar Entrenador NULL a un salon");
+    // dadoUnSalon_siAgregoUnEntrenadorNull_NoPermiteAgregarPorqueElEntrenadorEsNull();
 
-    pa2m_nuevo_grupo("Pruebas Agregar Entrenador sin pokemones a un salon e intentar guardar salon");
-    dadoUnSalon_siAgregoUnEntrenadorSinPokemonesYSolicitoGuardarSalon_NoPermiteGuardarPorqueElEntrenadorDebeTenerAlMenosUnPokemon();
+    // pa2m_nuevo_grupo("Pruebas Agregar Entrenador sin pokemones a un salon e intentar guardar salon");
+    // dadoUnSalon_siAgregoUnEntrenadorSinPokemonesYSolicitoGuardarSalon_NoPermiteGuardarPorqueElEntrenadorDebeTenerAlMenosUnPokemon();
 
-    pa2m_nuevo_grupo("Pruebas Agregar Entrenador con pokemones a un salon e intentar guardar salon");
-    dadoUnSalon_siAgregoUnEntrenadorConPokemonesYSolicitoGuardarSalon_permiteGuardarCorrectamente();
+    // pa2m_nuevo_grupo("Pruebas Agregar Entrenador con pokemones a un salon e intentar guardar salon");
+    // dadoUnSalon_siAgregoUnEntrenadorConPokemonesYSolicitoGuardarSalon_permiteGuardarCorrectamente();
 
-    pa2m_nuevo_grupo("Pruebas Filtrar Entrenador en salon NULL");
-    dadoUnSalonNull_SiSolicitoFiltrarEntrenadores_NoPermiteFiltrarPorqueElSalonEsNull();
+    // pa2m_nuevo_grupo("Pruebas Filtrar Entrenador en salon NULL");
+    // dadoUnSalonNull_SiSolicitoFiltrarEntrenadores_NoPermiteFiltrarPorqueElSalonEsNull();
 
-    pa2m_nuevo_grupo("Pruebas Filtrar Entrenador en salon con un criterio que no cumple ningun entrenador");
-    dadoUnSalon_SiSolicitoFiltrarEntrenadoresYNoEncuentraResultados_permiteFiltrarCorrectamente();
+    // pa2m_nuevo_grupo("Pruebas Filtrar Entrenador en salon con un criterio que no cumple ningun entrenador");
+    // dadoUnSalon_SiSolicitoFiltrarEntrenadoresYNoEncuentraResultados_permiteFiltrarCorrectamente();
 
-    pa2m_nuevo_grupo("Pruebas Filtrar Entrenador en salon con distintos criterios");
-    dadoUnSalon_SiSolicitoFiltrarEntrenadoresConDistintosCriterios_permiteFiltrarCorrectamente();
+    // pa2m_nuevo_grupo("Pruebas Filtrar Entrenador en salon con distintos criterios");
+    // dadoUnSalon_SiSolicitoFiltrarEntrenadoresConDistintosCriterios_permiteFiltrarCorrectamente();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos ENTRENADORES en salon NULL");
-    dadoUnSalonNull_SiSolicitoEjecutarComandoEntrenadores_NoPermiteEjecutarComando();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos ENTRENADORES en salon NULL");
+    // dadoUnSalonNull_SiSolicitoEjecutarComandoEntrenadores_NoPermiteEjecutarComando();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos ENTRENADORES mal escrito en salon");
-    dadoUnSalon_SiSolicitoEjecutarComandoEntrenadoresMalEscrito_NoPermiteEjecutarComando();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos ENTRENADORES mal escrito en salon");
+    // dadoUnSalon_SiSolicitoEjecutarComandoEntrenadoresMalEscrito_NoPermiteEjecutarComando();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos ENTRENADORES en salon");
-    dadoUnSalon_SiSolicitoEjecutarComandoEntrenadores_PermiteEjecutarComandoCorrectamente();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos ENTRENADORES en salon");
+    // dadoUnSalon_SiSolicitoEjecutarComandoEntrenadores_PermiteEjecutarComandoCorrectamente();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos ENTRENADORES:victorias en salon NULL");
-    dadoUnSalonNull_SiSolicitoEjecutarComandoEntrenadoresVictorias_NoPermiteEjecutarComando();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos ENTRENADORES:victorias en salon NULL");
+    // dadoUnSalonNull_SiSolicitoEjecutarComandoEntrenadoresVictorias_NoPermiteEjecutarComando();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos ENTRENADORES:victorias mal escrito en salon");
-    dadoUnSalon_SiSolicitoEjecutarComandoEntrenadoresVictoriasMalEscrito_NoPermiteEjecutarComando();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos ENTRENADORES:victorias mal escrito en salon");
+    // dadoUnSalon_SiSolicitoEjecutarComandoEntrenadoresVictoriasMalEscrito_NoPermiteEjecutarComando();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos ENTRENADORES:victorias en salon");
-    dadoUnSalon_SiSolicitoEjecutarComandoEntrenadoresVictorias_PermiteEjecutarComandoCorrectamente();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos ENTRENADORES:victorias en salon");
+    // dadoUnSalon_SiSolicitoEjecutarComandoEntrenadoresVictorias_PermiteEjecutarComandoCorrectamente();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos ENTRENADORES:pokemon en salon NULL");
-    dadoUnSalonNull_SiSolicitoEjecutarComandoEntrenadoresPokemon_NoPermiteEjecutarComando();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos ENTRENADORES:pokemon en salon NULL");
+    // dadoUnSalonNull_SiSolicitoEjecutarComandoEntrenadoresPokemon_NoPermiteEjecutarComando();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos ENTRENADORES:pokemon mal escrito en salon");
-    dadoUnSalon_SiSolicitoEjecutarComandoEntrenadoresPokemonMalEscrito_NoPermiteEjecutarComando();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos ENTRENADORES:pokemon mal escrito en salon");
+    // dadoUnSalon_SiSolicitoEjecutarComandoEntrenadoresPokemonMalEscrito_NoPermiteEjecutarComando();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos ENTRENADORES:pokemon en salon");
-    dadoUnSalon_SiSolicitoEjecutarComandoEntrenadoresPokemon_PermiteEjecutarComandoCorrectamente();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos ENTRENADORES:pokemon en salon");
+    // dadoUnSalon_SiSolicitoEjecutarComandoEntrenadoresPokemon_PermiteEjecutarComandoCorrectamente();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos EQUIPO: en salon NULL");
-    dadoUnSalonNull_SiSolicitoEjecutarComandoEquipo_NoPermiteEjecutarComando();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos EQUIPO: en salon NULL");
+    // dadoUnSalonNull_SiSolicitoEjecutarComandoEquipo_NoPermiteEjecutarComando();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos EQUIPO: mal escrito en salon");
-    dadoUnSalon_SiSolicitoEjecutarComandoEquipoMalEscrito_NoPermiteEjecutarComando();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos EQUIPO: mal escrito en salon");
+    // dadoUnSalon_SiSolicitoEjecutarComandoEquipoMalEscrito_NoPermiteEjecutarComando();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos EQUIPO: en salon");
-    dadoUnSalon_SiSolicitoEjecutarComandoEquipo_PermiteEjecutarComandoCorrectamente();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos EQUIPO: en salon");
+    // dadoUnSalon_SiSolicitoEjecutarComandoEquipo_PermiteEjecutarComandoCorrectamente();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos REGLAS: en salon NULL");
-    dadoUnSalonNull_SiSolicitoEjecutarComandoReglas_NoPermiteEjecutarComando();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos REGLAS: en salon NULL");
+    // dadoUnSalonNull_SiSolicitoEjecutarComandoReglas_NoPermiteEjecutarComando();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos REGLAS: mal escrito en salon");
-    dadoUnSalon_SiSolicitoEjecutarComandoReglasMalEscrito_NoPermiteEjecutarComando();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos REGLAS: mal escrito en salon");
+    // dadoUnSalon_SiSolicitoEjecutarComandoReglasMalEscrito_NoPermiteEjecutarComando();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos REGLAS: en salon");
-    dadoUnSalon_SiSolicitoEjecutarComandoReglas_PermiteEjecutarComandoCorrectamente();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos REGLAS: en salon");
+    // dadoUnSalon_SiSolicitoEjecutarComandoReglas_PermiteEjecutarComandoCorrectamente();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos AGREGAR_POKEMON: en salon NULL");
-    dadoUnSalonNull_SiSolicitoEjecutarComandoAgregarPokemon_NoPermiteEjecutarComando();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos AGREGAR_POKEMON: en salon NULL");
+    // dadoUnSalonNull_SiSolicitoEjecutarComandoAgregarPokemon_NoPermiteEjecutarComando();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos AGREGAR_POKEMON: mal escrito en salon");
-    dadoUnSalon_SiSolicitoEjecutarComandoAgregarPokemonMalEscrito_NoPermiteEjecutarComando();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos AGREGAR_POKEMON: mal escrito en salon");
+    // dadoUnSalon_SiSolicitoEjecutarComandoAgregarPokemonMalEscrito_NoPermiteEjecutarComando();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos AGREGAR_POKEMON: en salon");
-    dadoUnSalon_SiSolicitoEjecutarComandoAgregarPokemon_PermiteEjecutarComandoCorrectamente();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos AGREGAR_POKEMON: en salon");
+    // dadoUnSalon_SiSolicitoEjecutarComandoAgregarPokemon_PermiteEjecutarComandoCorrectamente();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos QUITAR_POKEMON: en salon NULL");
-    dadoUnSalonNull_SiSolicitoEjecutarComandoQuitarPokemon_NoPermiteEjecutarComando();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos QUITAR_POKEMON: en salon NULL");
+    // dadoUnSalonNull_SiSolicitoEjecutarComandoQuitarPokemon_NoPermiteEjecutarComando();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos QUITAR_POKEMON: mal escrito en salon");
-    dadoUnSalon_SiSolicitoEjecutarComandoQuitarPokemonMalEscrito_NoPermiteEjecutarComando();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos QUITAR_POKEMON: mal escrito en salon");
+    // dadoUnSalon_SiSolicitoEjecutarComandoQuitarPokemonMalEscrito_NoPermiteEjecutarComando();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos QUITAR_POKEMON: en salon");
-    dadoUnSalon_SiSolicitoEjecutarComandoQuitarPokemon_PermiteEjecutarComandoCorrectamente();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos QUITAR_POKEMON: en salon");
+    // dadoUnSalon_SiSolicitoEjecutarComandoQuitarPokemon_PermiteEjecutarComandoCorrectamente();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos GUARDAR: en salon NULL");
-    dadoUnSalonNull_SiSolicitoEjecutarComandoGuardar_NoPermiteEjecutarComando();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos GUARDAR: en salon NULL");
+    // dadoUnSalonNull_SiSolicitoEjecutarComandoGuardar_NoPermiteEjecutarComando();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos GUARDAR: mal escrito en salon");
-    dadoUnSalon_SiSolicitoEjecutarComandoGuardarMalEscrito_NoPermiteEjecutarComando();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos GUARDAR: mal escrito en salon");
+    // dadoUnSalon_SiSolicitoEjecutarComandoGuardarMalEscrito_NoPermiteEjecutarComando();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos GUARDAR: en salon");
-    dadoUnSalon_SiSolicitoEjecutarComandoGuardar_PermiteEjecutarComandoCorrectamente();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos GUARDAR: en salon");
+    // dadoUnSalon_SiSolicitoEjecutarComandoGuardar_PermiteEjecutarComandoCorrectamente();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos COMPARAR: en salon NULL");
-    dadoUnSalonNull_SiSolicitoEjecutarComandoComparar_NoPermiteEjecutarComando();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos COMPARAR: en salon NULL");
+    // dadoUnSalonNull_SiSolicitoEjecutarComandoComparar_NoPermiteEjecutarComando();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos COMPARAR: mal escrito en salon");
-    dadoUnSalon_SiSolicitoEjecutarComandoCompararMalEscrito_NoPermiteEjecutarComando();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos COMPARAR: mal escrito en salon");
+    // dadoUnSalon_SiSolicitoEjecutarComandoCompararMalEscrito_NoPermiteEjecutarComando();
 
-    pa2m_nuevo_grupo("Pruebas Ejecutar Comandos COMPARAR: (clásico) en salon");
-    dadoUnSalon_SiSolicitoEjecutarComandoComparar_PermiteEjecutarComandoCorrectamente();
+    // pa2m_nuevo_grupo("Pruebas Ejecutar Comandos COMPARAR: (clásico) en salon");
+    // dadoUnSalon_SiSolicitoEjecutarComandoComparar_PermiteEjecutarComandoCorrectamente();
 
-    pa2m_nuevo_grupo("Pruebas Lectura y escritura Archivos con edicion de equipos");
-    dadoUnSalonConEntrenadores_siModificoElSalonYGuardoAUnArchivoConUnPathValido_elArchivoSeGuardaCorrectamente();
+    // pa2m_nuevo_grupo("Pruebas Lectura y escritura Archivos con edicion de equipos");
+    // dadoUnSalonConEntrenadores_siModificoElSalonYGuardoAUnArchivoConUnPathValido_elArchivoSeGuardaCorrectamente();
 
-    pa2m_nuevo_grupo("Pruebas Lectura y escritura Archivos con edicion de equipos CHANUTRON version");
-    dadoUnSalonConEntrenadores_SiEliminoYAgregoEntrenadoresYPokemones_LosCambiosSeReflejanCorrectamenteEnElSalonYEnLosArchivos();
+    // pa2m_nuevo_grupo("Pruebas Lectura y escritura Archivos con edicion de equipos CHANUTRON version");
+    // dadoUnSalonConEntrenadores_SiEliminoYAgregoEntrenadoresYPokemones_LosCambiosSeReflejanCorrectamenteEnElSalonYEnLosArchivos();
 
-    pa2m_nuevo_grupo("Pruebas Agregar y eliminar pokemones en salon");
-    dadoUnSalonConEntrenadores_siAgregoYQuitoPokemones_elSalonSeActualizaDeFormaCorrecta();
+    // pa2m_nuevo_grupo("Pruebas Agregar y eliminar pokemones en salon");
+    // dadoUnSalonConEntrenadores_siAgregoYQuitoPokemones_elSalonSeActualizaDeFormaCorrecta();
+
+    // pruebasConcatPokemon();
+    pruebasConcatPokemonNuevaFuncion();
+    pruebasConcatEntrenadorNuevaFuncion();
+    pruebasConcatEntrenadorSinVictoriasNuevaFuncion();
+    // pruebasConcatEntrenador();
+    // pruebasConcatEntrenadorSinVictorias();
 
     return pa2m_mostrar_reporte();
 }
