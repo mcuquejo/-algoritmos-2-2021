@@ -21,7 +21,9 @@ pokemon_t *pokemon_crear(char *nombre, int nivel, int fuerza, int inteligencia, 
         return NULL;
 
     pokemon->nombre = calloc(1, sizeof(char) * (strlen(nombre) + 1));
-    if (!pokemon->nombre) {
+    printf("la longitud del nombre elegido es de: %zu\n", strlen(nombre));
+    if (!pokemon->nombre)
+    {
         free(pokemon);
         return NULL;
     }
@@ -68,7 +70,8 @@ int pokemon_obtener_defensa(pokemon_t *pokemon)
 
 void pokemon_destruir(void *pokemon)
 {
-    if (pokemon) {
+    if (pokemon)
+    {
         free(((pokemon_t *)pokemon)->nombre);
         free(pokemon);
     }
