@@ -7,31 +7,7 @@
 #define TAM_STRING_VACIO 1
 #define TAM_BUFFER_INI 512
 
-//me creo una funcion para concatenar el texto
-char *concat(char *s1, const char *s2)
-{
-    if (!s1) {
-        s1 = calloc(1, sizeof(strlen(s2) + 1));
-        strcpy(s1, s2);
-        return s1;
-    }
-
-    s1 = realloc(s1, sizeof(strlen(s1) + strlen(s2) + 1));
-
-    strcpy(s1, s2);
-    return s1;
-}
-
-char *concat2(const char *s1, const char *s2)
-{
-    const size_t len1 = strlen(s1);
-    const size_t len2 = strlen(s2);
-    char *result = malloc(len1 + len2 + 1); // +1 for the null-terminator
-    // in real code you would check for errors in malloc here
-    memcpy(result, s1, len1);
-    memcpy(result + len1, s2, len2 + 1); // +1 to copy the null-terminator
-    return result;
-}
+const bool agregar_salto_de_linea = true;
 
 size_t vtrlen(void *ptr)
 {
@@ -42,7 +18,8 @@ size_t vtrlen(void *ptr)
     size_t cant = 0;
     size_t pos = 0;
 
-    while (ptr_aux[pos]) {
+    while (ptr_aux[pos])
+    {
         cant++;
         pos++;
     }
@@ -54,7 +31,8 @@ void *vtradd(void *ptr, void *item)
     size_t tam = vtrlen(ptr);
     void **aux_ptr = realloc(ptr, (tam + TAM_POS_CORTE_PTR + TAM_NUEVA_POS) * sizeof(ptr));
 
-    if (!aux_ptr) {
+    if (!aux_ptr)
+    {
         return NULL;
     }
 
@@ -69,7 +47,8 @@ void vtrfree(void *ptr)
 {
     void **ptr_aux = (void **)ptr;
 
-    for (size_t i = 0; i < vtrlen(ptr); i++) {
+    for (size_t i = 0; i < vtrlen(ptr); i++)
+    {
         free(ptr_aux[i]);
     }
     free(ptr);
@@ -99,18 +78,22 @@ char **split(const char *str, char separador)
 
     char **split_str = NULL;
 
-    for (size_t i = 0; i < strlen(str); i++) {
-        if (str[i] == separador) {
+    for (size_t i = 0; i < strlen(str); i++)
+    {
+        if (str[i] == separador)
+        {
             cant_elem++;
 
             char *texto_cortado = duplicar_texto_hasta(str, pos_actual, i - 1);
-            if (!texto_cortado) {
+            if (!texto_cortado)
+            {
                 vtrfree(split_str);
                 return NULL;
             }
 
             void **resultado = vtradd(split_str, texto_cortado);
-            if (!resultado) {
+            if (!resultado)
+            {
                 free(texto_cortado);
                 vtrfree(split_str);
                 return NULL;
@@ -118,7 +101,8 @@ char **split(const char *str, char separador)
 
             split_str = (char **)resultado;
 
-            if (i < strlen(str)) {
+            if (i < strlen(str))
+            {
                 pos_actual = i + 1;
             }
         }
@@ -131,13 +115,15 @@ char **split(const char *str, char separador)
     size_t pos_actual_aux = (str[pos_actual] == separador) ? 0 : pos_actual;
 
     texto_cortado = duplicar_texto_hasta(str_aux, pos_actual_aux, strlen(str_aux) - 1);
-    if (!texto_cortado) {
+    if (!texto_cortado)
+    {
         vtrfree(split_str);
         return NULL;
     }
 
     void **resultado = vtradd(split_str, texto_cortado);
-    if (!resultado) {
+    if (!resultado)
+    {
         free(texto_cortado);
         vtrfree(split_str);
         return NULL;
@@ -156,13 +142,18 @@ char *fgets_alloc(FILE *archivo)
     if (!buffer)
         return NULL;
 
-    while (fgets(buffer + bytes_leidos, (int)(tam_buffer - bytes_leidos), archivo)) {
+    while (fgets(buffer + bytes_leidos, (int)(tam_buffer - bytes_leidos), archivo))
+    {
         size_t leido = strlen(buffer + bytes_leidos);
-        if (leido > 0 && *(buffer + bytes_leidos + leido - 1) == '\n') {
+        if (leido > 0 && *(buffer + bytes_leidos + leido - 1) == '\n')
+        {
             return buffer;
-        } else {
+        }
+        else
+        {
             char *auxiliar = realloc(buffer, sizeof(char) * tam_buffer + TAM_BUFFER_INI);
-            if (!auxiliar) {
+            if (!auxiliar)
+            {
                 free(buffer);
                 return NULL;
             }
@@ -173,7 +164,8 @@ char *fgets_alloc(FILE *archivo)
         bytes_leidos += leido;
     }
 
-    if (bytes_leidos == 0) {
+    if (bytes_leidos == 0)
+    {
         free(buffer);
         return NULL;
     }
@@ -181,30 +173,52 @@ char *fgets_alloc(FILE *archivo)
     return buffer;
 }
 
-char *join(char **vector_strings, size_t tam_texto, char *caracter_de_concatenacion)
+bool concatenar_str(void **vector_str, size_t tam_buffer, char **salida_str, char *separador, bool salto_linea)
 {
-    if (!vector_strings || tam_texto == 0 || !caracter_de_concatenacion)
-        return NULL;
-
-    char *string_resultado = calloc(1, sizeof(char) * tam_texto + vtrlen(vector_strings) + 1);
-    if (!string_resultado)
-        return NULL;
-
-    for (size_t i = 0; i < vtrlen(vector_strings); i++) {
-        strcpy(string_resultado, vector_strings[i]);
-
-        if (i < vtrlen(vector_strings) - 1)
-            strcpy(string_resultado, caracter_de_concatenacion);
+    if (!vector_str || !salida_str || !separador)
+    {
+        return false;
     }
 
-    strcpy(string_resultado, "\n");
+    size_t tam_vtr = vtrlen(vector_str);
+    size_t tam_salida_str = strlen(*salida_str);
+    size_t tam_sep = strlen(separador);
+    size_t tam_total = tam_salida_str + tam_buffer + (tam_sep * tam_vtr) + 2;
+    size_t cant_separadores_a_insertar = tam_vtr - 1;
 
-    return string_resultado;
+    char buffer[tam_total];
+    strcpy(buffer, *salida_str);
+
+    for (size_t i = 0; i < tam_vtr; i++)
+    {
+        // printf("lo que estoy concatenando: %s", (char *)vector_str[i]);
+        strcat(buffer, (char *)vector_str[i]);
+        if (cant_separadores_a_insertar-- >= 1)
+            strcat(buffer, separador);
+
+        if (i == tam_vtr - 1 && salto_linea)
+            strcat(buffer, "\n");
+    }
+
+    char *resultado_aux = realloc(*salida_str, sizeof(char) * tam_total);
+
+    *salida_str = resultado_aux;
+    if (!resultado_aux)
+    {
+        free(*salida_str);
+        *salida_str = NULL;
+        return false;
+    }
+
+    strcpy(*salida_str, buffer);
+
+    return true;
 }
 
 void fclosen(FILE *archivo)
 {
-    if (archivo) {
+    if (archivo)
+    {
         fclose(archivo);
     }
 }

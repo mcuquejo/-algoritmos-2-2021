@@ -17,7 +17,7 @@ struct menu
     hash_t *comandos;
 };
 
-comando_t *comando_crear(const char *nombre, const char *documentacion, bool (*ejecutar)(int argc, char *argv[], void *))
+comando_t *comando_crear(const char *nombre, const char *documentacion, void (*ejecutar)(size_t argc, char *argv[], void *))
 {
     comando_t *comando = calloc(1, sizeof(comando_t));
     if (!comando)
@@ -41,14 +41,15 @@ menu_t *menu_crear()
     if (!menu)
         return NULL;
     menu->comandos = hash_crear(comando_destruir, 10);
-    if (!menu->comandos) {
+    if (!menu->comandos)
+    {
         free(menu);
         return NULL;
     }
     return menu;
 }
 
-void menu_agregar_comando(menu_t *menu, const char *nombre, const char *documentacion, bool (*ejecutar)(int argc, char *argv[], void *))
+void menu_agregar_comando(menu_t *menu, const char *nombre, const char *documentacion, void (*ejecutar)(size_t argc, char *argv[], void *))
 {
     comando_t *comando = comando_crear(nombre, documentacion, ejecutar);
     if (!comando)
@@ -62,16 +63,20 @@ void menu_procesar_opcion(menu_t *menu, const char *linea, void *contexto)
     bool *error = lista_elemento_en_posicion(*(lista_t **)contexto, 2);
 
     char **argumentos = split(linea, ':');
-    if (!argumentos) {
+    if (!argumentos)
+    {
         *error = true;
         printf("No se pudo ejecutar la opción\n");
         return;
     }
 
     comando_t *comando = hash_obtener(menu->comandos, argumentos[0]);
-    if (comando) {
-        comando->ejecutor((int)vtrlen(argumentos), argumentos, contexto);
-    } else {
+    if (comando)
+    {
+        comando->ejecutor(vtrlen(argumentos), argumentos, contexto);
+    }
+    else
+    {
         *error = true;
     }
     vtrfree(argumentos);

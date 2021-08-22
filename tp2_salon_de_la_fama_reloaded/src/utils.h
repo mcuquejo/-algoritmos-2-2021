@@ -3,16 +3,15 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
-char* concat(char *s1, const char *s2);
-
-char* concat2(const char *s1, const char *s2);
+const bool agregar_salto_de_linea;
 
 /**
  * Dado un vector de punteros (funalizado en NULL), devuelve la cantidad de
  * punteros en el vector (sin contar el nulo al final).
  */
-size_t vtrlen(void* ptr);
+size_t vtrlen(void *ptr);
 
 /**
  * Agrega un item a un vector de punteros dinámico.
@@ -20,30 +19,32 @@ size_t vtrlen(void* ptr);
  * Si ptr es NULL, se crea un nuevo vector.
  * Devuelve un puntero al nuevo vector de punteros.
  */
-void* vtradd(void* ptr, void* item);
+void *vtradd(void *ptr, void *item);
 
 /**
  * Aplica la función free al vector de punteros y a todos los punteros
  * contenidos en el mismo.
  */
-void vtrfree(void* ptr);
+void vtrfree(void *ptr);
 
 /**
  * Divide un string cada vez que encuentra el separador dado y devuelve un
  * vector de strings.
  */
-char** split(const char* str, char separador);
+char **split(const char *str, char separador);
 
 /**
  * Lee una linea completa de un archivo y devuelve un puntero al string leido.
  *
  * El string devuelto debe ser liberado con malloc.
  */
-char* fgets_alloc(FILE* archivo);
+char *fgets_alloc(FILE *archivo);
+
+bool concatenar_str(void **vector_str, size_t tam_buffer, char **salida_str, char *separador, bool salto_linea);
 
 /**
  * Si el archivo no es nulo, lo cierra con fclose.
  */
-void fclosen(FILE* archivo);
+void fclosen(FILE *archivo);
 
 #endif /* UTILS_H */

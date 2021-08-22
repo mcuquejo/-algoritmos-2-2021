@@ -21,7 +21,6 @@ pokemon_t *pokemon_crear(char *nombre, int nivel, int fuerza, int inteligencia, 
         return NULL;
 
     pokemon->nombre = calloc(1, sizeof(char) * (strlen(nombre) + 1));
-    printf("la longitud del nombre elegido es de: %zu\n", strlen(nombre));
     if (!pokemon->nombre)
     {
         free(pokemon);
